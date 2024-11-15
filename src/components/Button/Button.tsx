@@ -1,6 +1,6 @@
 import { cn } from '@/utils/cn';
 import { cva, VariantProps } from 'class-variance-authority';
-import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react';
 
 interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
@@ -27,10 +27,16 @@ const ButtonVariants = cva('', {
   }
 });
 
-export const Button = ({ variant, size, children, ...props }: ButtonProps) => {
-  return (
-    <button className={cn(ButtonVariants({ variant, size }))} {...props}>
-      {children}
-    </button>
-  );
-};
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant, size, children, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(ButtonVariants({ variant, size }))}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+);
