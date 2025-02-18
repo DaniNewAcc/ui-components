@@ -12,6 +12,7 @@ export default defineConfig({
     setupFiles: "./tests/setupTests.ts",
   },
   build: {
+    copyPublicDir: false,
     lib: {
       entry: "./lib/index.ts",
       name: "ui",
