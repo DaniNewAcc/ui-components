@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && npm run build:css",
+    "build": "tsc --p ./tsconfig-build.json && vite build && npm run build:css",
     "build:css": "tailwindcss -m -i ./lib/tailwind-entry.css -o ./dist/styles.css",
     "lint": "eslint .",
     "preview": "vite preview",
