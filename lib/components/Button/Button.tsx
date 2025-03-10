@@ -37,11 +37,11 @@ const ButtonVariants = cva(
       },
       variant: {
         default:
-          "ui-bg-indigo-600 ui-border-transparent ui-text-white hover:ui-bg-indigo-700 hover:ui-border-indigo-900 focus:ui-ring-indigo-800 active:ui-bg-indigo-700 active:ui-border-indigo-900 active:ui-text-white",
+          "ui-bg-primary-600 ui-border-transparent ui-text-primary-50 hover:ui-bg-primary-700 hover:ui-border-primary-900 focus:ui-ring-primary-800 active:ui-bg-primary-700 active:ui-border-primary-900 active:ui-text-primary-50",
         outlined:
-          "ui-bg-white ui-border-indigo-700 ui-text-indigo-600 hover:ui-bg-indigo-600 hover:ui-border-transparent hover:ui-text-white focus:ui-bg-indigo-600 focus:ui-border-transparent focus:ui-ring-indigo-800 focus:ui-text-white active:ui-bg-indigo-700 active:ui-border-transparent active:ui-text-white",
+          "ui-bg-transparent ui-border-primary-700 ui-text-primary-600 hover:ui-bg-primary-600 hover:ui-border-transparent hover:ui-text-primary-50 focus:ui-bg-primary-600 focus:ui-border-transparent focus:ui-ring-primary-800 focus:ui-text-primary-50 active:ui-bg-primary-700 active:ui-border-transparent active:ui-text-primary-50",
         transparent:
-          "ui-bg-transparent ui-border-transparent ui-shadow-none ui-text-indigo-600 hover:ui-border-indigo-500 focus:ui-ring-indigo-500 active:ui-border-indigo-500",
+          "ui-bg-transparent ui-border-transparent ui-shadow-none ui-text-primary-600 hover:ui-border-primary-500 focus:ui-ring-primary-500 active:ui-border-primary-500",
       },
       size: {
         sm: "ui-text-sm ui-py-1 ui-px-2",
