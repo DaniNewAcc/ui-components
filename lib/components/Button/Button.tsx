@@ -48,6 +48,9 @@ const ButtonVariants = cva(
         md: "ui-text-base ui-py-2 ui-px-4",
         lg: "ui-text-base ui-py-3 ui-px-6",
       },
+      uppercase: {
+        true: "ui-uppercase",
+      },
       fullWidth: {
         true: "ui-w-full",
       },
@@ -123,14 +126,24 @@ const ButtonVariants = cva(
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { as, variant, size, fullWidth, rounded, className, children, ...props },
+    {
+      as,
+      variant,
+      size,
+      uppercase,
+      fullWidth,
+      rounded,
+      className,
+      children,
+      ...props
+    },
     ref,
   ) => {
     return (
       <button
         ref={ref}
         className={cn(
-          ButtonVariants({ as, variant, size, fullWidth, rounded }),
+          ButtonVariants({ as, variant, size, uppercase, fullWidth, rounded }),
           className,
         )}
         {...props}
