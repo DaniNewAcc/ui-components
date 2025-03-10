@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --hue: 248;
+
+    --color-theme-light: calc(var(--hue) - 5) 75% 58%;
+    --color-theme-light-50: calc(var(--hue) - 23) 100% 97%;
+    --color-theme-light-100: calc(var(--hue) - 22) 100% 94%;
+    --color-theme-light-200: calc(var(--hue) -20) 97% 89%;
+    --color-theme-light-300: calc(var(--hue) - 19) 94% 82%;
+    --color-theme-light-400: calc(var(--hue) - 14) 90% 74%;
+    --color-theme-light-500: calc(var(--hue) - 10) 84% 67%;
+    --color-theme-light-600: calc(var(--hue) - 5) 75% 58%;
+    --color-theme-light-700: calc(var(--hue) - 4) 58% 51%;
+    --color-theme-light-800: calc(var(--hue) - 5) 55% 41%;
+    --color-theme-light-900: calc(var(--hue) - 5) 47% 34%;
+
+    --color-theme: var(--color-theme-light);
+    --color-theme-50: var(--color-theme-light-50);
+    --color-theme-100: var(--color-theme-light-100);
+    --color-theme-200: var(--color-theme-light-200);
+    --color-theme-300: var(--color-theme-light-300);
+    --color-theme-400: var(--color-theme-light-400);
+    --color-theme-500: var(--color-theme-light-500);
+    --color-theme-600: var(--color-theme-light-600);
+    --color-theme-700: var(--color-theme-light-700);
+    --color-theme-800: var(--color-theme-light-800);
+    --color-theme-900: var(--color-theme-light-900);
+  }
+}
