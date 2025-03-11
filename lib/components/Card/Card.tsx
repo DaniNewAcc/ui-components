@@ -1,20 +1,42 @@
-import { ComponentPropsWithoutRef, ReactNode } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { ComponentProps, ReactNode } from "react";
 import { cn } from "../../utils/cn";
 
-interface CardProps extends ComponentPropsWithoutRef<"div"> {
-  testId: string;
+interface CardProps
+  extends ComponentProps<"article">,
+    VariantProps<typeof CardVariants> {
+  testId?: string;
   children: ReactNode;
 }
 
-const Card = ({ className, testId, children, ...props }: CardProps) => {
+const CardVariants = cva("ui-flex ui-flex-col", {
+  variants: {
+    size: {
+      sm: "",
+      md: "",
+      lg: "",
+    },
+  },
+  defaultVariants: {},
+});
+
+const Card = ({
+  ref,
+  size,
+  testId,
+  className,
+  children,
+  ...props
+}: CardProps) => {
   return (
-    <div
+    <article
+      ref={ref}
       data-testid={testId}
-      className={cn(["ui-flex ui-flex-col", className])}
+      className={cn(CardVariants({ size }), className)}
       {...props}
     >
       {children}
-    </div>
+    </article>
   );
 };
 
