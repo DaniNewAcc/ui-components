@@ -9,20 +9,53 @@ interface CardProps
   children: ReactNode;
 }
 
-const CardVariants = cva("ui-flex ui-flex-col", {
-  variants: {
-    size: {
-      sm: "",
-      md: "",
-      lg: "",
+const CardVariants = cva(
+  "ui-bg-primary-50 ui-flex ui-flex-col ui-gap-4 ui-relative ui-overflow-hidden ui-cursor-pointer ui-transition-all ui-ease-out ui-duration-200",
+  {
+    variants: {
+      border: {
+        default: "ui-border",
+        outlined: "ui-border-2 ui-border-primary-500",
+        topLeft:
+          "ui-border-t-2 ui-border-t-primary-50 ui-border-l-2 ui-border-l-primary-50",
+      },
+      hoverEffect: {
+        default: "",
+        zoom: "hover:ui-scale-110",
+      },
+      padding: {
+        sm: "ui-p-2",
+        md: "ui-p-4",
+        lg: "ui-p-6",
+      },
+      rounded: {
+        sm: "ui-rounded-sm",
+        md: "ui-rounded-md",
+        lg: "ui-rounded-lg",
+      },
+      shadow: {
+        sm: "ui-shadow-sm",
+        md: "ui-shadow-md",
+        lg: "ui-shadow-lg",
+      },
+    },
+    defaultVariants: {
+      border: "default",
+      hoverEffect: "default",
+      padding: "md",
+      rounded: "md",
+      shadow: "md",
     },
   },
-  defaultVariants: {},
-});
+);
 
 const Card = ({
   ref,
-  size,
+  border,
+  hoverEffect,
+  padding,
+  rounded,
+  shadow,
   testId,
   className,
   children,
@@ -32,7 +65,10 @@ const Card = ({
     <article
       ref={ref}
       data-testid={testId}
-      className={cn(CardVariants({ size }), className)}
+      className={cn(
+        CardVariants({ border, hoverEffect, padding, rounded, shadow }),
+        className,
+      )}
       {...props}
     >
       {children}
