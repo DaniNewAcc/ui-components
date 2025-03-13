@@ -2,16 +2,18 @@ import { cva, VariantProps } from "class-variance-authority";
 import { ImgHTMLAttributes } from "react";
 import { cn } from "../../utils/cn";
 
-const ImageVariants = cva("ui-w-full ui-block", {
+const ImageVariants = cva("ui-block", {
   variants: {
-    size: {
-      sm: "",
-      md: "",
-      lg: "",
+    rounded: {
+      default: "",
+      sm: "ui-rounded-sm",
+      md: "ui-rounded-md",
+      lg: "ui-rounded-lg",
+      full: "ui-rounded-full",
     },
   },
   defaultVariants: {
-    size: "md",
+    rounded: "default",
   },
 });
 
@@ -19,24 +21,31 @@ interface ImageProps
   extends ImgHTMLAttributes<HTMLImageElement>,
     VariantProps<typeof ImageVariants> {
   ref?: React.Ref<HTMLImageElement>;
+  width: number;
+  height: number;
   sourceImg: string;
   altText: string;
 }
 
 const Image = ({
   ref,
-  size,
+  rounded,
   sourceImg,
   altText,
+  width,
+  height,
   className,
   ...props
 }: ImageProps) => {
   return (
     <img
       ref={ref}
-      src={sourceImg}
+      loading="lazy"
+      srcSet={sourceImg}
       alt={altText}
-      className={cn(ImageVariants({ size }), className)}
+      height={height}
+      width={width}
+      className={cn(ImageVariants({ rounded }), className)}
       {...props}
     />
   );
