@@ -1,21 +1,16 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { ReactNode } from "react";
 import { cn } from "../../utils/cn";
+import { PolymorphicComponent } from "../../utils/types";
 
 const TextVariants = cva("", {
   variants: {},
   defaultVariants: {},
 });
 
-type TextOwnProps<C extends React.ElementType> = {
-  as?: C;
-  testId: string;
-  children?: ReactNode;
-};
-
-type TextProps<C extends React.ElementType> = TextOwnProps<C> &
-  VariantProps<typeof TextVariants> &
-  Omit<React.ComponentProps<C>, keyof TextOwnProps<C>>;
+type TextProps<C extends React.ElementType> = VariantProps<
+  typeof TextVariants
+> &
+  PolymorphicComponent<C, { as?: C; testId?: string }>;
 
 const Text = <C extends React.ElementType = "span">({
   as,

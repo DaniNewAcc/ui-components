@@ -1,8 +1,8 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { ReactNode } from "react";
 import { cn } from "../../utils/cn";
+import { PolymorphicComponent } from "../../utils/types";
 
-const SeparatorVariants = cva("bg-gray-300", {
+const SeparatorVariants = cva("ui-bg-gray-300", {
   variants: {
     variant: {
       horizontalMiddle: "ui-px-4",
@@ -18,14 +18,10 @@ const SeparatorVariants = cva("bg-gray-300", {
   },
 });
 
-type SeparatorOwnProps<C extends React.ElementType> = {
-  as?: C;
-  children?: ReactNode;
-};
-
-type SeparatorProps<C extends React.ElementType> = SeparatorOwnProps<C> &
-  VariantProps<typeof SeparatorVariants> &
-  Omit<React.ComponentProps<C>, keyof SeparatorOwnProps<C>>;
+type SeparatorProps<C extends React.ElementType> = VariantProps<
+  typeof SeparatorVariants
+> &
+  PolymorphicComponent<C, { as?: C }>;
 
 const Separator = <C extends React.ElementType = "hr">({
   as,
