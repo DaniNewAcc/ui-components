@@ -31,3 +31,23 @@
     --color-theme-900: var(--color-theme-light-900);
   }
 }
+
+@layer utilities {
+  .ui-dots-loader-animation {
+    animation: bounce 0.5s infinite alternate;
+  }
+
+  .ui-dots-loader-animation:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .ui-dots-loader-animation:nth-child(3) {
+    animation-delay: 200ms;
+  }
+
+  @keyframes bounce {
+    100% {
+      translate: 0 -0.5rem;
+    }
+  }
+}
