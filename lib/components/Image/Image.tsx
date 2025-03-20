@@ -1,5 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { ImgHTMLAttributes } from "react";
+import { ComponentProps } from "react";
 import { cn } from "../../utils/cn";
 
 const ImageVariants = cva(
@@ -49,18 +49,15 @@ const ImageVariants = cva(
   },
 );
 
-interface ImageProps
-  extends ImgHTMLAttributes<HTMLImageElement>,
-    VariantProps<typeof ImageVariants> {
-  ref?: React.Ref<HTMLImageElement>;
-  width: number;
-  height: number;
-  sourceImg: string;
-  altText: string;
-}
+type ImageProps = ComponentProps<"img"> &
+  VariantProps<typeof ImageVariants> & {
+    width?: number;
+    height?: number;
+    sourceImg?: string;
+    altText?: string;
+  };
 
 const Image = ({
-  ref,
   border,
   borderColor,
   fit,
@@ -75,7 +72,6 @@ const Image = ({
 }: ImageProps) => {
   return (
     <img
-      ref={ref}
       loading="lazy"
       srcSet={sourceImg}
       alt={altText}

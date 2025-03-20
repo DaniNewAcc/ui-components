@@ -24,13 +24,12 @@ const LoaderVariants = cva("", {
   },
 });
 
-interface LoaderProps
-  extends ComponentProps<"div">,
-    VariantProps<typeof LoaderVariants>,
-    VariantProps<typeof FlexVariants> {
-  testId?: string;
-  children: ReactNode;
-}
+type LoaderProps = ComponentProps<"div"> &
+  VariantProps<typeof LoaderVariants> &
+  VariantProps<typeof FlexVariants> & {
+    testId?: string;
+    children: ReactNode;
+  };
 
 const Loader = ({
   loaderType,

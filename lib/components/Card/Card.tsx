@@ -2,13 +2,6 @@ import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps, ReactNode } from "react";
 import { cn } from "../../utils/cn";
 
-interface CardProps
-  extends ComponentProps<"article">,
-    VariantProps<typeof CardVariants> {
-  testId?: string;
-  children: ReactNode;
-}
-
 const CardVariants = cva(
   "ui-bg-primary-50 ui-flex ui-flex-col ui-gap-4 ui-relative ui-overflow-hidden ui-cursor-pointer ui-transition-all ui-ease-out ui-duration-200",
   {
@@ -48,6 +41,12 @@ const CardVariants = cva(
     },
   },
 );
+
+type CardProps = ComponentProps<"article"> &
+  VariantProps<typeof CardVariants> & {
+    testId?: string;
+    children: ReactNode;
+  };
 
 const Card = ({
   ref,
