@@ -1,6 +1,11 @@
 export { default as Button } from "./Button";
 export { default as Card } from "./Card";
+export { default as Flex } from "./Flex";
+export { default as Footer } from "./Footer";
+export { default as Grid } from "./Grid";
+export { default as Header } from "./Header";
 export { default as Image } from "./Image";
+export { default as Layout } from "./Layout";
 export { default as Loader } from "./Loader";
 export { default as Separator } from "./Separator";
 export { default as Text } from "./Text";
