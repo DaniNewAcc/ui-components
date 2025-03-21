@@ -1,4 +1,4 @@
-import { PolymorphicComponent } from "../../utils/types";
+import { PolymorphicComponent } from "@utils/types";
 
 type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
   C,

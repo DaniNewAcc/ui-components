@@ -1,6 +1,6 @@
+import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps } from "react";
-import { cn } from "../../utils/cn";
 
 const ImageVariants = cva(
   "ui-block ui-cursor-pointer ui-transition-all ui-ease-in ui-duration-200",

@@ -1,7 +1,7 @@
+import { cn } from "@utils/cn";
+import { PolymorphicComponent } from "@utils/types";
 import { cva, VariantProps } from "class-variance-authority";
 import { ElementType } from "react";
-import { cn } from "../../utils/cn";
-import { PolymorphicComponent } from "../../utils/types";
 
 const GridVariants = cva("ui-grid", {
   variants: {

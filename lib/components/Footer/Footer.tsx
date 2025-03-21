@@ -1,6 +1,6 @@
+import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps, ReactNode } from "react";
-import { cn } from "../../utils/cn";
 
 const FooterVariants = cva(
   "ui-flex ui-w-full ui-items-center ui-justify-center ui-px-4",

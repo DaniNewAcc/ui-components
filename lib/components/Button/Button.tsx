@@ -1,6 +1,6 @@
+import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps, ReactNode } from "react";
-import { cn } from "../../utils/cn";
 
 const ButtonVariants = cva(
   [

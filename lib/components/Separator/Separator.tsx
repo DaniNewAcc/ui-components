@@ -1,6 +1,6 @@
+import { cn } from "@utils/cn";
+import { PolymorphicComponent } from "@utils/types";
 import { cva, VariantProps } from "class-variance-authority";
-import { cn } from "../../utils/cn";
-import { PolymorphicComponent } from "../../utils/types";
 
 const SeparatorVariants = cva("ui-bg-gray-300", {
   variants: {

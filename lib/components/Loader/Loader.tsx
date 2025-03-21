@@ -1,9 +1,9 @@
+import "@/tailwind-entry.css";
+import { FlexVariants } from "@/utils/variants";
+import Flex from "@components/Flex";
+import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps, ReactNode } from "react";
-import "../../tailwind-entry.css";
-import { cn } from "../../utils/cn";
-import Flex from "../Flex";
-import { FlexVariants } from "../Flex/Flex";
 
 const LoaderVariants = cva("", {
   variants: {
