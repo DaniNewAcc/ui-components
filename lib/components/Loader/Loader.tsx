@@ -1,4 +1,4 @@
-import "@/tailwind-entry.css";
+import "@/index.css";
 import { FlexVariants } from "@/utils/variants";
 import Flex from "@components/Flex";
 import { cn } from "@utils/cn";
