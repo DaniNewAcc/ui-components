@@ -1,6 +1,6 @@
 import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
-import { ComponentProps, ReactNode } from "react";
+import React, { ComponentPropsWithoutRef, forwardRef, ReactNode } from "react";
 
 const ButtonVariants = cva(
   [
@@ -101,40 +101,46 @@ const ButtonVariants = cva(
   },
 );
 
-type ButtonProps = Omit<ComponentProps<"button">, "disabled"> &
+type ButtonProps = Omit<ComponentPropsWithoutRef<"button">, "disabled"> &
   VariantProps<typeof ButtonVariants> & {
     children: ReactNode;
   };
 
-const Button = ({
-  as,
-  disabled,
-  variant,
-  size,
-  fullWidth,
-  rounded,
-  className,
-  children,
-  ...props
-}: ButtonProps) => {
-  return (
-    <button
-      className={cn(
-        ButtonVariants({
-          as,
-          disabled,
-          variant,
-          size,
-          fullWidth,
-          rounded,
-        }),
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+const Button = forwardRef<React.ElementRef<"button">, ButtonProps>(
+  (
+    {
+      as,
+      disabled,
+      variant,
+      size,
+      fullWidth,
+      rounded,
+      className,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          ButtonVariants({
+            as,
+            disabled,
+            variant,
+            size,
+            fullWidth,
+            rounded,
+          }),
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  },
+);
 
 export default Button;

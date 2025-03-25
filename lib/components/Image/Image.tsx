@@ -1,6 +1,6 @@
 import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
-import { ComponentProps } from "react";
+import { ComponentPropsWithoutRef, forwardRef } from "react";
 
 const ImageVariants = cva(
   "ui-block ui-cursor-pointer ui-transition-all ui-ease-in ui-duration-200",
@@ -49,7 +49,7 @@ const ImageVariants = cva(
   },
 );
 
-type ImageProps = ComponentProps<"img"> &
+type ImageProps = ComponentPropsWithoutRef<"img"> &
   VariantProps<typeof ImageVariants> & {
     width?: number;
     height?: number;
@@ -57,33 +57,39 @@ type ImageProps = ComponentProps<"img"> &
     altText?: string;
   };
 
-const Image = ({
-  border,
-  borderColor,
-  fit,
-  rounded,
-  zoom,
-  sourceImg,
-  altText,
-  width,
-  height,
-  className,
-  ...props
-}: ImageProps) => {
-  return (
-    <img
-      loading="lazy"
-      srcSet={sourceImg}
-      alt={altText}
-      height={height}
-      width={width}
-      className={cn(
-        ImageVariants({ border, borderColor, fit, rounded, zoom }),
-        className,
-      )}
-      {...props}
-    />
-  );
-};
+const Image = forwardRef<React.ElementRef<"img">, ImageProps>(
+  (
+    {
+      border,
+      borderColor,
+      fit,
+      rounded,
+      zoom,
+      sourceImg,
+      altText,
+      width,
+      height,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <img
+        ref={ref}
+        loading="lazy"
+        srcSet={sourceImg}
+        alt={altText}
+        height={height}
+        width={width}
+        className={cn(
+          ImageVariants({ border, borderColor, fit, rounded, zoom }),
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 export default Image;

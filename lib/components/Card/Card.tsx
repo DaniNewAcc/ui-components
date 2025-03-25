@@ -1,6 +1,6 @@
 import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
-import { ComponentProps, ReactNode } from "react";
+import React, { ComponentPropsWithRef, forwardRef, ReactNode } from "react";
 
 const CardVariants = cva(
   "ui-bg-primary-50 ui-flex ui-flex-col ui-gap-4 ui-relative ui-overflow-hidden ui-cursor-pointer ui-transition-all ui-ease-out ui-duration-200",
@@ -42,37 +42,41 @@ const CardVariants = cva(
   },
 );
 
-type CardProps = ComponentProps<"article"> &
+type CardProps = ComponentPropsWithRef<"article"> &
   VariantProps<typeof CardVariants> & {
     testId?: string;
     children: ReactNode;
   };
 
-const Card = ({
-  ref,
-  border,
-  hoverEffect,
-  padding,
-  rounded,
-  shadow,
-  testId,
-  className,
-  children,
-  ...props
-}: CardProps) => {
-  return (
-    <article
-      ref={ref}
-      data-testid={testId}
-      className={cn(
-        CardVariants({ border, hoverEffect, padding, rounded, shadow }),
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </article>
-  );
-};
+const Card = forwardRef<React.ElementRef<"article">, CardProps>(
+  (
+    {
+      border,
+      hoverEffect,
+      padding,
+      rounded,
+      shadow,
+      testId,
+      className,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <article
+        ref={ref}
+        data-testid={testId}
+        className={cn(
+          CardVariants({ border, hoverEffect, padding, rounded, shadow }),
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </article>
+    );
+  },
+);
 
 export default Card;
