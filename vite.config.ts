@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import dts from "vite-plugin-dts";
@@ -6,7 +7,7 @@ import peerDependencies from "./package.json";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), dts({ exclude: "**/*.test.tsx" })],
+  plugins: [react(), tailwindcss(), dts({ exclude: "**/*.test.tsx" })],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./lib"),

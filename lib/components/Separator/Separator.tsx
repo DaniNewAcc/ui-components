@@ -2,15 +2,15 @@ import { cn } from "@utils/cn";
 import { PolymorphicComponent } from "@utils/types";
 import { cva, VariantProps } from "class-variance-authority";
 
-const SeparatorVariants = cva("ui-bg-gray-300", {
+const SeparatorVariants = cva("ui:bg-gray-300", {
   variants: {
     variant: {
-      horizontalMiddle: "ui-px-4",
-      verticalMiddle: "ui-py-4",
+      horizontalMiddle: "ui:px-4",
+      verticalMiddle: "ui:py-4",
     },
     orientation: {
-      horizontal: "ui-w-full ui-h-1",
-      vertical: "ui-h-full ui-w-1",
+      horizontal: "ui:w-full ui:h-1",
+      vertical: "ui:h-full ui:w-1",
     },
   },
   defaultVariants: {

@@ -16,7 +16,7 @@ const Layout = <C extends React.ElementType = "div">({
   return (
     <Tag
       data-testid={testId}
-      className="ui-flex ui-h-screen ui-w-screen ui-flex-col ui-overflow-x-hidden"
+      className="ui:flex ui:h-screen ui:w-screen ui:flex-col ui:overflow-x-hidden"
       {...props}
     >
       {children}
