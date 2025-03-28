@@ -1,3 +1,9 @@
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@components/Accordion";
 export { default as Button } from "@components/Button";
 export { default as Card } from "@components/Card";
 export { default as Flex } from "@components/Flex";
