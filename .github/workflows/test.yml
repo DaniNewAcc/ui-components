@@ -2,16 +2,19 @@ name: Test
 
 on:
   push:
+    paths:
+      - "**.test.tsx"
     branches:
       - main
   pull_request:
+    paths:
+      - "**.test.tsx"
     branches:
       - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
