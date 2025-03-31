@@ -32,7 +32,14 @@ const Accordion = ({ className, children, ...props }: AccordionProps) => {
   };
   return (
     <AccordionContext.Provider value={contextValue}>
-      <div id="accordionGroup" className={cn({}, className)} {...props}>
+      <div
+        id="accordionGroup"
+        className={cn(
+          "ui:w-[250px] ui:bg-gray-300 ui:shadow-md ui:rounded-md ui:p-4 ui:flex ui:flex-col ui:gap-2",
+          className,
+        )}
+        {...props}
+      >
         {children}
       </div>
     </AccordionContext.Provider>
@@ -62,7 +69,6 @@ type AccordionItemProps = ComponentProps<"div"> & {
 
 type AccordionItemContextProps = {
   id: string | null;
-  isOpen: boolean;
 };
 
 const AccordionItemContext = createContext<AccordionItemContextProps | null>(
@@ -75,17 +81,14 @@ const AccordionItem = ({
   children,
   ...props
 }: AccordionItemProps) => {
-  const { activeItem } = useAccordionContext();
-  const isOpen = activeItem === id;
   const contextValue = {
     id,
-    isOpen,
   };
   return (
     <AccordionItemContext.Provider value={contextValue}>
-      <div id={id} className={cn({}, className)} {...props}>
+      <h3 id={id} className={cn("ui:overflow-hidden", className)} {...props}>
         {children}
-      </div>
+      </h3>
     </AccordionItemContext.Provider>
   );
 };
@@ -115,18 +118,18 @@ const AccordionTrigger = ({
   children,
   ...props
 }: AccordionTriggerProps) => {
-  const { handleAccordion } = useAccordionContext();
-  const { id, isOpen } = useAccordionItemContext();
+  const { activeItem, handleAccordion } = useAccordionContext();
+  const { id } = useAccordionItemContext();
+  const isOpen = activeItem === id;
   return (
     <Flex
       aria-expanded={isOpen ? "true" : "false"}
       justify={"between"}
       {...props}
-      className={cn({}, className)}
+      className={cn("ui:overflow-hidden", className)}
       onClick={() => handleAccordion(id)}
     >
       {children}
-      <span>icon</span>
     </Flex>
   );
 };
@@ -142,11 +145,17 @@ const AccordionContent = ({
   children,
   ...props
 }: AccordionContentProps) => {
-  const { isOpen } = useAccordionItemContext();
+  const { activeItem } = useAccordionContext();
+  const { id } = useAccordionItemContext();
+  const isOpen = activeItem === id;
   return (
     <>
       {isOpen ? (
-        <div role="region" className={cn({}, className)} {...props}>
+        <div
+          role="region"
+          className={cn("ui:overflow-hidden", className)}
+          {...props}
+        >
           {children}
         </div>
       ) : null}
