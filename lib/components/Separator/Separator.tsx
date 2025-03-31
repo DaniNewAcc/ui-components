@@ -27,7 +27,7 @@ const Separator = <C extends React.ElementType = "hr">({
   as,
   variant,
   orientation,
-  children,
+  className,
   ...props
 }: SeparatorProps<C>) => {
   let Tag = as || "hr";
@@ -35,9 +35,10 @@ const Separator = <C extends React.ElementType = "hr">({
     Tag = "div";
   }
   return (
-    <Tag className={cn(SeparatorVariants({ variant, orientation }))} {...props}>
-      {children}
-    </Tag>
+    <Tag
+      className={cn(SeparatorVariants({ variant, orientation }), className)}
+      {...props}
+    />
   );
 };
 
