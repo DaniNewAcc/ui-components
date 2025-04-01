@@ -1,3 +1,5 @@
 {
+  "tailwindStylesheet": "./lib/index.css",
+  "tailwindFunctions": ["cva"],
   "plugins": ["prettier-plugin-tailwindcss"]
 }
