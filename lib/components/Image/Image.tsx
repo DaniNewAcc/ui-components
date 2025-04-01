@@ -3,7 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { ComponentPropsWithoutRef, forwardRef } from "react";
 
 const ImageVariants = cva(
-  "ui:block ui:cursor-pointer ui:transition-all ui:ease-in ui:duration-200",
+  "ui:block ui:cursor-pointer ui:transition-all ui:duration-200 ui:ease-in",
   {
     variants: {
       border: {

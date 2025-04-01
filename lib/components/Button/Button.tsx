@@ -28,15 +28,15 @@ const ButtonVariants = cva(
         icon: "ui:p-0",
       },
       variant: {
-        default: "ui:bg-primary-600 ui:border-transparent ui:text-primary-50",
-        outlined: "ui:bg-transparent ui:border-primary-700 ui:text-primary-600",
+        default: "ui:border-transparent ui:bg-primary-600 ui:text-primary-50",
+        outlined: "ui:border-primary-700 ui:bg-transparent ui:text-primary-600",
         transparent:
-          "ui:bg-transparent ui:border-transparent ui:shadow-none ui:text-primary-600",
+          "ui:border-transparent ui:bg-transparent ui:text-primary-600 ui:shadow-none",
       },
       size: {
-        sm: "ui:text-sm ui:py-1 ui:px-2",
-        md: "ui:text-base ui:py-2 ui:px-4",
-        lg: "ui:text-base ui:py-3 ui:px-6",
+        sm: "ui:px-2 ui:py-1 ui:text-sm",
+        md: "ui:px-4 ui:py-2 ui:text-base",
+        lg: "ui:px-6 ui:py-3 ui:text-base",
       },
       disabled: {
         true: "ui:pointer-events-none ui:opacity-50 ui:shadow-none",
@@ -58,14 +58,14 @@ const ButtonVariants = cva(
         size: ["sm", "md", "lg"],
         variant: "default",
         class:
-          "ui:hover:bg-primary-700 ui:hover:border-primary-900 ui:focus:ring-primary-800 ui:active:bg-primary-700 ui:active:border-primary-900 ui:active:text-primary-50",
+          "ui:hover:border-primary-900 ui:hover:bg-primary-700 ui:focus:ring-primary-800 ui:active:border-primary-900 ui:active:bg-primary-700 ui:active:text-primary-50",
       },
       {
         as: ["icon", "btn"],
         size: ["sm", "md", "lg"],
         variant: "outlined",
         class:
-          "ui:hover:bg-primary-600 ui:hover:border-transparent ui:hover:text-primary-50 ui:focus:bg-primary-600 ui:focus:border-transparent ui:focus:ring-primary-800 ui:focus:text-primary-50 ui:active:bg-primary-700 ui:active:border-transparent ui:active:text-primary-50",
+          "ui:hover:border-transparent ui:hover:bg-primary-600 ui:hover:text-primary-50 ui:focus:border-transparent ui:focus:bg-primary-600 ui:focus:text-primary-50 ui:focus:ring-primary-800 ui:active:border-transparent ui:active:bg-primary-700 ui:active:text-primary-50",
       },
       {
         as: ["icon", "btn"],

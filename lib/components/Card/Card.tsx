@@ -3,14 +3,14 @@ import { cva, VariantProps } from "class-variance-authority";
 import React, { ComponentPropsWithRef, forwardRef, ReactNode } from "react";
 
 const CardVariants = cva(
-  "ui:bg-primary-50 ui:flex ui:flex-col ui:gap-4 ui:relative ui:overflow-hidden ui:cursor-pointer ui:transition-all ui:ease-out ui:duration-200",
+  "ui:relative ui:flex ui:cursor-pointer ui:flex-col ui:gap-4 ui:overflow-hidden ui:bg-primary-50 ui:transition-all ui:duration-200 ui:ease-out",
   {
     variants: {
       border: {
         default: "ui:border",
         outlined: "ui:border-2 ui:border-primary-500",
         topLeft:
-          "ui:border-t-2 ui:border-t-primary-50 ui:border-l-2 ui:border-l-primary-50",
+          "ui:border-t-2 ui:border-l-2 ui:border-t-primary-50 ui:border-l-primary-50",
       },
       hoverEffect: {
         default: "",

@@ -35,7 +35,7 @@ const Accordion = ({ className, children, ...props }: AccordionProps) => {
       <div
         id="accordionGroup"
         className={cn(
-          "ui:w-[250px] ui:bg-gray-300 ui:shadow-md ui:rounded-md ui:p-4 ui:flex ui:flex-col ui:gap-2",
+          "ui:flex ui:w-[250px] ui:flex-col ui:gap-2 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md",
           className,
         )}
         {...props}

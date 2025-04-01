@@ -3,7 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { ComponentProps, ReactNode } from "react";
 
 const HeaderVariants = cva(
-  "ui:flex ui:justify-between ui:items-center ui:px-4",
+  "ui:flex ui:items-center ui:justify-between ui:px-4",
   {
     variants: {
       bgColor: {

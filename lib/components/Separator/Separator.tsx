@@ -9,7 +9,7 @@ const SeparatorVariants = cva("ui:bg-gray-300", {
       verticalMiddle: "ui:py-4",
     },
     orientation: {
-      horizontal: "ui:w-full ui:h-1",
+      horizontal: "ui:h-1 ui:w-full",
       vertical: "ui:h-full ui:w-1",
     },
   },

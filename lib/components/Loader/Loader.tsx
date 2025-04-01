@@ -9,12 +9,12 @@ const LoaderVariants = cva("ui:rounded-full", {
   variants: {
     loaderType: {
       dots: "ui-dots-loader-animation ui:bg-gray-500",
-      spinner: "ui:border-2 ui:animate-spin",
+      spinner: "ui:animate-spin ui:border-2",
     },
     size: {
-      sm: "ui:w-2 ui:h-2",
-      md: "ui:w-4 ui:h-4",
-      lg: "ui:w-8 ui:h-8",
+      sm: "ui:h-2 ui:w-2",
+      md: "ui:h-4 ui:w-4",
+      lg: "ui:h-8 ui:w-8",
     },
     borderColor: {
       gray: "ui:border-gray-500",
