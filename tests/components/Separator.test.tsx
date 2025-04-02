@@ -1,6 +1,5 @@
+import { Separator } from "@/components";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import { Separator } from "../../lib";
 
 describe("Separator", () => {
   it("should render", () => {
