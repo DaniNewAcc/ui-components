@@ -16,4 +16,5 @@ export { default as Label } from "@components/Label";
 export { default as Layout } from "@components/Layout";
 export { default as Loader } from "@components/Loader";
 export { default as Separator } from "@components/Separator";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/Tabs";
 export { default as Text } from "@components/Text";
