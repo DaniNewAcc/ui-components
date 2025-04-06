@@ -34,7 +34,6 @@ const Tabs = ({ defaultValue, className, children, ...props }: TabsProps) => {
   return (
     <TabsContext.Provider value={contextValue}>
       <div
-        id="TabsGroup"
         className={cn(
           "ui:flex ui:w-[250px] ui:justify-between ui:gap-2 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md",
           className,
@@ -67,9 +66,14 @@ type TabsListProps = ComponentProps<"div"> & {
 
 const TabsList = ({ className, children, ...props }: TabsListProps) => {
   return (
-    <h3 className={cn("ui:overflow-hidden", className)} {...props}>
+    <div
+      role="tablist"
+      aria-orientation="horizontal"
+      className={cn("ui:overflow-hidden", className)}
+      {...props}
+    >
       {children}
-    </h3>
+    </div>
   );
 };
 
@@ -90,7 +94,8 @@ const TabsTrigger = ({
   const isActive = activeTab === value;
   return (
     <Flex
-      aria-expanded={isActive ? "true" : "false"}
+      aria-selected={isActive}
+      role="tab"
       justify={"between"}
       {...props}
       className={cn("ui:overflow-hidden", className)}
@@ -121,6 +126,7 @@ const TabsContent = ({
       {isActive ? (
         <div
           role="tabpanel"
+          aria-labelledby={value}
           className={cn("ui:overflow-hidden", className)}
           {...props}
         >
