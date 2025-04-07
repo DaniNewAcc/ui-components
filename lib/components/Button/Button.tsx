@@ -20,6 +20,9 @@ const ButtonVariants = cva(
     "ui:active:shadow-none",
     "ui:focus:outline-hidden",
     "ui:focus-visible:ring-4",
+    "ui:disabled:pointer-events-none",
+    "ui:disabled:opacity-50",
+    "ui:disabled:shadow-none",
   ],
   {
     variants: {
@@ -28,6 +31,7 @@ const ButtonVariants = cva(
         icon: "ui:p-0",
       },
       variant: {
+        unstyled: "ui:border-transparent",
         default: "ui:border-transparent ui:bg-primary-600 ui:text-primary-50",
         outlined: "ui:border-primary-700 ui:bg-transparent ui:text-primary-600",
         transparent:
@@ -37,9 +41,6 @@ const ButtonVariants = cva(
         sm: "ui:px-2 ui:py-1 ui:text-sm",
         md: "ui:px-4 ui:py-2 ui:text-base",
         lg: "ui:px-6 ui:py-3 ui:text-base",
-      },
-      disabled: {
-        true: "ui:pointer-events-none ui:opacity-50 ui:shadow-none",
       },
       fullWidth: {
         true: "ui:w-full",
@@ -95,31 +96,21 @@ const ButtonVariants = cva(
     ],
     defaultVariants: {
       as: "btn",
-      variant: "default",
+      variant: "unstyled",
       size: "md",
       rounded: "default",
     },
   },
 );
 
-type ButtonProps = Omit<ComponentPropsWithoutRef<"button">, "disabled"> &
+type ButtonProps = ComponentPropsWithoutRef<"button"> &
   VariantProps<typeof ButtonVariants> & {
     children: ReactNode;
   };
 
 const Button = forwardRef<React.ElementRef<"button">, ButtonProps>(
   (
-    {
-      as,
-      disabled,
-      variant,
-      size,
-      fullWidth,
-      rounded,
-      className,
-      children,
-      ...props
-    },
+    { as, variant, size, fullWidth, rounded, className, children, ...props },
     ref,
   ) => {
     return (
@@ -128,7 +119,6 @@ const Button = forwardRef<React.ElementRef<"button">, ButtonProps>(
         className={cn(
           ButtonVariants({
             as,
-            disabled,
             variant,
             size,
             fullWidth,
