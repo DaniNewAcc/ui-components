@@ -91,10 +91,14 @@ const TabsTrigger = ({
   ...props
 }: TabsTriggerProps) => {
   const { activeTab, handleTabs } = useTabsContext();
+  const triggerId = `trigger-${value}`;
+  const contentId = `content-${value}`;
   const isActive = activeTab === value;
   return (
     <Flex
+      aria-controls={contentId}
       aria-selected={isActive}
+      id={triggerId}
       role="tab"
       justify={"between"}
       {...props}
@@ -120,13 +124,17 @@ const TabsContent = ({
   ...props
 }: TabsContentProps) => {
   const { activeTab } = useTabsContext();
+  const triggerId = `trigger-${value}`;
+  const contentId = `content-${value}`;
   const isActive = activeTab === value;
   return (
     <>
       {isActive ? (
         <div
+          aria-labelledby={triggerId}
           role="tabpanel"
-          aria-labelledby={value}
+          id={contentId}
+          tabIndex={activeTab ? -1 : 0}
           className={cn("ui:overflow-hidden", className)}
           {...props}
         >
