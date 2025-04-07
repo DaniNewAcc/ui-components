@@ -1,12 +1,14 @@
 import { cn } from "@/utils/cn";
-import Flex from "@components/Flex";
+import { cva, VariantProps } from "class-variance-authority";
 import {
   ComponentProps,
+  ComponentPropsWithoutRef,
   createContext,
   ReactNode,
   useContext,
   useState,
 } from "react";
+import Button from "../Button";
 
 type TabsProps = ComponentProps<"div"> & {
   defaultValue: string;
@@ -35,7 +37,7 @@ const Tabs = ({ defaultValue, className, children, ...props }: TabsProps) => {
     <TabsContext.Provider value={contextValue}>
       <div
         className={cn(
-          "ui:flex ui:w-[250px] ui:justify-between ui:gap-2 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md",
+          "ui:flex ui:w-[250px] ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md",
           className,
         )}
         {...props}
@@ -60,16 +62,31 @@ function useTabsContext() {
 
 // ------------ List component
 
-type TabsListProps = ComponentProps<"div"> & {
-  children: ReactNode;
-};
+const TabsListVariants = cva(
+  "ui:inline-flex ui:shrink-0 ui:items-center ui:justify-center",
+  {
+    variants: {
+      hasGap: {
+        true: "ui:gap-2 ui:rounded-md ui:px-2 ui:py-2 ui:[&>button]:rounded-sm",
+      },
+    },
+    defaultVariants: {
+      hasGap: false,
+    },
+  },
+);
 
-const TabsList = ({ className, children, ...props }: TabsListProps) => {
+type TabsListProps = ComponentProps<"div"> &
+  VariantProps<typeof TabsListVariants> & {
+    children: ReactNode;
+  };
+
+const TabsList = ({ hasGap, className, children, ...props }: TabsListProps) => {
   return (
     <div
       role="tablist"
       aria-orientation="horizontal"
-      className={cn("ui:overflow-hidden", className)}
+      className={cn(TabsListVariants({ hasGap }), className)}
       {...props}
     >
       {children}
@@ -79,7 +96,7 @@ const TabsList = ({ className, children, ...props }: TabsListProps) => {
 
 // ------------ Trigger component
 
-type TabsTriggerProps = ComponentProps<"div"> & {
+type TabsTriggerProps = ComponentPropsWithoutRef<"button"> & {
   value: string;
   children: ReactNode;
 };
@@ -95,18 +112,23 @@ const TabsTrigger = ({
   const contentId = `content-${value}`;
   const isActive = activeTab === value;
   return (
-    <Flex
+    <Button
+      type="button"
+      variant={"unstyled"}
+      size={"sm"}
       aria-controls={contentId}
       aria-selected={isActive}
       id={triggerId}
       role="tab"
-      justify={"between"}
       {...props}
-      className={cn("ui:overflow-hidden", className)}
+      className={cn(
+        `${isActive ? "ui:bg-primary-600 ui:text-primary-50" : "ui:bg-primary-50 ui:text-primary-600"} ui:flex-1`,
+        className,
+      )}
       onClick={() => handleTabs(value)}
     >
       {children}
-    </Flex>
+    </Button>
   );
 };
 
@@ -135,7 +157,7 @@ const TabsContent = ({
           role="tabpanel"
           id={contentId}
           tabIndex={activeTab ? -1 : 0}
-          className={cn("ui:overflow-hidden", className)}
+          className={cn("", className)}
           {...props}
         >
           {children}
