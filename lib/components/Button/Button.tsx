@@ -2,7 +2,7 @@ import { cn } from "@utils/cn";
 import { cva, VariantProps } from "class-variance-authority";
 import React, { ComponentPropsWithoutRef, forwardRef, ReactNode } from "react";
 
-const ButtonVariants = cva(
+export const ButtonVariants = cva(
   [
     "ui:inline-flex",
     "ui:gap-2",
@@ -97,7 +97,7 @@ const ButtonVariants = cva(
     defaultVariants: {
       as: "btn",
       variant: "unstyled",
-      size: "md",
+      size: "sm",
       rounded: "default",
     },
   },
