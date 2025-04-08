@@ -10,10 +10,25 @@ import {
 } from "react";
 import Button from "../Button";
 
-type TabsProps = ComponentProps<"div"> & {
-  defaultValue: string;
-  children: ReactNode;
-};
+const TabsVariants = cva(
+  "ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md",
+  {
+    variants: {
+      hasPadding: {
+        true: "ui:p-4",
+      },
+    },
+    defaultVariants: {
+      hasPadding: false,
+    },
+  },
+);
+
+type TabsProps = ComponentProps<"div"> &
+  VariantProps<typeof TabsVariants> & {
+    defaultValue: string;
+    children: ReactNode;
+  };
 
 type TabsContextProps = {
   activeTab: string | null;
@@ -22,7 +37,13 @@ type TabsContextProps = {
 
 const TabsContext = createContext<TabsContextProps | null>(null);
 
-const Tabs = ({ defaultValue, className, children, ...props }: TabsProps) => {
+const Tabs = ({
+  defaultValue,
+  hasPadding,
+  className,
+  children,
+  ...props
+}: TabsProps) => {
   const [activeTab, setActiveTab] = useState<string | null>(defaultValue);
 
   function handleTabs(value: string) {
@@ -35,13 +56,7 @@ const Tabs = ({ defaultValue, className, children, ...props }: TabsProps) => {
   };
   return (
     <TabsContext.Provider value={contextValue}>
-      <div
-        className={cn(
-          "ui:flex ui:w-[250px] ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md",
-          className,
-        )}
-        {...props}
-      >
+      <div className={cn(TabsVariants({ hasPadding }), className)} {...props}>
         {children}
       </div>
     </TabsContext.Provider>
@@ -63,15 +78,19 @@ function useTabsContext() {
 // ------------ List component
 
 const TabsListVariants = cva(
-  "ui:inline-flex ui:shrink-0 ui:items-center ui:justify-center",
+  "ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent",
   {
     variants: {
       hasGap: {
-        true: "ui:gap-2 ui:rounded-md ui:px-2 ui:py-2 ui:[&>button]:rounded-sm",
+        true: "ui:gap-2 ui:rounded-md ui:bg-primary-300 ui:[&>button]:rounded-sm",
+      },
+      hasPadding: {
+        true: "ui:px-2 ui:py-2",
       },
     },
     defaultVariants: {
       hasGap: false,
+      hasPadding: false,
     },
   },
 );
@@ -81,12 +100,18 @@ type TabsListProps = ComponentProps<"div"> &
     children: ReactNode;
   };
 
-const TabsList = ({ hasGap, className, children, ...props }: TabsListProps) => {
+const TabsList = ({
+  hasGap,
+  hasPadding,
+  className,
+  children,
+  ...props
+}: TabsListProps) => {
   return (
     <div
       role="tablist"
       aria-orientation="horizontal"
-      className={cn(TabsListVariants({ hasGap }), className)}
+      className={cn(TabsListVariants({ hasGap, hasPadding }), className)}
       {...props}
     >
       {children}
@@ -122,7 +147,7 @@ const TabsTrigger = ({
       role="tab"
       {...props}
       className={cn(
-        `${isActive ? "ui:bg-primary-600 ui:text-primary-50" : "ui:bg-primary-50 ui:text-primary-600"} ui:flex-1`,
+        `${isActive ? "ui:bg-primary-600 ui:text-primary-50" : "ui:bg-primary-50 ui:text-primary-600"} ui:flex-1 ui:first:rounded-l-sm ui:last:rounded-r-sm`,
         className,
       )}
       onClick={() => handleTabs(value)}
@@ -157,7 +182,7 @@ const TabsContent = ({
           role="tabpanel"
           id={contentId}
           tabIndex={activeTab ? -1 : 0}
-          className={cn("", className)}
+          className={cn("ui:flex-1", className)}
           {...props}
         >
           {children}
