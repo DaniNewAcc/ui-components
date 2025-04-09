@@ -28,6 +28,7 @@ const TabsVariants = cva(
 type TabsProps = ComponentProps<"div"> &
   VariantProps<typeof TabsVariants> & {
     defaultValue: string;
+    testId?: string;
     children: ReactNode;
     hasPadding?: boolean;
   };
@@ -42,6 +43,7 @@ const TabsContext = createContext<TabsContextProps | null>(null);
 
 const Tabs = ({
   defaultValue,
+  testId,
   hasPadding,
   className,
   children,
@@ -60,7 +62,11 @@ const Tabs = ({
   };
   return (
     <TabsContext.Provider value={contextValue}>
-      <div className={cn(TabsVariants({ hasPadding }), className)} {...props}>
+      <div
+        data-testid={testId}
+        className={cn(TabsVariants({ hasPadding }), className)}
+        {...props}
+      >
         {children}
       </div>
     </TabsContext.Provider>
