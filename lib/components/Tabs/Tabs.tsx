@@ -1,4 +1,5 @@
 import { cn } from "@/utils/cn";
+import { ButtonVariants } from "@/utils/variants";
 import { cva, VariantProps } from "class-variance-authority";
 import {
   ComponentProps,
@@ -9,7 +10,6 @@ import {
   useState,
 } from "react";
 import Button from "../Button";
-import { ButtonVariants } from "../Button/Button";
 
 const TabsVariants = cva(
   "ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md",
