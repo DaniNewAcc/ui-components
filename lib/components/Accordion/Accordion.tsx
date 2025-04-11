@@ -110,10 +110,12 @@ function useAccordionItemContext() {
 // ------------ Trigger component
 
 type AccordionTriggerProps = ComponentProps<"div"> & {
+  testId?: string;
   children: ReactNode;
 };
 
 const AccordionTrigger = ({
+  testId,
   className,
   children,
   ...props
@@ -123,6 +125,7 @@ const AccordionTrigger = ({
   const isOpen = activeItem === id;
   return (
     <Flex
+      data-testid={testId}
       aria-expanded={isOpen ? "true" : "false"}
       justify={"between"}
       {...props}
@@ -137,10 +140,12 @@ const AccordionTrigger = ({
 // ------------ Content component
 
 type AccordionContentProps = ComponentProps<"div"> & {
+  testId?: string;
   children: ReactNode;
 };
 
 const AccordionContent = ({
+  testId,
   className,
   children,
   ...props
@@ -152,6 +157,7 @@ const AccordionContent = ({
     <>
       {isOpen ? (
         <div
+          data-testid={testId}
           role="region"
           className={cn("ui:overflow-hidden", className)}
           {...props}

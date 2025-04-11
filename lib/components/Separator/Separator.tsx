@@ -21,9 +21,10 @@ const SeparatorVariants = cva("ui:bg-gray-300", {
 type SeparatorProps<C extends React.ElementType> = VariantProps<
   typeof SeparatorVariants
 > &
-  PolymorphicComponent<C, { as?: C }>;
+  PolymorphicComponent<C, { as?: C; testId?: string }>;
 
 const Separator = <C extends React.ElementType = "hr">({
+  testId,
   as,
   variant,
   orientation,
@@ -36,6 +37,7 @@ const Separator = <C extends React.ElementType = "hr">({
   }
   return (
     <Tag
+      data-testId={testId}
       className={cn(SeparatorVariants({ variant, orientation }), className)}
       {...props}
     />
