@@ -37,7 +37,8 @@ const Separator = <C extends React.ElementType = "hr">({
   }
   return (
     <Tag
-      data-testId={testId}
+      data-testid={testId}
+      role="separator"
       className={cn(SeparatorVariants({ variant, orientation }), className)}
       {...props}
     />
