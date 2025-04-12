@@ -10,9 +10,10 @@ describe("Separator", () => {
     expect(separator).toBeInTheDocument();
   });
   it("should render based on as prop", () => {
-    render(<Separator as="div" />);
+    render(<Separator as="div" orientation={"vertical"} />);
 
     const separator = screen.getByRole("separator");
+    expect(separator.hasAttribute("orientation"));
     expect(separator.tagName).toBe("DIV");
     expect(separator).toBeInTheDocument();
   });
