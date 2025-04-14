@@ -74,6 +74,7 @@ const Loader = ({
       gap={"sm"}
       justify={"center"}
       data-testid={testId}
+      role="status"
       className={cn(FlexVariants)}
       {...props}
     >
