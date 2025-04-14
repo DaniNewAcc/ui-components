@@ -2,15 +2,11 @@ import { cn } from "@utils/cn";
 import { PolymorphicComponent } from "@utils/types";
 import { cva, VariantProps } from "class-variance-authority";
 
-const SeparatorVariants = cva("ui:bg-gray-300", {
+const SeparatorVariants = cva("ui:bg-gray-400", {
   variants: {
-    variant: {
-      horizontalMiddle: "ui:px-4",
-      verticalMiddle: "ui:py-4",
-    },
     orientation: {
-      horizontal: "ui:h-1 ui:w-full",
-      vertical: "ui:h-full ui:w-1",
+      horizontal: "ui:h-[1px] ui:w-full",
+      vertical: "ui:h-full ui:w-[1px]",
     },
   },
   defaultVariants: {
@@ -26,7 +22,6 @@ type SeparatorProps<C extends React.ElementType> = VariantProps<
 const Separator = <C extends React.ElementType = "hr">({
   testId,
   as,
-  variant,
   orientation,
   className,
   ...props
@@ -39,7 +34,7 @@ const Separator = <C extends React.ElementType = "hr">({
     <Tag
       data-testid={testId}
       role="separator"
-      className={cn(SeparatorVariants({ variant, orientation }), className)}
+      className={cn(SeparatorVariants({ orientation }), className)}
       {...props}
     />
   );
