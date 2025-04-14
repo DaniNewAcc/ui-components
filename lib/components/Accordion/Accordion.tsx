@@ -123,10 +123,12 @@ const AccordionTrigger = ({
   const { activeItem, handleAccordion } = useAccordionContext();
   const { id } = useAccordionItemContext();
   const isOpen = activeItem === id;
+  const contentId = `content-${id}`;
   return (
     <Flex
       data-testid={testId}
       aria-expanded={isOpen ? "true" : "false"}
+      aria-controls={contentId}
       justify={"between"}
       {...props}
       className={cn("ui:overflow-hidden", className)}
@@ -153,10 +155,12 @@ const AccordionContent = ({
   const { activeItem } = useAccordionContext();
   const { id } = useAccordionItemContext();
   const isOpen = activeItem === id;
+  const triggerId = `trigger-${id}`;
   return (
     <>
       {isOpen ? (
         <div
+          aria-labelledby={triggerId}
           data-testid={testId}
           role="region"
           className={cn("ui:overflow-hidden", className)}
