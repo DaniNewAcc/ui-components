@@ -1,3 +1,4 @@
+import { cn } from "@/utils/cn";
 import { PolymorphicComponent } from "@utils/types";
 
 type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
@@ -8,6 +9,7 @@ type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
 const Layout = <C extends React.ElementType = "div">({
   as,
   testId,
+  className,
   children,
   ...props
 }: LayoutProps<C>) => {
@@ -16,7 +18,10 @@ const Layout = <C extends React.ElementType = "div">({
   return (
     <Tag
       data-testid={testId}
-      className="ui:flex ui:h-screen ui:w-screen ui:flex-col ui:overflow-x-hidden"
+      className={cn(
+        "ui:flex ui:h-screen ui:w-screen ui:flex-col ui:items-center ui:justify-center ui:overflow-x-hidden",
+        className,
+      )}
       {...props}
     >
       {children}
