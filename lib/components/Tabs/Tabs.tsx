@@ -313,7 +313,7 @@ const TabsContent = ({
 }: TabsContentProps) => {
   const { activeTab, isTabbing, focusedIndex, setIsTabbing } = useTabsContext();
   const triggerId = `trigger-${value}`;
-  const contentId = `tabpanel-${value}`;
+  const contentId = `panel-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
 
