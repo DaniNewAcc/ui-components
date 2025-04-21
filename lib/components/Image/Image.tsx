@@ -51,10 +51,13 @@ const ImageVariants = cva(
 
 type ImageProps = ComponentPropsWithoutRef<"img"> &
   VariantProps<typeof ImageVariants> & {
-    width?: number;
-    height?: number;
-    sourceImg?: string;
+    width?: string | number;
+    height?: string | number;
+    loading?: "lazy" | "eager";
+    src?: string;
+    srcSet?: string;
     altText?: string;
+    sizes?: string;
   };
 
 const Image = forwardRef<React.ElementRef<"img">, ImageProps>(
@@ -65,8 +68,11 @@ const Image = forwardRef<React.ElementRef<"img">, ImageProps>(
       fit,
       rounded,
       zoom,
-      sourceImg,
-      altText,
+      loading = "lazy",
+      src,
+      srcSet,
+      sizes,
+      altText = "Image",
       width,
       height,
       className,
@@ -77,9 +83,11 @@ const Image = forwardRef<React.ElementRef<"img">, ImageProps>(
     return (
       <img
         ref={ref}
-        loading="lazy"
-        srcSet={sourceImg}
+        loading={loading}
+        src={src}
+        srcSet={srcSet}
         alt={altText}
+        sizes={sizes}
         height={height}
         width={width}
         className={cn(
