@@ -44,6 +44,7 @@ type TabsContextProps = {
   tabs: number;
   hasPadding?: boolean;
   isTabbing: boolean;
+  panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
   moveFocus: (direction: "next" | "previous") => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -77,6 +78,7 @@ const Tabs = ({
   } = useRovingFocus(tabs);
   const [activeTab, setActiveTab] = useState<number>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const contextValue = {
     activeTab: activeTab,
@@ -84,6 +86,7 @@ const Tabs = ({
     tabs,
     hasPadding,
     isTabbing,
+    panelRefs,
     setActiveTab,
     setIsTabbing,
     setFocusRef,
@@ -148,6 +151,7 @@ const TabsList = ({
   const {
     activeTab,
     hasPadding,
+    panelRefs,
     moveFocus,
     moveToStart,
     moveToEnd,
@@ -184,13 +188,12 @@ const TabsList = ({
         case "Tab": {
           e.preventDefault();
           setIsTabbing(true);
-          const panel = document.getElementById(`panel-${activeTab}`);
-          panel?.focus();
+          panelRefs.current[activeTab]?.focus();
           break;
         }
       }
     },
-    [activeTab, setIsTabbing, moveFocus, moveToStart, moveToEnd],
+    [panelRefs, activeTab, setIsTabbing, moveFocus, moveToStart, moveToEnd],
   );
 
   return (
@@ -311,7 +314,8 @@ const TabsContent = ({
   children,
   ...props
 }: TabsContentProps) => {
-  const { activeTab, isTabbing, focusedIndex, setIsTabbing } = useTabsContext();
+  const { panelRefs, activeTab, isTabbing, focusedIndex, setIsTabbing } =
+    useTabsContext();
   const triggerId = `trigger-${value}`;
   const contentId = `panel-${value}`;
   const isActive = activeTab === value;
@@ -320,10 +324,11 @@ const TabsContent = ({
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    panelRefs.current[activeTab] = panelRef.current;
     if (isActive && isFocused && isTabbing && panelRef.current) {
       panelRef.current.focus();
     }
-  }, [isFocused, isActive, isTabbing]);
+  }, [panelRefs, activeTab, isFocused, isActive, isTabbing]);
 
   const handleFocus = useCallback(() => {
     setIsTabbing(false);
