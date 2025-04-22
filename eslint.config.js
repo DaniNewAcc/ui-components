@@ -1,31 +1,45 @@
 import js from '@eslint/js';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import parser from '@typescript-eslint/parser';
+import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
-  { ignores: ['dist'] },
+/** @type {import("eslint").FlatConfig[]} */
+
+export default [
+  js.configs.recommended,
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
+    files: ['lib/**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser
+      parser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.browser,
+        React: 'readonly',
+        process: 'readonly',
+        window: 'readonly',
+      },
     },
     plugins: {
+      '@typescript-eslint': tseslint,
       'react-hooks': reactHooks,
-      'react-refresh': reactRefresh
+      'react-refresh': reactRefresh,
+      react: reactPlugin,
     },
     rules: {
+      ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true }
-      ],
-      '@typescript-eslint/no-unsed-vars': 'off',
-      '@typescript-eslint/ban-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
-    }
-  }
-);
+      ...reactPlugin.configs.recommended.rules,
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],
+      '@typescript-eslint/no-explicit-any': ['warn', { fixToUnknown: true }],
+    },
+  },
+];

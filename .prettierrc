@@ -1,5 +1,13 @@
 {
   "tailwindStylesheet": "./lib/index.css",
   "tailwindFunctions": ["cva"],
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "jsxSingleQuote": false,
+  "arrowParens": "avoid"
 }
