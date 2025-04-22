@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "types": "dist/index.d.ts",
+  "main": "./dist/ui.umd.js",
+  "module": "./dist/ui.es.js",
+  "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/ui.es.js",
@@ -14,14 +16,22 @@
       "default": "./dist/styles.css"
     }
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/types/*"
+      ]
+    }
+  },
+  "sideEffects": false,
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc --p ./tsconfig-build.json && vite build && npm run build:css",
+    "build": "vite build && npm run build:css",
     "build:css": "tailwindcss -m -i ./lib/index.css -o ./dist/styles.css",
-    "lint": "eslint .",
+    "lint": "eslint . --config eslint.config.js",
     "preview": "vite preview",
     "test": "vitest --coverage",
     "prepublishOnly": "npm run build"
@@ -42,10 +52,11 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.13.13",
-    "@types/react": "^18.3.12 || ^19.0.12",
-    "@types/react-dom": "^18.3.1 || ^19.0.1",
+    "@types/react": "^18.2.47",
+    "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.3.3",
     "@vitest/coverage-v8": "^3.0.7",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^16.0.0",
@@ -57,11 +68,11 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.29.0",
     "vite": "^6.2.0",
-    "vite-plugin-dts": "^4.5.0",
+    "vite-plugin-dts": "^4.5.3",
     "vitest": "^3.0.7"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0 || ^20.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0 || ^20.0.0"
   }
 }
