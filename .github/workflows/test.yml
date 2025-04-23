@@ -13,12 +13,14 @@ on:
       - main
 
 jobs:
-  check-test-files:
+  check-and-run-tests:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -28,48 +30,42 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Check if test files exist
+      - name: Get modified component files and validate tests
+        id: modified
         run: |
-          modified_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^lib/components/.*\.tsx$')
+          echo "Finding modified component files..."
 
-          if [ -z "$modified_files" ]; then
-            echo "No modified components found, skipping tests check."
-            exit 0
+          # Choose diff target depending on event type
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only origin/${{ github.base_ref }} > changed_files.txt
+          else
+            git diff --name-only HEAD~1 > changed_files.txt
           fi
 
-          missing_tests=false
+          cat changed_files.txt
 
-          for file in $modified_files; do
-            component_name=$(basename "$file" .tsx)
-            test_file="tests/components/${component_name}.test.tsx"
-            
-            if [ ! -f "$test_file" ]; then
-              echo "Error: Test file for '$file' does not exist. Please create '$test_file'."
-              missing_tests=true
-            else
-              echo "Test file '$test_file' found for '$file'."
+          MODIFIED_TESTS=""
+
+          while read file; do
+            # Only consider .tsx files inside lib/components
+            if [[ "$file" == lib/components/*.tsx ]]; then
+              name=$(basename "$file" .tsx)
+              test_path="tests/components/${name}.test.tsx"
+
+              if [[ -f "$test_path" ]]; then
+                echo "Found test for $file"
+                MODIFIED_TESTS+="$test_path "
+              else
+                echo "::error file=$file:: Missing test file for component. Expected: $test_path"
+                exit 1
+              fi
             fi
-          done
+          done < changed_files.txt
 
-          if [ "$missing_tests" = true ]; then
-            exit 1
-          fi
+          echo "test_paths=$MODIFIED_TESTS" >> $GITHUB_OUTPUT
 
-  run-tests:
-    runs-on: ubuntu-latest
-    needs: check-test-files
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Tests
-        run: npm test
+      - name: Run tests for modified components
+        if: steps.modified.outputs.test_paths != ''
+        run: |
+          echo "Running tests for: ${{ steps.modified.outputs.test_paths }}"
+          npm test -- ${{ steps.modified.outputs.test_paths }}
