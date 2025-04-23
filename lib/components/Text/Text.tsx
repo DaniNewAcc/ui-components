@@ -1,32 +1,30 @@
-import { cn } from "@utils/cn";
-import { PolymorphicComponent } from "@utils/types";
-import { cva, VariantProps } from "class-variance-authority";
+import { cn } from '@utils/cn';
+import { PolymorphicComponent } from '@utils/types';
+import { cva, VariantProps } from 'class-variance-authority';
 
-const TextVariants = cva("", {
+const TextVariants = cva('', {
   variants: {
     variant: {
-      default: "",
-      heading: "ui:scroll-mt-16 ui:tracking-tight",
-      list: "ui:list-disc ui:[&>li]:mt-2",
+      unstyled: '',
+      heading: 'ui:scroll-mt-16 ui:tracking-tight',
+      list: 'ui:list-disc ui:[&>li]:mt-2',
     },
     border: {
-      default: "",
-      bottom: "ui:border-b ui:pb-2",
-      left: "ui:border-l ui:pl-4",
+      unstyled: '',
+      bottom: 'ui:border-b ui:pb-2',
+      left: 'ui:border-l ui:pl-4',
     },
   },
   defaultVariants: {
-    variant: "default",
-    border: "default",
+    variant: 'unstyled',
+    border: 'unstyled',
   },
 });
 
-type TextProps<C extends React.ElementType> = VariantProps<
-  typeof TextVariants
-> &
+type TextProps<C extends React.ElementType> = VariantProps<typeof TextVariants> &
   PolymorphicComponent<C, { as?: C; testId?: string }>;
 
-const Text = <C extends React.ElementType = "span">({
+const Text = <C extends React.ElementType = 'span'>({
   as,
   border,
   variant,
@@ -35,7 +33,7 @@ const Text = <C extends React.ElementType = "span">({
   children,
   ...props
 }: TextProps<C>) => {
-  const Tag = as || "span";
+  const Tag = as || 'span';
   return (
     <Tag
       data-testid={testId}
