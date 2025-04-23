@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Tabs > Rendering > should matches snapshot 1`] = `
+<div>
+  <div
+    class="ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md"
+    data-testid="tabsgroup"
+  >
+    <div
+      aria-activedescendant="tab-1"
+      aria-label="Tabs"
+      aria-orientation="horizontal"
+      class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent"
+      role="tablist"
+    >
+      <button
+        aria-controls="content-1"
+        aria-selected="true"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:outline-none ui:focus-visible:ring-4 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:h-8 ui:w-16 ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm"
+        id="trigger-1"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          class=""
+        >
+          Trigger 
+          1
+        </span>
+      </button>
+      <button
+        aria-controls="content-2"
+        aria-selected="false"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:outline-none ui:focus-visible:ring-4 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:h-8 ui:w-16 ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm"
+        id="trigger-2"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          class=""
+        >
+          Trigger 
+          2
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="trigger-1"
+      class="ui:flex"
+      id="panel-1"
+      role="tabpanel"
+      tabindex="0"
+    >
+      Content 
+      1
+    </div>
+  </div>
+</div>
+`;
