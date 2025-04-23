@@ -51,12 +51,24 @@ type CardProps = ComponentPropsWithRef<'article'> &
 
 const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
   (
-    { border, hoverEffect, padding, rounded, shadow, testId, className, children, ...props },
+    {
+      border,
+      hoverEffect,
+      padding,
+      rounded,
+      shadow,
+      testId,
+      className,
+      children,
+      onClick,
+      ...props
+    },
     ref
   ) => {
     return (
       <article
         ref={ref}
+        onClick={onClick}
         data-testid={testId}
         className={cn(CardVariants({ border, hoverEffect, padding, rounded, shadow }), className)}
         {...props}
