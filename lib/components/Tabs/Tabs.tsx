@@ -1,7 +1,6 @@
-import useRovingFocus from "@/hooks/useRovingFocus";
-import { cn } from "@/utils/cn";
-import { ButtonVariants } from "@/utils/variants";
-import { cva, VariantProps } from "class-variance-authority";
+import useRovingFocus from '@/hooks/useRovingFocus';
+import { cn } from '@/utils/cn';
+import { cva, VariantProps } from 'class-variance-authority';
 import React, {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -12,24 +11,25 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react";
-import Button from "../Button";
+} from 'react';
+import Button from '../Button';
+import { ButtonVariants } from '../Button/Button';
 
 const TabsVariants = cva(
-  "ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md",
+  'ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md',
   {
     variants: {
       hasPadding: {
-        true: "ui:p-4",
+        true: 'ui:p-4',
       },
     },
     defaultVariants: {
       hasPadding: false,
     },
-  },
+  }
 );
 
-type TabsProps = ComponentProps<"div"> &
+type TabsProps = ComponentProps<'div'> &
   VariantProps<typeof TabsVariants> & {
     defaultValue: number;
     tabs: number;
@@ -45,16 +45,13 @@ type TabsContextProps = {
   hasPadding?: boolean;
   isTabbing: boolean;
   panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-  moveFocus: (direction: "next" | "previous") => void;
+  moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
   setActiveTab: React.Dispatch<React.SetStateAction<number>>;
   setIsTabbing: React.Dispatch<React.SetStateAction<boolean>>;
   setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
-  setFocusRef: (SetFocusRefProps: {
-    index: number;
-    element: HTMLElement | null;
-  }) => void;
+  setFocusRef: (SetFocusRefProps: { index: number; element: HTMLElement | null }) => void;
 };
 
 const TabsContext = createContext<TabsContextProps | null>(null);
@@ -68,14 +65,8 @@ const Tabs = ({
   children,
   ...props
 }: TabsProps) => {
-  const {
-    setFocusRef,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-    focusedIndex,
-    setFocusedIndex,
-  } = useRovingFocus(tabs);
+  const { setFocusRef, moveFocus, moveToStart, moveToEnd, focusedIndex, setFocusedIndex } =
+    useRovingFocus(tabs);
   const [activeTab, setActiveTab] = useState<number>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -97,11 +88,7 @@ const Tabs = ({
   };
   return (
     <TabsContext.Provider value={contextValue}>
-      <div
-        data-testid={testId}
-        className={cn(TabsVariants({ hasPadding }), className)}
-        {...props}
-      >
+      <div data-testid={testId} className={cn(TabsVariants({ hasPadding }), className)} {...props}>
         {children}
       </div>
     </TabsContext.Provider>
@@ -114,7 +101,7 @@ function useTabsContext() {
   const context = useContext(TabsContext);
 
   if (!context) {
-    throw new Error("Tabs components need to be wrapped into <Tabs>.");
+    throw new Error('Tabs components need to be wrapped into <Tabs>.');
   }
 
   return context;
@@ -123,69 +110,57 @@ function useTabsContext() {
 // ------------ List component
 
 const TabsListVariants = cva(
-  "ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent",
+  'ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent',
   {
     variants: {
       variant: {
-        default: "",
-        spaced: "ui:gap-2 ui:bg-primary-300 ui:[&>button]:rounded-sm",
+        default: '',
+        spaced: 'ui:gap-2 ui:bg-primary-300 ui:[&>button]:rounded-sm',
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: 'default',
     },
-  },
+  }
 );
 
-type TabsListProps = ComponentProps<"div"> &
+type TabsListProps = ComponentProps<'div'> &
   VariantProps<typeof TabsListVariants> & {
     children: ReactNode;
   };
 
-const TabsList = ({
-  variant,
-  className,
-  children,
-  ...props
-}: TabsListProps) => {
-  const {
-    activeTab,
-    hasPadding,
-    panelRefs,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-    setIsTabbing,
-  } = useTabsContext();
+const TabsList = ({ variant, className, children, ...props }: TabsListProps) => {
+  const { activeTab, hasPadding, panelRefs, moveFocus, moveToStart, moveToEnd, setIsTabbing } =
+    useTabsContext();
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
-        case "ArrowRight": {
+        case 'ArrowRight': {
           e.preventDefault();
           setIsTabbing(false);
-          moveFocus("next");
+          moveFocus('next');
           break;
         }
-        case "ArrowLeft": {
+        case 'ArrowLeft': {
           e.preventDefault();
           setIsTabbing(false);
-          moveFocus("previous");
+          moveFocus('previous');
           break;
         }
-        case "Home": {
+        case 'Home': {
           e.preventDefault();
           setIsTabbing(false);
           moveToStart();
           break;
         }
-        case "End": {
+        case 'End': {
           e.preventDefault();
           setIsTabbing(false);
           moveToEnd();
           break;
         }
-        case "Tab": {
+        case 'Tab': {
           e.preventDefault();
           setIsTabbing(true);
           panelRefs.current[activeTab]?.focus();
@@ -193,7 +168,7 @@ const TabsList = ({
         }
       }
     },
-    [panelRefs, activeTab, setIsTabbing, moveFocus, moveToStart, moveToEnd],
+    [panelRefs, activeTab, setIsTabbing, moveFocus, moveToStart, moveToEnd]
   );
 
   return (
@@ -204,8 +179,8 @@ const TabsList = ({
       aria-label="Tabs"
       className={cn(
         TabsListVariants({ variant }),
-        `${hasPadding ? "ui:rounded-md ui:px-2 ui:py-2" : "ui:rounded-t-md ui:bg-transparent"}`,
-        className,
+        `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
+        className
       )}
       onKeyDown={handleKeyDown}
       {...props}
@@ -217,7 +192,7 @@ const TabsList = ({
 
 // ------------ Trigger component
 
-type TabsTriggerProps = ComponentPropsWithoutRef<"button"> &
+type TabsTriggerProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     disabled?: boolean;
     value: number;
@@ -228,7 +203,7 @@ const TabsTrigger = ({
   disabled,
   variant,
   size,
-  as,
+  intent,
   rounded,
   value,
   className,
@@ -274,8 +249,8 @@ const TabsTrigger = ({
     <Button
       ref={triggerRef}
       type="button"
-      variant={"unstyled"}
-      size={"sm"}
+      variant={'unstyled'}
+      size={'sm'}
       aria-controls={contentId}
       aria-disabled={disabled}
       aria-selected={isActive}
@@ -284,13 +259,13 @@ const TabsTrigger = ({
       role="tab"
       tabIndex={disabled ? -1 : isFocused ? 0 : -1}
       className={cn(
-        ButtonVariants({ variant, size, as, rounded }),
+        ButtonVariants({ variant, size, intent, rounded }),
         {
-          "ui:bg-primary-50 ui:text-primary-600": isFocused,
-          "ui:first:rounded-l-sm ui:last:rounded-r-sm": hasPadding,
+          'ui:bg-primary-50 ui:text-primary-600': isFocused,
+          'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
         },
-        "ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm",
-        className,
+        'ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm',
+        className
       )}
       onClick={handleClick}
       onFocus={handleFocus}
@@ -303,19 +278,13 @@ const TabsTrigger = ({
 
 // ------------ Content component
 
-type TabsContentProps = ComponentProps<"div"> & {
+type TabsContentProps = ComponentProps<'div'> & {
   value: number;
   children: ReactNode;
 };
 
-const TabsContent = ({
-  value,
-  className,
-  children,
-  ...props
-}: TabsContentProps) => {
-  const { panelRefs, activeTab, isTabbing, focusedIndex, setIsTabbing } =
-    useTabsContext();
+const TabsContent = ({ value, className, children, ...props }: TabsContentProps) => {
+  const { panelRefs, activeTab, isTabbing, focusedIndex, setIsTabbing } = useTabsContext();
   const triggerId = `trigger-${value}`;
   const contentId = `panel-${value}`;
   const isActive = activeTab === value;
@@ -344,7 +313,7 @@ const TabsContent = ({
           role="tabpanel"
           id={contentId}
           tabIndex={0}
-          className={cn("ui:flex", className)}
+          className={cn('ui:flex', className)}
           onFocus={handleFocus}
           {...props}
         >
