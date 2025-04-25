@@ -66,7 +66,7 @@ const Tabs = ({
   ...props
 }: TabsProps) => {
   const { setFocusRef, moveFocus, moveToStart, moveToEnd, focusedIndex, setFocusedIndex } =
-    useRovingFocus(tabs);
+    useRovingFocus(tabs, defaultValue);
   const [activeTab, setActiveTab] = useState<number>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
