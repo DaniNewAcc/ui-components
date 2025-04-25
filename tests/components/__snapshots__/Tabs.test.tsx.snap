@@ -16,10 +16,10 @@ exports[`Tabs > Rendering > should matches snapshot 1`] = `
       <button
         aria-controls="content-1"
         aria-selected="true"
-        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:outline-none ui:focus-visible:ring-4 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:h-8 ui:w-16 ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:outline-none ui:focus-visible:ring-4 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:h-8 ui:w-16 ui:bg-primary-50 ui:text-primary-600 ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm"
         id="trigger-1"
         role="tab"
-        tabindex="-1"
+        tabindex="0"
         type="button"
       >
         <span
