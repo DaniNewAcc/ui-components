@@ -24,7 +24,7 @@ const Separator = <C extends React.ElementType = 'hr'>({
   className,
   ...props
 }: SeparatorProps<C>) => {
-  let Tag = as ?? (orientation === 'vertical' ? 'hr' : 'div');
+  let Tag = as ?? (orientation === 'vertical' ? 'div' : 'hr');
   return (
     <Tag
       data-testid={testId}
