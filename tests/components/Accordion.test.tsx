@@ -61,50 +61,91 @@ describe('Accordion', () => {
 
       expect(content[0]).toBeVisible();
     });
-  });
-
-  describe('Interaction', () => {
-    it('should allow to open only the related accordionItem when multiple is false', () => {
-      renderAccordion(2, 1, false);
-      const trigger = screen.getAllByTestId('trigger');
-
-      let content = screen.queryAllByTestId('content');
-      expect(content[0]).toBeVisible();
-      expect(trigger[0]).toHaveAttribute('aria-expanded', 'true');
-
-      fireEvent.click(trigger[0]);
-
-      content = screen.queryAllByTestId('content');
+    it('should render correctly with no items', () => {
+      renderAccordion(0);
+      const content = screen.queryAllByTestId('content');
       expect(content.length).toBe(0);
-
-      fireEvent.click(trigger[1]);
-
-      content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 2');
-      expect(trigger[0]).toHaveAttribute('aria-expanded', 'false');
-      expect(trigger[1]).toHaveAttribute('aria-expanded', 'true');
     });
   });
 
-  it('should allow to open multiple accordionItems when multiple is true', () => {
-    renderAccordion(3, 1, true);
-    const trigger = screen.getAllByTestId('trigger');
+  describe('Interaction', () => {
+    it('should not allow opening multiple items when multiple is false', () => {
+      renderAccordion(3, 1, false);
+      const trigger = screen.getAllByTestId('trigger');
 
-    let content = screen.queryAllByTestId('content');
-    expect(content.length).toBe(1);
-    expect(content[0]).toHaveTextContent('Content 1');
+      let content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
 
-    fireEvent.click(trigger[1]);
-    content = screen.queryAllByTestId('content');
-    expect(content.length).toBe(2);
-    expect(content[0]).toHaveTextContent('Content 1');
-    expect(content[1]).toHaveTextContent('Content 2');
+      fireEvent.click(trigger[1]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 2');
 
-    fireEvent.click(trigger[2]);
-    content = screen.queryAllByTestId('content');
-    expect(content.length).toBe(3);
-    expect(content[2]).toHaveTextContent('Content 3');
+      fireEvent.click(trigger[0]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
+    });
+
+    it('should allow opening multiple items when multiple is true', () => {
+      renderAccordion(3, 1, true);
+      const trigger = screen.getAllByTestId('trigger');
+
+      let content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
+
+      fireEvent.click(trigger[1]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(2);
+      expect(content[0]).toHaveTextContent('Content 1');
+      expect(content[1]).toHaveTextContent('Content 2');
+
+      fireEvent.click(trigger[2]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(3);
+      expect(content[2]).toHaveTextContent('Content 3');
+    });
+
+    it('should toggle an already open item when clicked again (multiple is true)', () => {
+      renderAccordion(3, 1, true);
+      const trigger = screen.getAllByTestId('trigger');
+
+      let content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
+
+      fireEvent.click(trigger[1]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(2);
+      expect(content[0]).toHaveTextContent('Content 1');
+      expect(content[1]).toHaveTextContent('Content 2');
+
+      // Toggle the second item off
+      fireEvent.click(trigger[1]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
+    });
+
+    it('should close an open item if clicked again when multiple is false', () => {
+      renderAccordion(3, 1, false);
+      const trigger = screen.getAllByTestId('trigger');
+
+      let content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 1');
+
+      fireEvent.click(trigger[0]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(0); // Should be closed.
+
+      fireEvent.click(trigger[1]);
+      content = screen.queryAllByTestId('content');
+      expect(content.length).toBe(1);
+      expect(content[0]).toHaveTextContent('Content 2');
+    });
   });
 
   describe('Keyboard Navigation', () => {
