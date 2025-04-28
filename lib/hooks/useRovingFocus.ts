@@ -16,7 +16,7 @@ export type RovingFocusHookProps = {
 
 function useRovingFocus(
   totalItems: number,
-  initialFocusedIndex: number | number[]
+  initialFocusedIndex?: number | number[] | null
 ): RovingFocusHookProps {
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const elementsRef = useRef<(HTMLElement | null)[]>([]);

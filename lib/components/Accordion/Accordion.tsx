@@ -14,7 +14,7 @@ import Flex from '../Flex';
 
 type AccordionProps = ComponentProps<'div'> & {
   items: number;
-  defaultValue: number | number[];
+  defaultValue?: number | number[];
   multiple?: boolean;
   testId?: string;
   children: ReactNode;
@@ -45,17 +45,14 @@ const Accordion = ({
   children,
   ...props
 }: AccordionProps) => {
-  const [activeItems, setActiveItems] = useState<number[] | number | null>(defaultValue);
+  const [activeItems, setActiveItems] = useState<number[] | number | null>(
+    defaultValue ?? (multiple ? [] : null)
+  );
   const { focusedIndex, setFocusedIndex, setFocusRef, moveFocus, moveToStart, moveToEnd } =
     useRovingFocus(items, defaultValue);
 
-  function handleAccordion(index: number | null) {
-    const toggleItem = (prev: number | number[] | null, index: number | null) => {
-      // clear activeItems for both mode(single or multiple)
-      if (index === null) {
-        return multiple ? [] : null;
-      }
-
+  function handleAccordion(index: number) {
+    const toggleItem = (prev: number | number[] | null, index: number) => {
       // toggle items inside of activeItems array
       if (multiple) {
         const prevItems = Array.isArray(prev) ? [...prev] : prev === null ? [] : [prev];
@@ -105,7 +102,7 @@ const Accordion = ({
 
 // helper function for using accordion context
 
-export function useAccordionContext() {
+function useAccordionContext() {
   const context = useContext(AccordionContext);
 
   if (!context) {
@@ -219,7 +216,7 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
 
 // helper function for using accordionItem context
 
-export function useAccordionItemContext() {
+function useAccordionItemContext() {
   const context = useContext(AccordionItemContext);
 
   if (!context) {
