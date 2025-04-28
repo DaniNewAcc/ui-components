@@ -1,25 +1,7 @@
+import { TextVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
 import { PolymorphicComponent } from '@utils/types';
-import { cva, VariantProps } from 'class-variance-authority';
-
-const TextVariants = cva('', {
-  variants: {
-    variant: {
-      unstyled: '',
-      heading: 'ui:scroll-mt-16 ui:tracking-tight',
-      list: 'ui:list-disc ui:[&>li]:mt-2',
-    },
-    border: {
-      unstyled: '',
-      bottom: 'ui:border-b ui:pb-2',
-      left: 'ui:border-l ui:pl-4',
-    },
-  },
-  defaultVariants: {
-    variant: 'unstyled',
-    border: 'unstyled',
-  },
-});
+import { VariantProps } from 'class-variance-authority';
 
 type TextProps<C extends React.ElementType> = VariantProps<typeof TextVariants> &
   PolymorphicComponent<C, { as?: C; testId?: string }>;

@@ -1,18 +1,7 @@
+import { SeparatorVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
 import { PolymorphicComponent } from '@utils/types';
-import { cva, VariantProps } from 'class-variance-authority';
-
-const SeparatorVariants = cva('ui:bg-gray-400', {
-  variants: {
-    orientation: {
-      horizontal: 'ui:h-[1px] ui:w-full',
-      vertical: 'ui:h-full ui:w-[1px]',
-    },
-  },
-  defaultVariants: {
-    orientation: 'horizontal',
-  },
-});
+import { VariantProps } from 'class-variance-authority';
 
 type SeparatorProps<C extends React.ElementType> = VariantProps<typeof SeparatorVariants> &
   PolymorphicComponent<C, { as?: C; testId?: string }>;

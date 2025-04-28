@@ -1,46 +1,7 @@
+import { CardVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
-import { cva, VariantProps } from 'class-variance-authority';
+import { VariantProps } from 'class-variance-authority';
 import React, { ComponentPropsWithRef, forwardRef, ReactNode } from 'react';
-
-const CardVariants = cva(
-  'ui:relative ui:flex ui:cursor-pointer ui:flex-col ui:gap-4 ui:overflow-hidden ui:bg-primary-50 ui:transition-all ui:duration-200 ui:ease-out',
-  {
-    variants: {
-      border: {
-        default: 'ui:border',
-        outlined: 'ui:border-2 ui:border-primary-500',
-        topLeft: 'ui:border-t-2 ui:border-l-2 ui:border-t-primary-50 ui:border-l-primary-50',
-      },
-      hoverEffect: {
-        default: '',
-        zoom: 'ui:hover:scale-110',
-        shift: 'ui:hover:translate-x-2 ui:hover:translate-y-2',
-      },
-      padding: {
-        sm: 'ui:p-2',
-        md: 'ui:p-4',
-        lg: 'ui:p-6',
-      },
-      rounded: {
-        sm: 'ui:rounded-sm',
-        md: 'ui:rounded-md',
-        lg: 'ui:rounded-lg',
-      },
-      shadow: {
-        sm: 'ui:shadow-sm',
-        md: 'ui:shadow-md',
-        lg: 'ui:shadow-lg',
-      },
-    },
-    defaultVariants: {
-      border: 'default',
-      hoverEffect: 'default',
-      padding: 'md',
-      rounded: 'md',
-      shadow: 'md',
-    },
-  }
-);
 
 type CardProps = ComponentPropsWithRef<'article'> &
   VariantProps<typeof CardVariants> & {

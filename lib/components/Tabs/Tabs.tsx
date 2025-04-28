@@ -1,6 +1,7 @@
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { cn } from '@/utils/cn';
-import { cva, VariantProps } from 'class-variance-authority';
+import { ButtonVariants, TabsListVariants, TabsVariants } from '@/utils/variants';
+import { VariantProps } from 'class-variance-authority';
 import React, {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -13,21 +14,6 @@ import React, {
   useState,
 } from 'react';
 import Button from '../Button';
-import { ButtonVariants } from '../Button/Button';
-
-const TabsVariants = cva(
-  'ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md',
-  {
-    variants: {
-      hasPadding: {
-        true: 'ui:p-4',
-      },
-    },
-    defaultVariants: {
-      hasPadding: false,
-    },
-  }
-);
 
 type TabsProps = ComponentProps<'div'> &
   VariantProps<typeof TabsVariants> & {
@@ -108,21 +94,6 @@ function useTabsContext() {
 }
 
 // ------------ List component
-
-const TabsListVariants = cva(
-  'ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent',
-  {
-    variants: {
-      variant: {
-        default: '',
-        spaced: 'ui:gap-2 ui:bg-primary-300 ui:[&>button]:rounded-sm',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-);
 
 type TabsListProps = ComponentProps<'div'> &
   VariantProps<typeof TabsListVariants> & {
