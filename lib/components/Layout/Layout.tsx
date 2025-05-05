@@ -3,13 +3,15 @@ import { PolymorphicComponent } from '@utils/types';
 
 type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
   C,
-  { as?: C; testId?: string }
+  { as?: C; testId?: string; isCentered?: boolean; overflowHidden?: boolean }
 >;
 
 const Layout = <C extends React.ElementType = 'div'>({
   as,
   testId,
   className,
+  isCentered = true,
+  overflowHidden = false,
   children,
   ...props
 }: LayoutProps<C>) => {
@@ -20,7 +22,9 @@ const Layout = <C extends React.ElementType = 'div'>({
       data-testid={testId}
       role={as === 'main' ? 'main' : undefined}
       className={cn(
-        'ui:flex ui:h-screen ui:w-screen ui:flex-col ui:items-center ui:justify-center ui:overflow-x-hidden',
+        'ui:flex ui:min-h-screen ui:w-full ui:grow-0 ui:flex-col',
+        isCentered ? 'ui:items-center ui:justify-center' : 'ui:items-start ui:justify-start',
+        overflowHidden ? 'ui:overflow-hidden' : 'ui:overflow-auto',
         className
       )}
       {...props}
