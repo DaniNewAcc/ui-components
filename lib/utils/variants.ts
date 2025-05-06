@@ -498,3 +498,70 @@ export const TextVariants = cva('', {
     border: 'unstyled',
   },
 });
+
+export const AnimationVariants = cva('', {
+  variants: {
+    type: {
+      default: '',
+      fadeIn: 'ui-animate-fadeIn',
+      fadeOut: 'ui-animate-fadeOut',
+      slideUp: 'ui-animate-slideUp',
+      slideDown: 'ui-animate-slideDown',
+      bounce: 'ui-animate-bounce',
+      zoomIn: 'ui-animate-zoomIn',
+    },
+    duration: {
+      default: '',
+      300: 'ui-animate-duration-300',
+      500: 'ui-animate-duration-500',
+      700: 'ui-animate-duration-700',
+      1000: 'ui-animate-duration-1000',
+    },
+    delay: {
+      0: 'ui-animate-delay-0',
+      200: 'ui-animate-delay-200',
+      500: 'ui-animate-delay-500',
+    },
+    repeat: {
+      once: 'ui-animate-once',
+      infinite: 'ui-animate-infinite',
+    },
+    fillMode: {
+      default: 'ui-animate-default',
+      forwards: 'ui-animate-forwards',
+    },
+    exitType: {
+      default: '',
+      fadeIn: 'ui-animate-fadeIn',
+      fadeOut: 'ui-animate-fadeOut',
+      slideUp: 'ui-animate-slideUp',
+      slideDown: 'ui-animate-slideDown',
+      bounce: 'ui-animate-bounce',
+      zoomIn: 'ui-animate-zoomIn',
+    },
+    easing: {
+      ease: 'ui-animate-ease',
+      easeIn: 'ui-animate-ease-in',
+      easeOut: 'ui-animate-ease-out',
+      easeInOut: 'ui-animate-ease-in-out',
+      linear: 'ui-animate-linear',
+    },
+    exitEasing: {
+      ease: 'ui-animate-ease',
+      easeIn: 'ui-animate-ease-in',
+      easeOut: 'ui-animate-ease-out',
+      easeInOut: 'ui-animate-ease-in-out',
+      linear: 'ui-animate-linear',
+    },
+  },
+  defaultVariants: {
+    type: 'default',
+    duration: 'default',
+    delay: 0,
+    repeat: 'once',
+    fillMode: 'default',
+    exitType: 'default',
+    easing: 'easeOut',
+    exitEasing: 'easeIn',
+  },
+});
