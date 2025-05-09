@@ -88,6 +88,38 @@
 
   /* animation utilities */
 
+  .is-animating {
+    pointer-events: none;
+  }
+
+  .is-animating-enter {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(-100%);
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
+  }
+
+  .is-animating-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .is-animating-exit {
+    opacity: 1;
+    visibility: hidden;
+    transform: translateY(0);
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
+  }
+
+  .is-animating-exit-active {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
   /* name */
   .ui-animate-fadeIn {
     animation-name: fadeIn;
@@ -109,6 +141,12 @@
   }
 
   /* duration */
+  .ui-animate-duration-100 {
+    animation-duration: 300ms;
+  }
+  .ui-animate-duration-200 {
+    animation-duration: 300ms;
+  }
   .ui-animate-duration-300 {
     animation-duration: 300ms;
   }
