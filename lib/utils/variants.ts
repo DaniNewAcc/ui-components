@@ -511,7 +511,8 @@ export const AnimationVariants = cva('', {
       zoomIn: 'ui-animate-zoomIn',
     },
     duration: {
-      default: '',
+      100: 'ui-animate-duration-100',
+      200: 'ui-animate-duration-200',
       300: 'ui-animate-duration-300',
       500: 'ui-animate-duration-500',
       700: 'ui-animate-duration-700',
@@ -556,7 +557,7 @@ export const AnimationVariants = cva('', {
   },
   defaultVariants: {
     type: 'default',
-    duration: 'default',
+    duration: 300,
     delay: 0,
     repeat: 'once',
     fillMode: 'default',
