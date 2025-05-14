@@ -1,13 +1,52 @@
+/**
+ * Custom hook to manage roving focus among a set of elements.
+ *
+ * Overview:
+ * - Maintains a "focusedIndex" and moves focus among registered elements.
+ * - Supports both string and number keys (either a single value or an array).
+ * - Useful in menus, tab lists, or custom keyboard navigation components.
+ *
+ * Focus Movement Methods:
+ * - `moveFocus(direction: 'next' | 'previous')`: Moves focus to the next or previous focusable element.
+ * - `moveToStart()`: Moves focus to the first focusable element.
+ * - `moveToEnd()`: Moves focus to the last focusable element.
+ *
+ * Ref Registration:
+ * - Use `setFocusRef({ index, element })` to register elements by their index.
+ * - The hook maintains an internal map of registered elements.
+ *
+ * Focus Logic:
+ * - Disabled or hidden elements are skipped (checks `disabled`, `aria-disabled`, and visibility).
+ * - If the `initialFocusedIndex` is valid and the corresponding element is focusable, it will be focused on mount.
+ *
+ * Usage:
+ *
+ * const {
+ *   focusedIndex,
+ *   setFocusedIndex,
+ *   moveFocus,
+ *   moveToStart,
+ *   moveToEnd,
+ *   setFocusRef
+ * } = useRovingFocus(initialFocusedIndex);
+ *
+ * - `initialFocusedIndex` is optional; if provided, it determines which element starts focused.
+ * - Call `setFocusRef({ index, element })` for each element you want to include in the roving focus group.
+ * - Use `moveFocus('next' | 'previous')`, `moveToStart()`, and `moveToEnd()` inside a keydown handler to support keyboard navigation.
+ * - `setFocusedIndex` allows manual control of which element is focused (e.g. from mouse interaction or other logic).
+ * - `focusedIndex` can be used to conditionally style or render elements based on current focus.
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SetFocusRefProps = {
-  index: number;
+  index: string | number;
   element: HTMLElement | null;
 };
 
 export type RovingFocusHookProps = {
-  focusedIndex: number;
-  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
+  focusedIndex: string | number | null;
+  setFocusedIndex: React.Dispatch<React.SetStateAction<string | number | null>>;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -15,101 +54,82 @@ export type RovingFocusHookProps = {
 };
 
 function useRovingFocus(
-  totalItems: number,
-  initialFocusedIndex?: number | number[] | null
+  initialFocusedIndex?: string | number | (string | number)[] | null
 ): RovingFocusHookProps {
-  const [focusedIndex, setFocusedIndex] = useState<number>(0);
-  const elementsRef = useRef<(HTMLElement | null)[]>([]);
+  const [focusedIndex, setFocusedIndex] = useState(() => {
+    if (initialFocusedIndex == null) return null;
+    return Array.isArray(initialFocusedIndex)
+      ? (initialFocusedIndex[0] ?? null)
+      : initialFocusedIndex;
+  });
 
-  // Check if the initialFocusedIndex is an array or a single value
-  useEffect(() => {
-    if (Array.isArray(initialFocusedIndex)) {
-      setFocusedIndex(initialFocusedIndex[0] || 0);
-    } else {
-      setFocusedIndex(initialFocusedIndex || 0);
-    }
-  }, [initialFocusedIndex]);
+  const elementsRef = useRef<Map<string | number, HTMLElement | null>>(new Map());
 
-  // helper functions for checking if an element is focusable
+  const isElementDisabled = (el: HTMLElement | null): boolean =>
+    !el || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
 
-  // check if the element is disabled
-  const isElementDisabled = (el: HTMLElement | null) => {
-    return !el || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
-  };
-
-  // check if the element is visible
-  const isElementVisible = (el: HTMLElement | null) => {
+  const isElementVisible = (el: HTMLElement | null): boolean => {
     if (!el) return false;
-
     const style = window.getComputedStyle(el);
-    const isHidden =
+    return !(
       style.display === 'none' ||
       style.visibility === 'hidden' ||
-      el.getAttribute('aria-hidden') === 'true';
-
-    return !isHidden;
+      el.getAttribute('aria-hidden') === 'true'
+    );
   };
 
-  // check if the element is focusable
-  const isElementFocusable = (el: HTMLElement | null) => {
-    return el && !isElementDisabled(el) && isElementVisible(el);
+  const isElementFocusable = (el: HTMLElement | null | undefined): el is HTMLElement => {
+    return !!el && !isElementDisabled(el) && isElementVisible(el);
   };
 
-  // functions for moving focus through different elements
+  const setFocusRef = useCallback(({ index, element }: SetFocusRefProps) => {
+    if (element != null) {
+      elementsRef.current.set(index, element);
+    }
+  }, []);
 
-  // moves focus to the next or previous focusable element
   const moveFocus = useCallback(
     (direction: 'next' | 'previous') => {
-      let index = focusedIndex;
-      for (let i = 0; i < totalItems; i++) {
-        index =
-          direction === 'next' ? (index + 1) % totalItems : (index - 1 + totalItems) % totalItems;
+      const entries = Array.from(elementsRef.current.entries());
+      const focusables = entries.filter(([_, el]) => isElementFocusable(el));
 
-        const el = elementsRef.current[index];
-        if (isElementFocusable(el)) {
-          setFocusedIndex(index);
-          break;
-        }
-      }
+      if (focusables.length === 0) return;
+
+      const currentIndex = focusables.findIndex(([key]) => key === focusedIndex);
+      const nextIndex =
+        direction === 'next'
+          ? (currentIndex + 1) % focusables.length
+          : (currentIndex - 1 + focusables.length) % focusables.length;
+
+      const [nextKey] = focusables[nextIndex];
+      setFocusedIndex(nextKey);
     },
-    [focusedIndex, totalItems]
+    [focusedIndex]
   );
 
-  // moves focus to the first focusable element
   const moveToStart = useCallback(() => {
-    for (let i = 0; i < totalItems; i++) {
-      if (isElementFocusable(elementsRef.current[i])) {
-        setFocusedIndex(i);
+    for (const [key, el] of elementsRef.current.entries()) {
+      if (isElementFocusable(el)) {
+        setFocusedIndex(key);
         break;
       }
     }
-  }, [totalItems]);
+  }, []);
 
-  // moves focus to the last focusable element
   const moveToEnd = useCallback(() => {
-    for (let i = totalItems - 1; i >= 0; i--) {
-      if (isElementFocusable(elementsRef.current[i])) {
-        setFocusedIndex(i);
+    const entries = Array.from(elementsRef.current.entries()).reverse();
+    for (const [key, el] of entries) {
+      if (isElementFocusable(el)) {
+        setFocusedIndex(key);
         break;
       }
     }
-  }, [totalItems]);
+  }, []);
 
-  // register a ref to a focusable element at specific index
-  const setFocusRef = useCallback(
-    ({ index, element }: SetFocusRefProps) => {
-      if (element && index >= 0 && index < totalItems) {
-        elementsRef.current[index] = element;
-      }
-    },
-    [totalItems]
-  );
-
-  // focuses the current element at the current focusedIndex if it's focusable
   useEffect(() => {
-    const currentEl = elementsRef.current[focusedIndex];
-    if (currentEl && isElementFocusable(currentEl)) {
-      currentEl.focus();
+    const el = elementsRef.current.get(focusedIndex ?? '');
+    if (isElementFocusable(el)) {
+      el.focus();
     }
   }, [focusedIndex]);
 
