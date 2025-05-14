@@ -17,50 +17,50 @@ import Button from '../Button';
 
 type TabsProps = ComponentProps<'div'> &
   VariantProps<typeof TabsVariants> & {
-    defaultValue: number;
-    tabs: number;
+    defaultValue: number | string;
     testId?: string;
+    valueKey?: string;
+    labelKey?: string;
     children: ReactNode;
     hasPadding?: boolean;
   };
 
 type TabsContextProps = {
-  activeTab: number;
-  focusedIndex: number;
-  tabs: number;
+  activeTab: number | string;
+  focusedIndex: number | string | null;
   hasPadding?: boolean;
   isTabbing: boolean;
   panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
-  setActiveTab: React.Dispatch<React.SetStateAction<number>>;
+  setActiveTab: React.Dispatch<React.SetStateAction<number | string>>;
   setIsTabbing: React.Dispatch<React.SetStateAction<boolean>>;
-  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
-  setFocusRef: (SetFocusRefProps: { index: number; element: HTMLElement | null }) => void;
+  setFocusedIndex: React.Dispatch<React.SetStateAction<number | string | null>>;
+  setFocusRef: (SetFocusRefProps: { index: number | string; element: HTMLElement | null }) => void;
 };
 
 const TabsContext = createContext<TabsContextProps | null>(null);
 
 const Tabs = ({
   defaultValue,
-  tabs,
   testId,
+  valueKey,
+  labelKey,
   hasPadding,
   className,
   children,
   ...props
 }: TabsProps) => {
   const { setFocusRef, moveFocus, moveToStart, moveToEnd, focusedIndex, setFocusedIndex } =
-    useRovingFocus(tabs, defaultValue);
-  const [activeTab, setActiveTab] = useState<number>(defaultValue);
+    useRovingFocus(defaultValue);
+  const [activeTab, setActiveTab] = useState<number | string>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const contextValue = {
     activeTab: activeTab,
     focusedIndex,
-    tabs,
     hasPadding,
     isTabbing,
     panelRefs,
@@ -134,7 +134,7 @@ const TabsList = ({ variant, className, children, ...props }: TabsListProps) => 
         case 'Tab': {
           e.preventDefault();
           setIsTabbing(true);
-          panelRefs.current[activeTab]?.focus();
+          panelRefs.current[Number(activeTab)]?.focus();
           break;
         }
       }
@@ -166,7 +166,7 @@ const TabsList = ({ variant, className, children, ...props }: TabsListProps) => 
 type TabsTriggerProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     disabled?: boolean;
-    value: number;
+    value: number | string;
     children: ReactNode;
   };
 
@@ -250,7 +250,7 @@ const TabsTrigger = ({
 // ------------ Content component
 
 type TabsContentProps = ComponentProps<'div'> & {
-  value: number;
+  value: number | string;
   children: ReactNode;
 };
 
@@ -264,7 +264,7 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    panelRefs.current[activeTab] = panelRef.current;
+    panelRefs.current[Number(activeTab)] = panelRef.current;
     if (isActive && isFocused && isTabbing && panelRef.current) {
       panelRef.current.focus();
     }
