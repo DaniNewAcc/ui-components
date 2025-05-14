@@ -4,7 +4,7 @@ import { userEvent } from '@testing-library/user-event';
 
 const renderTabs = (count = 3, defaultValue = 1, hasPadding = false) => {
   return render(
-    <Tabs tabs={count} defaultValue={defaultValue} hasPadding={hasPadding} testId="tabsgroup">
+    <Tabs defaultValue={defaultValue} hasPadding={hasPadding} testId="tabsgroup">
       <TabsList>
         {Array.from({ length: count }, (_, i) => (
           <TabsTrigger key={i} value={i + 1}>

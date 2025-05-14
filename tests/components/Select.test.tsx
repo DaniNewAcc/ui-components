@@ -1,6 +1,15 @@
+import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { Select, SelectDropdown, SelectOption, SelectTrigger } from '@components/Select'; // Adjust the import path as necessary
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
+beforeEach(() => {
+  __setReduceMotionForTests(true);
+});
+
+afterEach(() => {
+  __setReduceMotionForTests(undefined);
+});
 
 describe('Select', () => {
   const options = [
@@ -27,7 +36,7 @@ describe('Select', () => {
   describe('Rendering', () => {
     it('should render correctly', () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -44,7 +53,7 @@ describe('Select', () => {
 
     it('should display placeholder text when no option is selected', () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger placeholderText="Select an option..." testId="select-trigger">
             Toggle
           </SelectTrigger>
@@ -63,7 +72,7 @@ describe('Select', () => {
 
     it('should not render dropdown if closed', () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -82,7 +91,7 @@ describe('Select', () => {
   describe('Interaction', () => {
     it('should open dropdown when trigger is clicked', async () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -101,7 +110,7 @@ describe('Select', () => {
 
     it('should close dropdown when an option is selected', async () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -122,7 +131,13 @@ describe('Select', () => {
 
     it('should close the dropdown when the same option is clicked again', async () => {
       render(
-        <Select options={options} defaultValue={1} testId="select-component">
+        <Select
+          valueKey="id"
+          labelKey="name"
+          options={options}
+          defaultValue={1}
+          testId="select-component"
+        >
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -141,7 +156,13 @@ describe('Select', () => {
 
     it('should reset selection when "Clear" is clicked', async () => {
       render(
-        <Select options={options} defaultValue={1} testId="select-component">
+        <Select
+          valueKey="id"
+          labelKey="name"
+          options={options}
+          defaultValue={1}
+          testId="select-component"
+        >
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (
@@ -163,7 +184,7 @@ describe('Select', () => {
 
     it('should open dropdown when trigger is clicked twice', async () => {
       render(
-        <Select options={options} testId="select-component">
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
           <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
           <SelectDropdown testId="select-dropdown">
             {options.map(option => (

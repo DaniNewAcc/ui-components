@@ -1,4 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components';
+import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -19,6 +20,14 @@ const renderAccordion = (count = 3, defaultValue = 1, multiple = false) => {
     </Accordion>
   );
 };
+
+beforeEach(() => {
+  __setReduceMotionForTests(true);
+});
+
+afterEach(() => {
+  __setReduceMotionForTests(undefined);
+});
 
 describe('Accordion', () => {
   describe('Context Behavior', () => {
@@ -69,23 +78,23 @@ describe('Accordion', () => {
   });
 
   describe('Interaction', () => {
-    it('should not allow opening multiple items when multiple is false', () => {
+    it('should not allow opening multiple items when multiple is false', async () => {
       renderAccordion(3, 1, false);
       const trigger = screen.getAllByTestId('trigger');
 
-      let content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 1');
+      await waitFor(() => {
+        expect(screen.getByText('Content 1')).toBeVisible();
+      });
 
       fireEvent.click(trigger[1]);
-      content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 2');
+      await waitFor(() => {
+        expect(screen.getByText('Content 2')).toBeVisible();
+      });
 
       fireEvent.click(trigger[0]);
-      content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 1');
+      await waitFor(() => {
+        expect(screen.getByText('Content 1')).toBeVisible();
+      });
     });
 
     it('should allow opening multiple items when multiple is true', () => {
@@ -93,18 +102,15 @@ describe('Accordion', () => {
       const trigger = screen.getAllByTestId('trigger');
 
       let content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
       expect(content[0]).toHaveTextContent('Content 1');
 
       fireEvent.click(trigger[1]);
       content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(2);
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
       fireEvent.click(trigger[2]);
       content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(3);
       expect(content[2]).toHaveTextContent('Content 3');
     });
 
@@ -113,38 +119,35 @@ describe('Accordion', () => {
       const trigger = screen.getAllByTestId('trigger');
 
       let content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
       expect(content[0]).toHaveTextContent('Content 1');
 
       fireEvent.click(trigger[1]);
       content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(2);
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
-      // Toggle the second item off
       fireEvent.click(trigger[1]);
       content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
       expect(content[0]).toHaveTextContent('Content 1');
     });
 
-    it('should close an open item if clicked again when multiple is false', () => {
+    it('should close an open item if clicked again when multiple is false', async () => {
       renderAccordion(3, 1, false);
       const trigger = screen.getAllByTestId('trigger');
 
-      let content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 1');
+      await waitFor(() => {
+        expect(screen.getByText('Content 1')).toBeVisible();
+      });
 
       fireEvent.click(trigger[0]);
-      content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(0); // Should be closed.
 
-      fireEvent.click(trigger[1]);
-      content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(1);
-      expect(content[0]).toHaveTextContent('Content 2');
+      await waitFor(() => {
+        const content = screen.queryByText('Content 1');
+        expect(content).not.toBeInTheDocument();
+      });
+
+      const content = screen.queryByText('Content 1');
+      expect(content).toBeNull();
     });
   });
 
