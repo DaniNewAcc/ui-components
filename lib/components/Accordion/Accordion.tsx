@@ -1,4 +1,5 @@
 import useRovingFocus from '@/hooks/useRovingFocus';
+import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import {
   ComponentProps,
@@ -10,25 +11,32 @@ import {
   useRef,
   useState,
 } from 'react';
+import Animate from '../Animate';
+import { AnimateProps } from '../Animate/Animate';
 import Flex from '../Flex';
+
+type ActiveItems = string | number | (string | number)[] | null;
 
 type AccordionProps = ComponentProps<'div'> & {
   items: number;
-  defaultValue?: number | number[];
+  defaultValue?: string | number | null;
   multiple?: boolean;
   testId?: string;
+  valueKey?: string;
+  labelKey?: string;
   children: ReactNode;
 };
 
 type AccordionContextProps = {
-  items: number;
-  activeItems: number[] | number | null;
+  activeItems: ActiveItems;
   isMultiple: boolean;
-  focusedIndex: number;
-  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
-  setActiveItems: React.Dispatch<React.SetStateAction<number | number[] | null>>;
-  setFocusRef: (SetFocusRefProps: { index: number; element: HTMLElement | null }) => void;
-  handleAccordion: (index: number) => void;
+  isFocused: boolean;
+  focusedIndex: string | number | null;
+  setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  setFocusedIndex: React.Dispatch<React.SetStateAction<string | number | null>>;
+  setActiveItems: React.Dispatch<React.SetStateAction<ActiveItems>>;
+  setFocusRef: (SetFocusRefProps: { index: string | number; element: HTMLElement | null }) => void;
+  handleAccordion: (index: string | number) => void;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -42,17 +50,22 @@ const Accordion = ({
   multiple = false,
   testId,
   className,
+  valueKey,
+  labelKey,
   children,
   ...props
 }: AccordionProps) => {
-  const [activeItems, setActiveItems] = useState<number[] | number | null>(
+  const [activeItems, setActiveItems] = useState<ActiveItems>(
     defaultValue ?? (multiple ? [] : null)
   );
-  const { focusedIndex, setFocusedIndex, setFocusRef, moveFocus, moveToStart, moveToEnd } =
-    useRovingFocus(items, defaultValue);
 
-  function handleAccordion(index: number) {
-    const toggleItem = (prev: number | number[] | null, index: number) => {
+  const { focusedIndex, setFocusedIndex, setFocusRef, moveFocus, moveToStart, moveToEnd } =
+    useRovingFocus(defaultValue);
+
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  function handleAccordion(index: string | number) {
+    const toggleItem = (prev: ActiveItems, index: string | number) => {
       // toggle items inside of activeItems array
       if (multiple) {
         const prevItems = Array.isArray(prev) ? [...prev] : prev === null ? [] : [prev];
@@ -71,10 +84,13 @@ const Accordion = ({
   }
 
   const contextValue = {
-    items,
-    activeItems: activeItems,
-    isMultiple: multiple,
+    activeItems,
     focusedIndex,
+    valueKey,
+    labelKey,
+    isMultiple: multiple,
+    isFocused,
+    setIsFocused,
     setFocusRef,
     setFocusedIndex,
     setActiveItems,
@@ -83,15 +99,12 @@ const Accordion = ({
     moveToStart,
     moveToEnd,
   };
+
   return (
     <AccordionContext.Provider value={contextValue}>
       <div
-        id="accordionGroup"
         data-testid={testId}
-        className={cn(
-          'ui:flex ui:w-[250px] ui:flex-col ui:gap-2 ui:rounded-md ui:bg-gray-300 ui:p-4 ui:shadow-md',
-          className
-        )}
+        className={cn('ui:flex ui:w-[250px] ui:flex-col ui:rounded-md ui:shadow-md', className)}
         {...props}
       >
         {children}
@@ -100,7 +113,7 @@ const Accordion = ({
   );
 };
 
-// helper function for using accordion context
+// Helper function for using Accordion context
 
 function useAccordionContext() {
   const context = useContext(AccordionContext);
@@ -115,20 +128,22 @@ function useAccordionContext() {
 // ------------ Item component
 
 type AccordionItemContextProps = {
-  value: number;
+  value: string | number;
 };
 
 const AccordionItemContext = createContext<AccordionItemContextProps | null>(null);
 
 type AccordionItemProps = ComponentProps<'div'> & {
   testId?: string;
-  value: number;
+  value: string | number;
   children: ReactNode;
 };
 
 const AccordionItem = ({ testId, value, className, children, ...props }: AccordionItemProps) => {
   const {
     focusedIndex,
+    isFocused,
+    setIsFocused,
     setFocusedIndex,
     setFocusRef,
     handleAccordion,
@@ -147,7 +162,12 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
 
   const handleFocus = useCallback(() => {
     setFocusedIndex(value);
+    setIsFocused(true);
   }, [value, setFocusedIndex]);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -156,28 +176,23 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
           e.preventDefault();
           moveFocus('next');
           break;
-
         case 'ArrowUp':
           e.preventDefault();
           moveFocus('previous');
           break;
-
         case 'Home':
           e.preventDefault();
           moveToStart();
           break;
-
         case 'End':
           e.preventDefault();
           moveToEnd();
           break;
-
         case 'Enter':
         case ' ':
           e.preventDefault();
           handleAccordion(value);
           break;
-
         case 'Tab':
           e.preventDefault();
           if (e.shiftKey) {
@@ -203,10 +218,15 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
         data-testid={testId}
         ref={itemRef}
         tabIndex={0}
-        className={cn('ui:overflow-hidden', className)}
-        {...props}
+        className={cn(
+          'ui:relative ui:overflow-hidden ui:not-last:border-b ui:first:rounded-t-md ui:last:rounded-b-md ui:focus-within:relative ui:focus-within:z-10 ui:focus:outline',
+          isFocused ? 'ui:border-b-transparent' : 'ui:border-b-gray-600',
+          className
+        )}
+        onBlur={handleBlur}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
+        {...props}
       >
         {children}
       </div>
@@ -214,7 +234,7 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
   );
 };
 
-// helper function for using accordionItem context
+// Helper function for using AccordionItem context
 
 function useAccordionItemContext() {
   const context = useContext(AccordionItemContext);
@@ -236,6 +256,7 @@ type AccordionTriggerProps = ComponentProps<'div'> & {
 const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTriggerProps) => {
   const { activeItems, handleAccordion } = useAccordionContext();
   const { value } = useAccordionItemContext();
+
   const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
   const contentId = `content-${value}`;
 
@@ -244,10 +265,11 @@ const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTr
       data-testid={testId}
       aria-controls={contentId}
       aria-expanded={isOpen ? 'true' : 'false'}
+      align={'center'}
       justify={'between'}
       role="button"
       {...props}
-      className={cn('ui:overflow-hidden', className)}
+      className={cn('ui:h-10 ui:px-4 ui:py-2 ui:not-last:border-b', className)}
       onClick={() => handleAccordion(value)}
     >
       {children}
@@ -258,31 +280,52 @@ const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTr
 // ------------ Content component
 
 type AccordionContentProps = ComponentProps<'div'> & {
+  animateProps?: Partial<AnimateProps>;
   testId?: string;
   children: ReactNode;
 };
 
-const AccordionContent = ({ testId, className, children, ...props }: AccordionContentProps) => {
+const AccordionContent = ({
+  animateProps,
+  testId,
+  className,
+  children,
+  ...props
+}: AccordionContentProps) => {
   const { activeItems } = useAccordionContext();
   const { value } = useAccordionItemContext();
+
   const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
   const triggerId = `trigger-${value}`;
+  const duration = animateProps?.duration ?? 300;
+
+  const { ref, shouldRender, maxHeight } = useSyncAnimation({
+    isOpen,
+    duration,
+  });
+
   return (
-    <>
-      {isOpen ? (
+    <Animate isVisible={isOpen} type={'slideDown'} exitType={'fadeOut'} {...animateProps}>
+      {shouldRender && (
         <div
+          ref={ref}
           data-testid={testId}
           aria-hidden={!isOpen ? 'true' : 'false'}
           aria-labelledby={triggerId}
-          hidden={!isOpen}
           role="region"
-          className={cn('ui:overflow-hidden', className)}
+          className={cn('ui:relative ui:overflow-hidden', className)}
+          style={{
+            maxHeight: `${maxHeight}px`,
+            transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+            opacity: isOpen ? 1 : 0,
+            visibility: isOpen ? 'visible' : 'hidden',
+          }}
           {...props}
         >
-          {children}
+          <div className="ui:px-4">{children}</div>
         </div>
-      ) : null}
-    </>
+      )}
+    </Animate>
   );
 };
 
