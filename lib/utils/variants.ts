@@ -520,7 +520,9 @@ export const AnimationVariants = cva('', {
     },
     delay: {
       0: 'ui-animate-delay-0',
+      100: 'ui-animate-delay-100',
       200: 'ui-animate-delay-200',
+      300: 'ui-animate-delay-300',
       500: 'ui-animate-delay-500',
     },
     repeat: {

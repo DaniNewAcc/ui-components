@@ -164,8 +164,14 @@
   .ui-animate-delay-0 {
     animation-delay: 0ms;
   }
+  .ui-animate-delay-100 {
+    animation-delay: 100ms;
+  }
   .ui-animate-delay-200 {
     animation-delay: 200ms;
+  }
+  .ui-animate-delay-300 {
+    animation-delay: 300ms;
   }
   .ui-animate-delay-500 {
     animation-delay: 500ms;
