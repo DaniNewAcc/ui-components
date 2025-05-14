@@ -16,7 +16,7 @@ export const __setReduceMotionForTests = (value: boolean | undefined) => {
 };
 
 const useReduceMotion = () => {
-  const [reduceMotion, setReduceMotion] = useState(() => {
+  const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
     if (forcedValue !== undefined) return forcedValue;
 
     if (typeof window !== 'undefined' && 'matchMedia' in window) {
