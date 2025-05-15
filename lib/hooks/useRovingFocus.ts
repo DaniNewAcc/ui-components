@@ -83,7 +83,7 @@ function useRovingFocus(
   };
 
   const setFocusRef = useCallback(({ index, element }: SetFocusRefProps) => {
-    if (element != null) {
+    if (element != null && isElementFocusable(element)) {
       elementsRef.current.set(index, element);
     }
   }, []);
