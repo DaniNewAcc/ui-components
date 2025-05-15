@@ -1,13 +1,24 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-const renderTabs = (count = 3, defaultValue = 1, hasPadding = false) => {
+const renderTabs = (
+  count = 3,
+  defaultValue = 1,
+  hasPadding = false,
+  orientation: 'horizontal' | 'vertical' = 'horizontal',
+  disabledTabs: boolean[] = []
+) => {
   return render(
-    <Tabs defaultValue={defaultValue} hasPadding={hasPadding} testId="tabsgroup">
-      <TabsList>
+    <Tabs
+      defaultValue={defaultValue}
+      hasPadding={hasPadding}
+      orientation={orientation}
+      testId="tabsgroup"
+    >
+      <TabsList testId="tabslist">
         {Array.from({ length: count }, (_, i) => (
-          <TabsTrigger key={i} value={i + 1}>
+          <TabsTrigger key={i} value={i + 1} disabled={disabledTabs[i]}>
             Trigger {i + 1}
           </TabsTrigger>
         ))}
@@ -20,6 +31,8 @@ const renderTabs = (count = 3, defaultValue = 1, hasPadding = false) => {
     </Tabs>
   );
 };
+
+afterEach(cleanup);
 
 describe('Tabs', () => {
   describe('Context behavior', () => {
@@ -38,36 +51,57 @@ describe('Tabs', () => {
   });
 
   describe('Rendering', () => {
-    it('should renders with padding', () => {
+    it('should render with padding', () => {
       const { getByTestId } = renderTabs(1, 1, true);
       expect(getByTestId('tabsgroup')).toHaveClass('ui:p-4');
     });
 
-    it('should renders required elements', () => {
+    it('should render required elements', () => {
       renderTabs(2);
       expect(screen.getByRole('tablist')).toBeInTheDocument();
       expect(screen.getAllByRole('tab')).toHaveLength(2);
       expect(screen.getByRole('tabpanel')).toHaveTextContent('Content 1');
     });
 
-    it('should matches snapshot', () => {
+    it('should match snapshot', () => {
       const { container } = renderTabs(2);
       expect(container).toMatchSnapshot();
     });
   });
 
+  describe('Disabled Tabs', () => {
+    it('should skip disabled tabs when using keyboard navigation', async () => {
+      renderTabs(3, 1, false, 'horizontal', [false, true, false]);
+
+      const tabs = screen.getAllByRole('tab');
+      const user = userEvent.setup();
+
+      tabs[0].focus();
+
+      await user.keyboard('{ArrowRight}');
+
+      expect(tabs[2]).toHaveFocus();
+
+      await user.keyboard('{ArrowLeft}');
+      expect(tabs[0]).toHaveFocus();
+    });
+  });
+
   describe('Interaction', () => {
-    it('should switches content on tab trigger click', () => {
+    beforeEach(() => {
       renderTabs(2);
+    });
+
+    it('should switch content on tab trigger click', () => {
       const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 2' });
 
       fireEvent.click(tabsTrigger);
       expect(screen.getByRole('tabpanel')).toHaveTextContent('Content 2');
-      expect(tabsTrigger.ariaSelected).toBe('true');
       expect(tabsTrigger).toHaveAttribute('aria-selected', 'true');
     });
 
     it('should not render non-active tab content', () => {
+      cleanup();
       renderTabs(2, 1);
       expect(screen.queryByText('Content 2')).not.toBeInTheDocument();
     });
@@ -78,11 +112,9 @@ describe('Tabs', () => {
       renderTabs();
     });
 
-    it('should moves focus to the first tab when Home key is pressed', async () => {
+    it('should move focus to the first tab when Home key is pressed', async () => {
       const user = userEvent.setup();
       const tabs = screen.getAllByRole('tab');
-
-      tabs[0].focus();
 
       await user.keyboard('{Home}');
 
@@ -91,22 +123,18 @@ describe('Tabs', () => {
       });
     });
 
-    it('should moves focus to the last tab when End key is pressed', async () => {
+    it('should move focus to the last tab when End key is pressed', async () => {
       const user = userEvent.setup();
       const tabs = screen.getAllByRole('tab');
 
       tabs[0].focus();
-
       await user.keyboard('{End}');
-
-      tabs[tabs.length - 1].focus();
-
       await waitFor(() => {
         expect(tabs[tabs.length - 1]).toHaveFocus();
       });
     });
 
-    it('should moves focus to the tabpanel related to the tabtrigger with focus when Tab key is pressed', async () => {
+    it('should move focus to the tabpanel related to tabtrigger focused when Tab is pressed', async () => {
       const user = userEvent.setup();
       const tabs = screen.getAllByRole('tab');
       const panels = screen.getAllByRole('tabpanel');
@@ -126,35 +154,49 @@ describe('Tabs', () => {
       });
     });
 
-    it('should moves focus with arrow keys', async () => {
-      renderTabs();
+    it('should move focus with left and right arrow keys', async () => {
+      const user = userEvent.setup();
+      const tabs = screen.getAllByRole('tab');
+
+      tabs[0].focus();
+      await waitFor(() => expect(tabs[0]).toHaveFocus());
+
+      await user.keyboard('{ArrowRight}');
+      await waitFor(() => expect(tabs[1]).toHaveFocus());
+
+      await user.keyboard('{ArrowRight}');
+      await waitFor(() => expect(tabs[2]).toHaveFocus());
+
+      await user.keyboard('{ArrowRight}');
+      await waitFor(() => expect(tabs[0]).toHaveFocus());
+
+      await user.keyboard('{ArrowLeft}');
+      await waitFor(() => expect(tabs[2]).toHaveFocus());
+    });
+
+    it('should move focus with up and down arrow keys when vertical orientation is set', async () => {
+      cleanup();
+      renderTabs(3, 1, false, 'vertical');
       const tabs = screen.getAllByRole('tab');
       const user = userEvent.setup();
 
+      const tabList = screen.getByRole('tablist');
+      expect(tabList).toHaveAttribute('aria-orientation', 'vertical');
+
       tabs[0].focus();
-      waitFor(() => {
-        expect(tabs[0]).toHaveFocus();
-      });
+      await waitFor(() => expect(tabs[0]).toHaveFocus());
 
-      await user.keyboard('{ArrowRight}');
-      waitFor(() => {
-        expect(tabs[1]).toHaveFocus();
-      });
+      await user.keyboard('{ArrowDown}');
+      await waitFor(() => expect(tabs[1]).toHaveFocus());
 
-      await user.keyboard('{ArrowRight}');
-      waitFor(() => {
-        expect(tabs[2]).toHaveFocus();
-      });
+      await user.keyboard('{ArrowDown}');
+      await waitFor(() => expect(tabs[2]).toHaveFocus());
 
-      await user.keyboard('{ArrowRight}');
-      waitFor(() => {
-        expect(tabs[0]).toHaveFocus();
-      });
+      await user.keyboard('{ArrowDown}');
+      await waitFor(() => expect(tabs[0]).toHaveFocus());
 
-      await user.keyboard('{ArrowLeft}');
-      waitFor(() => {
-        expect(tabs[2]).toHaveFocus();
-      });
+      await user.keyboard('{ArrowUp}');
+      await waitFor(() => expect(tabs[2]).toHaveFocus());
     });
   });
 });
