@@ -1,16 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tabs > Rendering > should matches snapshot 1`] = `
+exports[`Tabs > Rendering > should match snapshot 1`] = `
 <div>
   <div
-    class="ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md"
+    class="ui:flex ui:w-fit ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md ui:flex-col"
     data-testid="tabsgroup"
   >
     <div
       aria-activedescendant="tab-1"
       aria-label="Tabs"
       aria-orientation="horizontal"
-      class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent"
+      class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent ui:flex-row"
+      data-testid="tabslist"
       role="tablist"
     >
       <button
