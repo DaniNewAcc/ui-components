@@ -15,12 +15,15 @@ import React, {
 } from 'react';
 import Button from '../Button';
 
+type Orientation = 'horizontal' | 'vertical';
+
 type TabsProps = ComponentProps<'div'> &
   VariantProps<typeof TabsVariants> & {
     defaultValue: number | string;
     testId?: string;
     valueKey?: string;
     labelKey?: string;
+    orientation?: Orientation;
     children: ReactNode;
     hasPadding?: boolean;
   };
@@ -28,6 +31,7 @@ type TabsProps = ComponentProps<'div'> &
 type TabsContextProps = {
   activeTab: number | string;
   focusedIndex: number | string | null;
+  orientation?: Orientation;
   hasPadding?: boolean;
   isTabbing: boolean;
   panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
@@ -47,6 +51,7 @@ const Tabs = ({
   testId,
   valueKey,
   labelKey,
+  orientation = 'horizontal',
   hasPadding,
   className,
   children,
@@ -64,6 +69,7 @@ const Tabs = ({
     hasPadding,
     isTabbing,
     panelRefs,
+    orientation,
     setActiveTab,
     setIsTabbing,
     setFocusRef,
@@ -74,7 +80,15 @@ const Tabs = ({
   };
   return (
     <TabsContext.Provider value={contextValue}>
-      <div data-testid={testId} className={cn(TabsVariants({ hasPadding }), className)} {...props}>
+      <div
+        data-testid={testId}
+        className={cn(
+          TabsVariants({ hasPadding }),
+          `${orientation === 'vertical' ? 'ui:flex-row' : 'ui:flex-col'}`,
+          className
+        )}
+        {...props}
+      >
         {children}
       </div>
     </TabsContext.Provider>
@@ -98,27 +112,24 @@ function useTabsContext() {
 type TabsListProps = ComponentProps<'div'> &
   VariantProps<typeof TabsListVariants> & {
     children: ReactNode;
+    testId?: string;
   };
 
-const TabsList = ({ variant, className, children, ...props }: TabsListProps) => {
-  const { activeTab, hasPadding, panelRefs, moveFocus, moveToStart, moveToEnd, setIsTabbing } =
-    useTabsContext();
+const TabsList = ({ variant, className, children, testId, ...props }: TabsListProps) => {
+  const {
+    activeTab,
+    hasPadding,
+    panelRefs,
+    orientation,
+    moveFocus,
+    moveToStart,
+    moveToEnd,
+    setIsTabbing,
+  } = useTabsContext();
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
-        case 'ArrowRight': {
-          e.preventDefault();
-          setIsTabbing(false);
-          moveFocus('next');
-          break;
-        }
-        case 'ArrowLeft': {
-          e.preventDefault();
-          setIsTabbing(false);
-          moveFocus('previous');
-          break;
-        }
         case 'Home': {
           e.preventDefault();
           setIsTabbing(false);
@@ -138,19 +149,55 @@ const TabsList = ({ variant, className, children, ...props }: TabsListProps) => 
           break;
         }
       }
+      switch (orientation) {
+        case 'horizontal': {
+          switch (e.key) {
+            case 'ArrowRight': {
+              e.preventDefault();
+              setIsTabbing(false);
+              moveFocus('next');
+              break;
+            }
+            case 'ArrowLeft': {
+              e.preventDefault();
+              setIsTabbing(false);
+              moveFocus('previous');
+              break;
+            }
+          }
+          break;
+        }
+        case 'vertical': {
+          switch (e.key) {
+            case 'ArrowDown':
+              e.preventDefault();
+              setIsTabbing(false);
+              moveFocus('next');
+              break;
+            case 'ArrowUp':
+              e.preventDefault();
+              setIsTabbing(false);
+              moveFocus('previous');
+              break;
+          }
+          break;
+        }
+      }
     },
     [panelRefs, activeTab, setIsTabbing, moveFocus, moveToStart, moveToEnd]
   );
 
   return (
     <div
+      data-testid={testId}
       role="tablist"
       aria-activedescendant={`tab-${activeTab}`}
-      aria-orientation="horizontal"
+      aria-orientation={orientation}
       aria-label="Tabs"
       className={cn(
         TabsListVariants({ variant }),
         `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
+        `${orientation === 'vertical' ? 'ui:flex-col' : 'ui:flex-row'}`,
         className
       )}
       onKeyDown={handleKeyDown}
