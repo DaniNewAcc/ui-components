@@ -193,14 +193,6 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
           e.preventDefault();
           handleAccordion(value);
           break;
-        case 'Tab':
-          e.preventDefault();
-          if (e.shiftKey) {
-            moveFocus('previous');
-          } else {
-            moveFocus('next');
-          }
-          break;
         default:
           break;
       }
