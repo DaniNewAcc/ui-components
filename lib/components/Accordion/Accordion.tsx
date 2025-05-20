@@ -142,7 +142,6 @@ type AccordionItemProps = ComponentProps<'div'> & {
 const AccordionItem = ({ testId, value, className, children, ...props }: AccordionItemProps) => {
   const {
     focusedIndex,
-    isFocused,
     setIsFocused,
     setFocusedIndex,
     setFocusRef,
@@ -211,8 +210,7 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
         ref={itemRef}
         tabIndex={0}
         className={cn(
-          'ui:relative ui:overflow-hidden ui:not-last:border-b ui:first:rounded-t-md ui:last:rounded-b-md ui:focus-within:relative ui:focus-within:z-10 ui:focus:outline',
-          isFocused ? 'ui:border-b-transparent' : 'ui:border-b-gray-600',
+          'ui:relative ui:border-b ui:border-gray-300 ui:first:rounded-t-md ui:last:rounded-b-md ui:focus-within:ring-2 ui:focus-within:ring-primary-500 ui:focus-within:outline-none',
           className
         )}
         onBlur={handleBlur}
@@ -261,7 +259,7 @@ const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTr
       justify={'between'}
       role="button"
       {...props}
-      className={cn('ui:h-10 ui:px-4 ui:py-2 ui:not-last:border-b', className)}
+      className={cn('ui:h-10 ui:border-gray-300 ui:px-4 ui:py-2 ui:not-last:border-b', className)}
       onClick={() => handleAccordion(value)}
     >
       {children}
@@ -314,7 +312,7 @@ const AccordionContent = ({
           }}
           {...props}
         >
-          <div className="ui:px-4">{children}</div>
+          <div className="ui:px-4 ui:py-2">{children}</div>
         </div>
       )}
     </Animate>
