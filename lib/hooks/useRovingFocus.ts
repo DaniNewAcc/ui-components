@@ -95,14 +95,22 @@ function useRovingFocus(
 
       if (focusables.length === 0) return;
 
-      const currentIndex = focusables.findIndex(([key]) => key === focusedIndex);
-      const nextIndex =
-        direction === 'next'
-          ? (currentIndex + 1) % focusables.length
-          : (currentIndex - 1 + focusables.length) % focusables.length;
+      let currentIndex = focusables.findIndex(([key]) => key === focusedIndex);
+
+      if (currentIndex === -1 || !focusables[currentIndex][1]?.focus) {
+        currentIndex = direction === 'next' ? 0 : focusables.length - 1;
+      }
+
+      let nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+
+      if (nextIndex >= focusables.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = focusables.length - 1;
 
       const [nextKey] = focusables[nextIndex];
       setFocusedIndex(nextKey);
+
+      const nextElement = focusables[nextIndex][1];
+      nextElement?.focus();
     },
     [focusedIndex]
   );
