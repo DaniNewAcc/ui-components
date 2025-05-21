@@ -24,6 +24,7 @@ type AccordionProps = ComponentProps<'div'> & {
   testId?: string;
   valueKey?: string;
   labelKey?: string;
+  loop?: boolean;
   children: ReactNode;
 };
 
@@ -48,6 +49,7 @@ const Accordion = ({
   items,
   defaultValue,
   multiple = false,
+  loop = true,
   testId,
   className,
   valueKey,
@@ -60,7 +62,7 @@ const Accordion = ({
   );
 
   const { focusedIndex, setFocusedIndex, setFocusRef, moveFocus, moveToStart, moveToEnd } =
-    useRovingFocus(defaultValue);
+    useRovingFocus(defaultValue, loop);
 
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
