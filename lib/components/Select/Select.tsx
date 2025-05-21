@@ -17,20 +17,21 @@ type SelectProps = ComponentProps<'div'> & {
   testId?: string;
   valueKey: string;
   labelKey: string;
+  loop?: boolean;
   children: ReactNode;
 };
 
 type SelectContextProps = {
   options: Option[];
   activeOption: ActiveOption;
+  valueKey: string;
+  labelKey: string;
   isDropdownOpen: boolean;
   setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveOption: React.Dispatch<React.SetStateAction<ActiveOption>>;
   handleDropdown: () => void;
   handleReset: (e: React.MouseEvent<HTMLSpanElement>) => void;
   handleOptions: (value: string | number) => void;
-  valueKey: string;
-  labelKey: string;
 };
 
 const SelectContext = createContext<SelectContextProps | null>(null);
@@ -42,6 +43,7 @@ const Select = ({
   testId,
   valueKey,
   labelKey,
+  loop = false,
   children,
   ...props
 }: SelectProps) => {
@@ -86,16 +88,7 @@ const Select = ({
   const ref = useClickOutside<HTMLDivElement>(() => setIsDropdownOpen(false), isDropdownOpen);
   return (
     <SelectContext.Provider value={contextValue}>
-      <div
-        ref={ref}
-        data-testid={testId}
-        className={cn(
-          'ui:h-10 ui:w-48 ui:rounded-md ui:border-2',
-          { 'ui:rounded-b-none ui:border-b-0': isDropdownOpen },
-          className
-        )}
-        {...props}
-      >
+      <div ref={ref} data-testid={testId} className={cn('ui:h-10 ui:w-48', className)} {...props}>
         {children}
       </div>
     </SelectContext.Provider>
@@ -127,7 +120,7 @@ const SelectTrigger = ({
   testId,
   ...props
 }: SelectTriggerProps) => {
-  const { activeOption, options, handleReset, handleDropdown, valueKey, labelKey } =
+  const { activeOption, options, handleReset, handleDropdown, valueKey, labelKey, isDropdownOpen } =
     useSelectContext();
 
   const selectedOption = options.find(opt => opt[valueKey] === activeOption);
@@ -135,7 +128,8 @@ const SelectTrigger = ({
     <button
       data-testid={testId}
       className={cn(
-        'ui:flex ui:w-full ui:cursor-pointer ui:justify-between ui:gap-4 ui:px-4 ui:pt-2',
+        'ui:flex ui:w-full ui:cursor-pointer ui:justify-between ui:gap-4 ui:rounded-md ui:border-2 ui:px-4 ui:py-1 ui:focus:border-primary-500 ui:focus:outline-none',
+        { 'ui:rounded-b-none ui:border-primary-500': isDropdownOpen },
         className
       )}
       onClick={handleDropdown}
@@ -179,8 +173,8 @@ const SelectDropdown = ({
           ref={ref}
           data-testid={testId}
           className={cn(
-            'ui:-mx-[0.125rem] ui:flex ui:flex-col ui:rounded-md ui:border-2 ui:border-t-0 ui:px-4',
-            { 'ui:rounded-t-none': isDropdownOpen },
+            'ui:mt-[-2px] ui:flex ui:flex-col ui:rounded-md ui:border-2 ui:px-4 ui:shadow-md',
+            { 'ui:rounded-t-none ui:border-primary-500': isDropdownOpen },
             className
           )}
           style={{
@@ -211,7 +205,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
   return (
     <li
       data-testid={testId}
-      className={cn('ui:cursor-pointer ui:first:pt-2 ui:last:pb-4', className)}
+      className={cn('ui:cursor-pointer ui:first:pt-1 ui:last:pb-2', className)}
       onClick={() => handleOptions(value)}
       {...props}
     >
