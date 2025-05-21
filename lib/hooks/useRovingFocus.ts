@@ -28,9 +28,10 @@
  *   moveToStart,
  *   moveToEnd,
  *   setFocusRef
- * } = useRovingFocus(initialFocusedIndex);
+ * } = useRovingFocus(initialFocusedIndex, loop);
  *
  * - `initialFocusedIndex` is optional; if provided, it determines which element starts focused.
+ * - `loop` is optional; If true, focus will cycle between the first and last elements when navigating with "next" or "previous". If false, focus will stop at the first or last element.
  * - Call `setFocusRef({ index, element })` for each element you want to include in the roving focus group.
  * - Use `moveFocus('next' | 'previous')`, `moveToStart()`, and `moveToEnd()` inside a keydown handler to support keyboard navigation.
  * - `setFocusedIndex` allows manual control of which element is focused (e.g. from mouse interaction or other logic).
@@ -54,7 +55,8 @@ export type RovingFocusHookProps = {
 };
 
 function useRovingFocus(
-  initialFocusedIndex?: string | number | (string | number)[] | null
+  initialFocusedIndex?: string | number | (string | number)[] | null,
+  loop: boolean = false
 ): RovingFocusHookProps {
   const [focusedIndex, setFocusedIndex] = useState(() => {
     if (initialFocusedIndex == null) return null;
@@ -103,8 +105,11 @@ function useRovingFocus(
 
       let nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
 
-      if (nextIndex >= focusables.length) nextIndex = 0;
-      if (nextIndex < 0) nextIndex = focusables.length - 1;
+      if (!loop && (nextIndex < 0 || nextIndex >= focusables.length)) {
+        return;
+      }
+
+      nextIndex = (nextIndex + focusables.length) % focusables.length;
 
       const [nextKey] = focusables[nextIndex];
       setFocusedIndex(nextKey);
@@ -112,7 +117,7 @@ function useRovingFocus(
       const nextElement = focusables[nextIndex][1];
       nextElement?.focus();
     },
-    [focusedIndex]
+    [focusedIndex, loop]
   );
 
   const moveToStart = useCallback(() => {
