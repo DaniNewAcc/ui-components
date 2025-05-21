@@ -53,12 +53,13 @@ const Tabs = ({
   labelKey,
   orientation = 'horizontal',
   hasPadding,
+  selfAlign,
   className,
   children,
   ...props
 }: TabsProps) => {
   const { setFocusRef, moveFocus, moveToStart, moveToEnd, focusedIndex, setFocusedIndex } =
-    useRovingFocus(defaultValue);
+    useRovingFocus();
   const [activeTab, setActiveTab] = useState<number | string>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -83,7 +84,7 @@ const Tabs = ({
       <div
         data-testid={testId}
         className={cn(
-          TabsVariants({ hasPadding }),
+          TabsVariants({ hasPadding, selfAlign }),
           `${orientation === 'vertical' ? 'ui:flex-row' : 'ui:flex-col'}`,
           className
         )}
@@ -143,9 +144,7 @@ const TabsList = ({ variant, className, children, testId, ...props }: TabsListPr
           break;
         }
         case 'Tab': {
-          e.preventDefault();
           setIsTabbing(true);
-          panelRefs.current[Number(activeTab)]?.focus();
           break;
         }
       }
@@ -241,6 +240,7 @@ const TabsTrigger = ({
   const contentId = `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
+  const isFirst = isActive && focusedIndex === null;
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -253,6 +253,9 @@ const TabsTrigger = ({
 
   const handleFocus = useCallback(() => {
     if (!disabled) {
+      if (focusedIndex === null) {
+        setFocusedIndex(value);
+      }
       setActiveTab(value);
     }
   }, [disabled, setActiveTab, value]);
@@ -275,11 +278,11 @@ const TabsTrigger = ({
       disabled={disabled}
       id={triggerId}
       role="tab"
-      tabIndex={disabled ? -1 : isFocused ? 0 : -1}
+      tabIndex={disabled ? -1 : isFocused || isFirst ? 0 : -1}
       className={cn(
         ButtonVariants({ variant, size, intent, rounded }),
         {
-          'ui:bg-primary-50 ui:text-primary-600': isFocused,
+          'ui:bg-primary-50 ui:text-primary-600': isFocused || isActive,
           'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
         },
         'ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm',
@@ -313,7 +316,9 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
   useEffect(() => {
     panelRefs.current[Number(activeTab)] = panelRef.current;
     if (isActive && isFocused && isTabbing && panelRef.current) {
-      panelRef.current.focus();
+      setTimeout(() => {
+        panelRef.current?.focus();
+      }, 0);
     }
   }, [panelRefs, activeTab, isFocused, isActive, isTabbing]);
 
