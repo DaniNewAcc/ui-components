@@ -3,7 +3,7 @@
 exports[`Tabs > Rendering > should match snapshot 1`] = `
 <div>
   <div
-    class="ui:flex ui:w-fit ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md ui:flex-col"
+    class="ui:flex ui:w-fit ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md ui:self-stretch ui:flex-col"
     data-testid="tabsgroup"
   >
     <div

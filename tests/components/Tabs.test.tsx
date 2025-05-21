@@ -112,9 +112,12 @@ describe('Tabs', () => {
       renderTabs();
     });
 
-    it('should move focus to the first tab when Home key is pressed', async () => {
+    it('should move focus to the first tab when Tab key is pressed before Home key', async () => {
       const user = userEvent.setup();
       const tabs = screen.getAllByRole('tab');
+      expect(tabs[0]).not.toHaveFocus();
+
+      await user.keyboard('{Tab}');
 
       await user.keyboard('{Home}');
 
