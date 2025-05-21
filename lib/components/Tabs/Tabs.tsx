@@ -26,6 +26,7 @@ type TabsProps = ComponentProps<'div'> &
     orientation?: Orientation;
     children: ReactNode;
     hasPadding?: boolean;
+    loop?: boolean;
   };
 
 type TabsContextProps = {
@@ -51,6 +52,7 @@ const Tabs = ({
   testId,
   valueKey,
   labelKey,
+  loop = true,
   orientation = 'horizontal',
   hasPadding,
   selfAlign,
@@ -59,7 +61,7 @@ const Tabs = ({
   ...props
 }: TabsProps) => {
   const { setFocusRef, moveFocus, moveToStart, moveToEnd, focusedIndex, setFocusedIndex } =
-    useRovingFocus();
+    useRovingFocus(null, loop);
   const [activeTab, setActiveTab] = useState<number | string>(defaultValue);
   const [isTabbing, setIsTabbing] = useState<boolean>(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -85,7 +87,7 @@ const Tabs = ({
         data-testid={testId}
         className={cn(
           TabsVariants({ hasPadding, selfAlign }),
-          `${orientation === 'vertical' ? 'ui:flex-row' : 'ui:flex-col'}`,
+          `${orientation === 'vertical' ? 'ui:flex-row ui:gap-0' : 'ui:flex-col'}`,
           className
         )}
         {...props}
@@ -231,6 +233,7 @@ const TabsTrigger = ({
     activeTab,
     focusedIndex,
     hasPadding,
+    orientation,
     setActiveTab,
     setFocusedIndex,
     setIsTabbing,
@@ -284,8 +287,9 @@ const TabsTrigger = ({
         {
           'ui:bg-primary-50 ui:text-primary-600': isFocused || isActive,
           'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
+          [`ui:last:${orientation === 'vertical' ? 'rounded-bl-md' : 'rounded-tr-sm'}`]: true,
         },
-        'ui:flex-1 ui:first:rounded-tl-sm ui:last:rounded-tr-sm',
+        'ui:flex-1 ui:first:rounded-tl-sm',
         className
       )}
       onClick={handleClick}
@@ -305,7 +309,8 @@ type TabsContentProps = ComponentProps<'div'> & {
 };
 
 const TabsContent = ({ value, className, children, ...props }: TabsContentProps) => {
-  const { panelRefs, activeTab, isTabbing, focusedIndex, setIsTabbing } = useTabsContext();
+  const { panelRefs, activeTab, isTabbing, focusedIndex, orientation, setIsTabbing } =
+    useTabsContext();
   const triggerId = `trigger-${value}`;
   const contentId = `panel-${value}`;
   const isActive = activeTab === value;
@@ -336,7 +341,11 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
           role="tabpanel"
           id={contentId}
           tabIndex={0}
-          className={cn('ui:flex', className)}
+          className={cn(
+            { 'ui:w-[250px] ui:px-4': orientation === 'vertical' },
+            'ui:flex-1 ui:overflow-y-auto',
+            className
+          )}
           onFocus={handleFocus}
           {...props}
         >
