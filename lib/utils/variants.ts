@@ -458,9 +458,15 @@ export const TabsVariants = cva(
       hasPadding: {
         true: 'ui:p-4',
       },
+      selfAlign: {
+        center: 'ui:self-center',
+        start: 'ui:self-start',
+        stretch: 'ui:self-stretch',
+      },
     },
     defaultVariants: {
       hasPadding: false,
+      selfAlign: 'stretch',
     },
   }
 );
