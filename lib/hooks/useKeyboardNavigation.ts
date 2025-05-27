@@ -1,28 +1,50 @@
-import { useEffect, useState } from "react";
+/**
+ * A custom hook that detects whether the user is interacting via keyboard
+ * (e.g., using Tab or Arrow keys) or mouse.
+ *
+ * Returns the current input mode ('keyboard' or 'mouse'), allowing components
+ * to conditionally style elements, for example, to show focus outlines only when
+ * the user is navigating via keyboard.
+ *
+ * This enhances accessibility by preventing unwanted focus styles during mouse interaction,
+ * while preserving them for keyboard users.
+ */
+
+import { useEffect, useState } from 'react';
+
+type InputMode = 'mouse' | 'keyboard';
 
 function useKeyboardNavigation() {
-  const [isKeyboardUser, setIsKeyboardUser] = useState<boolean>(false);
+  const [inputMode, setInputMode] = useState<InputMode>('mouse');
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Tab" || e.key.startsWith("Arrow")) {
-        setIsKeyboardUser(true);
+    const updateInputMode = (mode: InputMode) => {
+      if (document.body.dataset.inputMode !== mode) {
+        document.body.dataset.inputMode = mode;
+        setInputMode(mode);
       }
     };
-    const handleMouseDown = () => {
-      setIsKeyboardUser(false);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab' || e.key.startsWith('Arrow')) {
+        updateInputMode('keyboard');
+      }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("mousedown", handleMouseDown);
+    const handleMouseDown = () => {
+      updateInputMode('mouse');
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('mousedown', handleMouseDown, true);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('mousedown', handleMouseDown, true);
     };
   }, []);
 
-  return isKeyboardUser;
+  return inputMode;
 }
 
 export default useKeyboardNavigation;
