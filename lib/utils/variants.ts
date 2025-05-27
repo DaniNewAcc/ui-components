@@ -19,7 +19,7 @@ export const ButtonVariants = cva(
     'ui:focus:transition-none',
     'ui:focus:duration-initial',
     'ui:focus:outline-hidden',
-    'ui:focus-visible:ring-2',
+    'ui:focus-visible:ring',
     'ui:disabled:pointer-events-none',
     'ui:disabled:opacity-50',
     'ui:disabled:shadow-none',
