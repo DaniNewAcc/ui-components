@@ -2,6 +2,7 @@ import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { Select, SelectDropdown, SelectOption, SelectTrigger } from '@components/Select'; // Adjust the import path as necessary
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 beforeEach(() => {
   __setReduceMotionForTests(true);
@@ -201,6 +202,287 @@ describe('Select', () => {
 
       fireEvent.click(screen.getByTestId('select-trigger'));
       await waitFor(() => expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument());
+    });
+  });
+
+  describe('Keyboard Navigation - Trigger', () => {
+    it('should open dropdown with arrow down key and give focus to the first focusable option', () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      trigger.focus();
+
+      fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+
+      const listbox = screen.getByRole('listbox');
+      expect(listbox).toBeVisible();
+      expect(screen.getByText('Option 1')).toBeInTheDocument();
+    });
+
+    it('should open dropdown with arrow up key and give focus to the first focusable option', () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      trigger.focus();
+
+      fireEvent.keyDown(trigger, { key: 'ArrowUp' });
+
+      const listbox = screen.getByRole('listbox');
+      expect(listbox).toBeVisible();
+      expect(screen.getByText('Option 1')).toBeInTheDocument();
+    });
+
+    it('should open dropdown with enter key and give focus to the first focusable option', () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      trigger.focus();
+
+      fireEvent.keyDown(trigger, { key: 'Enter' });
+
+      const listbox = screen.getByRole('listbox');
+      expect(listbox).toBeVisible();
+      expect(screen.getByText('Option 1')).toBeInTheDocument();
+    });
+
+    it('should open dropdown with spacebar key and give focus to the first focusable option', () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      trigger.focus();
+
+      fireEvent.keyDown(trigger, { key: ' ' });
+
+      const listbox = screen.getByRole('listbox');
+      expect(listbox).toBeVisible();
+      expect(screen.getByText('Option 1')).toBeInTheDocument();
+    });
+
+    it('should not open dropdown with unrelated key', () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      trigger.focus();
+
+      fireEvent.keyDown(trigger, { key: 'Tab' });
+
+      const listbox = screen.queryByRole('listbox');
+      expect(listbox).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Keyboard Navigation - Dropdown', () => {
+    it('should move the focus with up and down arrow keys', async () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      await userEvent.click(trigger);
+
+      const listbox = screen.getByRole('listbox');
+
+      fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Option 1' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+
+      fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Option 2' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+
+      fireEvent.keyDown(listbox, { key: 'ArrowUp' });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Option 1' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+    });
+
+    it('should close the dropdown when escape key is pressed', async () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+
+      const trigger = screen.getByRole('combobox');
+      await userEvent.click(trigger);
+
+      const listbox = screen.getByRole('listbox');
+
+      fireEvent.keyDown(listbox, { key: 'Escape' });
+      await waitFor(() => {
+        expect(listbox).not.toBeInTheDocument();
+      });
+    });
+
+    it('should pass to the trigger the option selected when enter key is pressed', async () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+      const trigger = screen.getByRole('combobox');
+      await userEvent.click(trigger);
+
+      const listbox = screen.getByRole('listbox');
+
+      fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Option 1' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+
+      fireEvent.keyDown(screen.getByTestId('option-1'), { key: 'Enter', code: 'Enter' });
+      expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+
+      expect(trigger).toHaveTextContent('Option 1');
+    });
+
+    it('should pass to the trigger the option selected when spacebar key is pressed', async () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+      const trigger = screen.getByRole('combobox');
+      await userEvent.click(trigger);
+
+      const listbox = screen.getByRole('listbox');
+
+      fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Option 1' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+
+      fireEvent.keyDown(screen.getByTestId('option-1'), { key: ' ', code: 'Space' });
+      expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+
+      expect(trigger).toHaveTextContent('Option 1');
+    });
+
+    it('should not move the focus if tab key is pressed when the dropdown is open', async () => {
+      render(
+        <Select valueKey="id" labelKey="name" options={options} testId="select-component">
+          <SelectTrigger testId="select-trigger">Toggle</SelectTrigger>
+          <SelectDropdown testId="select-dropdown">
+            {options.map(option => (
+              <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+                {option.name}
+              </SelectOption>
+            ))}
+          </SelectDropdown>
+        </Select>
+      );
+      const trigger = screen.getByRole('combobox');
+      await userEvent.click(trigger);
+
+      const listbox = screen.getByRole('listbox');
+      const option1 = screen.getByTestId('option-1');
+
+      fireEvent.keyDown(listbox, { key: 'Tab' });
+      await waitFor(() => {
+        expect(option1).toHaveAttribute('aria-selected', 'true');
+      });
     });
   });
 });
