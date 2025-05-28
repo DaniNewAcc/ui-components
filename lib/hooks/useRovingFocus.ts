@@ -27,7 +27,8 @@
  *   moveFocus,
  *   moveToStart,
  *   moveToEnd,
- *   setFocusRef
+ *   setFocusRef,
+ *   clearFocusRefs
  * } = useRovingFocus(initialFocusedIndex, loop);
  *
  * - `initialFocusedIndex` is optional; if provided, it determines which element starts focused.
@@ -36,6 +37,8 @@
  * - Use `moveFocus('next' | 'previous')`, `moveToStart()`, and `moveToEnd()` inside a keydown handler to support keyboard navigation.
  * - `setFocusedIndex` allows manual control of which element is focused (e.g. from mouse interaction or other logic).
  * - `focusedIndex` can be used to conditionally style or render elements based on current focus.
+ * - `clearFocusRefs` clears all registered focusable element references.
+ * - `registeredCount` tracks how many focusable elements have been registered via setFocusRef.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -47,11 +50,13 @@ export type SetFocusRefProps = {
 
 export type RovingFocusHookProps = {
   focusedIndex: string | number | null;
+  registeredCount: number;
   setFocusedIndex: React.Dispatch<React.SetStateAction<string | number | null>>;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
   setFocusRef: (props: SetFocusRefProps) => void;
+  clearFocusRefs: () => void;
 };
 
 function useRovingFocus(
@@ -66,6 +71,7 @@ function useRovingFocus(
   });
 
   const elementsRef = useRef<Map<string | number, HTMLElement | null>>(new Map());
+  const [registeredCount, setRegisteredCount] = useState<number>(0);
 
   const isElementDisabled = (el: HTMLElement | null): boolean =>
     !el || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
@@ -87,6 +93,7 @@ function useRovingFocus(
   const setFocusRef = useCallback(({ index, element }: SetFocusRefProps) => {
     if (element != null && isElementFocusable(element)) {
       elementsRef.current.set(index, element);
+      setRegisteredCount(elementsRef.current.size);
     }
   }, []);
 
@@ -139,6 +146,11 @@ function useRovingFocus(
     }
   }, []);
 
+  const clearFocusRefs = useCallback(() => {
+    elementsRef.current.clear();
+    setRegisteredCount(0);
+  }, []);
+
   useEffect(() => {
     const el = elementsRef.current.get(focusedIndex ?? '');
     if (isElementFocusable(el)) {
@@ -148,11 +160,13 @@ function useRovingFocus(
 
   return {
     focusedIndex,
+    registeredCount,
     setFocusedIndex,
     setFocusRef,
     moveFocus,
     moveToStart,
     moveToEnd,
+    clearFocusRefs,
   };
 }
 
