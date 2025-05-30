@@ -8,11 +8,26 @@ import Text from '../Text';
 type ButtonProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     loading?: boolean;
+    showLoader?: boolean;
     children: ReactNode;
   };
 
 const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
-  ({ intent, loading, variant, size, fullWidth, rounded, className, children, ...props }, ref) => {
+  (
+    {
+      intent,
+      loading,
+      showLoader,
+      variant,
+      size,
+      fullWidth,
+      rounded,
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         ref={ref}
@@ -28,7 +43,11 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
         )}
         {...props}
       >
-        {loading ? <Loader size={'md'} loaderType={'spinner'} /> : <Text>{children}</Text>}
+        {loading && showLoader ? (
+          <Loader size={'md'} loaderType={'spinner'} />
+        ) : (
+          <Text>{children}</Text>
+        )}
       </button>
     );
   }
