@@ -11,7 +11,7 @@ describe('Button', () => {
 
   it('should render loader correctly while attending the completion of the action', () => {
     render(
-      <Button type="submit" loading>
+      <Button type="submit" loading showLoader>
         Content
       </Button>
     );
