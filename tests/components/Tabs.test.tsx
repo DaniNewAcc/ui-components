@@ -105,6 +105,14 @@ describe('Tabs', () => {
       renderTabs(2, 1);
       expect(screen.queryByText('Content 2')).not.toBeInTheDocument();
     });
+
+    it('should set focus visible styling on mousedown event', () => {
+      const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 2' });
+      expect(tabsTrigger).not.toHaveClass('focus-visible');
+
+      fireEvent.mouseDown(tabsTrigger);
+      expect(tabsTrigger).not.toHaveClass('focus-visible');
+    });
   });
 
   describe('Keyboard Navigation', () => {
