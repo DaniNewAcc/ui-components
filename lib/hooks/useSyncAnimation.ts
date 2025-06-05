@@ -25,6 +25,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import useReduceMotion from './useReduceMotion';
 
 type UseSyncAnimationProps = {
   isOpen: boolean;
@@ -39,7 +40,19 @@ export const useSyncAnimation = <T extends HTMLElement = HTMLDivElement>({
   const [shouldRender, setShouldRender] = useState<boolean>(isOpen);
   const [maxHeight, setMaxHeight] = useState<number | string>(0);
 
+  const reduceMotion = useReduceMotion();
+
   useEffect(() => {
+    if (reduceMotion) {
+      if (isOpen) {
+        setShouldRender(true);
+        setMaxHeight('auto');
+      } else {
+        setMaxHeight(0);
+        setShouldRender(false);
+      }
+      return;
+    }
     if (isOpen) {
       setShouldRender(true);
 
