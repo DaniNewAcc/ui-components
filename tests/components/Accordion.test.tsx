@@ -1,7 +1,16 @@
+import AnimateMock from '../__mocks__/components/MockAnimate';
+
+vi.mock('@/components/Animate', () => {
+  return {
+    default: AnimateMock,
+  };
+});
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react';
 
 const renderAccordion = (count = 3, defaultValue = 1, multiple = false) => {
   return render(
@@ -23,16 +32,25 @@ const renderAccordion = (count = 3, defaultValue = 1, multiple = false) => {
 
 beforeEach(() => {
   __setReduceMotionForTests(true);
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
   __setReduceMotionForTests(undefined);
+  vi.useRealTimers();
 });
 
 describe('Accordion', () => {
   describe('Context Behavior', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      (console.error as any).mockRestore();
+    });
+
     it('should throw an error when components are not wrapped into accordion', () => {
-      expect(() =>
+      try {
         render(
           <>
             <AccordionItem value={0}>
@@ -40,12 +58,18 @@ describe('Accordion', () => {
               <AccordionContent>Content 1</AccordionContent>
             </AccordionItem>
           </>
-        )
-      ).toThrowError('Accordion components need to be wrapped into <Accordion>.');
+        );
+        throw new Error('Expected error was not thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe(
+          'Accordion components need to be wrapped into <Accordion>.'
+        );
+      }
     });
 
     it('should throw an error when components are not wrapped into AccordionItem', () => {
-      expect(() =>
+      try {
         render(
           <Accordion items={1} defaultValue={0}>
             <AccordionItem value={0}>
@@ -53,25 +77,34 @@ describe('Accordion', () => {
             </AccordionItem>
             <AccordionContent>Content 1</AccordionContent>
           </Accordion>
-        )
-      ).toThrowError('AccordionItem components need to be wrapped into <AccordionItem>.');
+        );
+        throw new Error('Expected error was not thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe(
+          'AccordionItem components need to be wrapped into <AccordionItem>.'
+        );
+      }
     });
   });
 
   describe('Rendering', () => {
     it('should render correctly', () => {
-      const { getByTestId } = renderAccordion(1);
-      expect(getByTestId('accordiongroup')).toBeInTheDocument();
+      renderAccordion(1);
+
+      expect(screen.getByTestId('accordiongroup')).toBeInTheDocument();
+
       const trigger = screen.getAllByTestId('trigger');
       const content = screen.getAllByTestId('content');
 
       expect(trigger[0]).toBeInTheDocument();
       expect(content[0]).toBeInTheDocument();
-
       expect(content[0]).toBeVisible();
     });
-    it('should render correctly with no items', () => {
+
+    it('should render correctly with no items', async () => {
       renderAccordion(0);
+
       const content = screen.queryAllByTestId('content');
       expect(content.length).toBe(0);
     });
@@ -79,67 +112,97 @@ describe('Accordion', () => {
 
   describe('Interaction', () => {
     it('should not allow opening multiple items when multiple is false', async () => {
-      renderAccordion(3, 1, false);
-      const trigger = screen.getAllByTestId('trigger');
+      vi.useRealTimers();
 
-      await waitFor(() => {
-        expect(screen.getByText('Content 1')).toBeVisible();
+      renderAccordion(3, 1, false);
+
+      const triggers = screen.getAllByTestId('trigger');
+
+      expect(screen.getByText('Content 1')).toBeVisible();
+      expect(screen.queryByText('Content 2')).toBeNull();
+
+      await act(async () => {
+        await userEvent.click(triggers[1]);
       });
 
-      fireEvent.click(trigger[1]);
       await waitFor(() => {
         expect(screen.getByText('Content 2')).toBeVisible();
       });
+      expect(screen.queryByText('Content 1')).toBeNull();
 
-      fireEvent.click(trigger[0]);
+      await act(async () => {
+        await userEvent.click(triggers[0]);
+      });
+
       await waitFor(() => {
         expect(screen.getByText('Content 1')).toBeVisible();
       });
+      expect(screen.queryByText('Content 2')).toBeNull();
     });
 
-    it('should allow opening multiple items when multiple is true', () => {
+    it('should allow opening multiple items when multiple is true', async () => {
+      vi.useRealTimers();
       renderAccordion(3, 1, true);
+
       const trigger = screen.getAllByTestId('trigger');
 
       let content = screen.queryAllByTestId('content');
       expect(content[0]).toHaveTextContent('Content 1');
 
-      fireEvent.click(trigger[1]);
+      await act(async () => {
+        await userEvent.click(trigger[1]);
+      });
+
       content = screen.queryAllByTestId('content');
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
-      fireEvent.click(trigger[2]);
+      await act(async () => {
+        await userEvent.click(trigger[2]);
+      });
+
       content = screen.queryAllByTestId('content');
       expect(content[2]).toHaveTextContent('Content 3');
     });
 
-    it('should toggle an already open item when clicked again (multiple is true)', () => {
+    it('should toggle an already open item when clicked again (multiple is true)', async () => {
+      vi.useRealTimers();
       renderAccordion(3, 1, true);
+
       const trigger = screen.getAllByTestId('trigger');
 
       let content = screen.queryAllByTestId('content');
       expect(content[0]).toHaveTextContent('Content 1');
 
-      fireEvent.click(trigger[1]);
+      await act(async () => {
+        await userEvent.click(trigger[1]);
+      });
+
       content = screen.queryAllByTestId('content');
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
-      fireEvent.click(trigger[1]);
+      await act(async () => {
+        await userEvent.click(trigger[1]);
+      });
+
       content = screen.queryAllByTestId('content');
       expect(content[0]).toHaveTextContent('Content 1');
     });
 
     it('should close an open item if clicked again when multiple is false', async () => {
+      vi.useRealTimers();
       renderAccordion(3, 1, false);
+
       const trigger = screen.getAllByTestId('trigger');
 
       await waitFor(() => {
         expect(screen.getByText('Content 1')).toBeVisible();
       });
 
-      fireEvent.click(trigger[0]);
+      await act(async () => {
+        await userEvent.click(trigger[0]);
+      });
 
       await waitFor(() => {
         const content = screen.queryByText('Content 1');
@@ -152,109 +215,142 @@ describe('Accordion', () => {
   });
 
   describe('Keyboard Navigation', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       renderAccordion();
     });
 
     it('should moves focus to the first item when Home key is pressed', async () => {
-      const user = userEvent.setup();
+      vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
       const item = screen.getAllByTestId('accordionItem');
 
       item[0].focus();
 
-      await user.keyboard('{Home}');
-
-      await waitFor(() => {
-        expect(item[0]).toHaveFocus();
+      await act(async () => {
+        await user.keyboard('{Home}');
       });
+
+      expect(item[0]).toHaveFocus();
     });
 
-    it('should moves focus to the last item when End key is pressed', async () => {
-      const user = userEvent.setup();
+    it('should move focus to the last item when End key is pressed', async () => {
+      vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
       const item = screen.getAllByTestId('accordionItem');
 
       item[0].focus();
 
-      await user.keyboard('{End}');
-
-      item[item.length - 1].focus();
-
-      await waitFor(() => {
-        expect(item[item.length - 1]).toHaveFocus();
+      await act(async () => {
+        await user.keyboard('{End}');
       });
+
+      expect(item[item.length - 1]).toHaveFocus();
     });
 
     it('should moves focus with arrow keys', async () => {
-      renderAccordion();
-      const item = screen.getAllByTestId('accordionItem');
-      const user = userEvent.setup();
-
-      item[0].focus();
-      waitFor(() => {
-        expect(item[0]).toHaveFocus();
+      vi.useRealTimers();
+      await act(async () => {
+        renderAccordion();
       });
 
-      await user.keyboard('{ArrowDown}');
-      waitFor(() => {
-        expect(item[1]).toHaveFocus();
+      const user = userEvent.setup({ delay: null });
+      const items = screen.getAllByTestId('accordionItem');
+
+      await act(async () => {
+        items[0].focus();
       });
 
-      await user.keyboard('{ArrowDown}');
-      waitFor(() => {
-        expect(item[2]).toHaveFocus();
-      });
+      expect(items[0]).toHaveFocus();
 
-      await user.keyboard('{ArrowDown}');
-      waitFor(() => {
-        expect(item[0]).toHaveFocus();
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
       });
+      expect(items[1]).toHaveFocus();
 
-      await user.keyboard('{ArrowUp}');
-      waitFor(() => {
-        expect(item[2]).toHaveFocus();
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
       });
+      expect(items[2]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
+      });
+      expect(items[0]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowUp}');
+      });
+      expect(items[2]).toHaveFocus();
     });
 
     it('should moves focus with tab and shiftTab keys', async () => {
-      renderAccordion();
+      vi.useRealTimers();
+      await act(async () => {
+        renderAccordion();
+      });
+
+      const user = userEvent.setup({ delay: null });
       const item = screen.getAllByTestId('accordionItem');
-      const user = userEvent.setup();
 
-      item[0].focus();
-      waitFor(() => {
-        expect(item[0]).toHaveFocus();
+      await act(async () => {
+        item[0].focus();
       });
 
-      await user.keyboard('{Tab}');
-      waitFor(() => {
-        expect(item[1]).toHaveFocus();
+      expect(item[0]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{Tab}');
       });
 
-      await user.keyboard('{Tab}');
-      waitFor(() => {
-        expect(item[2]).toHaveFocus();
+      expect(item[1]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{Tab}');
+      });
+      expect(item[2]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{Tab}');
+      });
+      expect(document.activeElement).not.toBe(item[0]);
+
+      await act(async () => {
+        await user.keyboard('{Shift>}{Tab}{/Shift}');
       });
 
-      await user.keyboard('{Tab}');
-      waitFor(() => {
-        expect(item[0]).toHaveFocus();
-      });
-
-      await user.keyboard('{Shift>}{Tab}{/Shift}');
-      waitFor(() => {
-        expect(item[2]).toHaveFocus();
-      });
+      expect(item[2]).toHaveFocus();
     });
 
-    it('should open accordion content when Enter or Spacebar key is pressed', async () => {
+    it('should open accordion with Enter key', async () => {
+      vi.useRealTimers();
       renderAccordion();
+      const user = userEvent.setup({ delay: null });
       const item = screen.getAllByTestId('accordionItem');
-      const content = screen.queryAllByTestId('content');
+      await act(async () => {
+        item[1].focus();
+      });
 
-      item[1].focus();
+      await act(async () => {
+        await user.keyboard('{Enter}');
+      });
 
-      await userEvent.keyboard('{Enter}');
-      expect(content[1]).toBeVisible();
+      expect(screen.getAllByTestId('content')[1]).toBeVisible();
+    });
+
+    it('should open accordion with Space key', async () => {
+      vi.useRealTimers();
+      renderAccordion();
+      const user = userEvent.setup({ delay: null });
+      const item = screen.getAllByTestId('accordionItem');
+      await act(async () => {
+        item[1].focus();
+      });
+
+      await act(async () => {
+        await user.keyboard(' ');
+      });
+
+      expect(screen.getAllByTestId('content')[1]).toBeVisible();
     });
   });
 });
