@@ -40,6 +40,101 @@ describe('Animate', () => {
     });
   });
 
+  describe('Preset Handling', () => {
+    beforeEach(() => {
+      vi.mocked(useReduceMotion).mockReturnValue(false);
+    });
+
+    it('should apply values from a valid preset', () => {
+      render(
+        <Animate preset="toast" isVisible={true} testId="animate">
+          <div>Toast content</div>
+        </Animate>
+      );
+
+      const animate = screen.getByTestId('animate');
+      expect(animate).toBeInTheDocument();
+      expect(animate.className).toContain('fadeIn');
+    });
+
+    it('should fallback when unknown preset key is used', () => {
+      render(
+        <Animate preset={'nonexistent' as any} isVisible={true} testId="animate">
+          <div>Invalid preset content</div>
+        </Animate>
+      );
+
+      const animate = screen.getByTestId('animate');
+      expect(animate).toBeInTheDocument();
+    });
+
+    it('should allow overriding preset props with direct props', () => {
+      render(
+        <Animate preset="toast" type="zoomIn" duration={1000} isVisible={true} testId="animate">
+          <div>Overridden</div>
+        </Animate>
+      );
+
+      const animate = screen.getByTestId('animate');
+      expect(animate.className).toContain('zoomIn');
+    });
+  });
+
+  describe('Animate useHeightAnimation behavior', () => {
+    beforeEach(() => {
+      vi.mocked(useReduceMotion).mockReturnValue(false);
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should call startOpenAnimation and onStart when isVisible is true with useHeightAnimation', () => {
+      const onStart = vi.fn();
+
+      const { rerender } = render(
+        <Animate isVisible={false} useHeightAnimation onStart={onStart} testId="animate">
+          <div style={{ height: 50 }}>Content</div>
+        </Animate>
+      );
+
+      rerender(
+        <Animate isVisible={true} useHeightAnimation onStart={onStart} testId="animate">
+          <div style={{ height: 50 }}>Content</div>
+        </Animate>
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(0);
+      });
+
+      expect(onStart).toHaveBeenCalled();
+    });
+
+    it('should call startCloseAnimation and onStart when isVisible is false with useHeightAnimation', () => {
+      const onStart = vi.fn();
+
+      const { rerender } = render(
+        <Animate isVisible={true} useHeightAnimation onStart={onStart} testId="animate">
+          <div style={{ height: 50 }}>Content</div>
+        </Animate>
+      );
+
+      rerender(
+        <Animate isVisible={false} useHeightAnimation onStart={onStart} testId="animate">
+          <div style={{ height: 50 }}>Content</div>
+        </Animate>
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(0);
+      });
+
+      expect(onStart).toHaveBeenCalled();
+    });
+  });
+
   describe('Reduced Motion', () => {
     it('should skip animations when reduced motion is enabled', () => {
       vi.mocked(useReduceMotion).mockReturnValue(true);
@@ -132,7 +227,56 @@ describe('Animate', () => {
     });
 
     afterEach(() => {
-      vi.useRealTimers(); // Restores real timers after each test
+      vi.useRealTimers();
+    });
+
+    it('should trigger exit animation when isVisible changes to false', () => {
+      vi.useFakeTimers();
+
+      const { rerender } = render(
+        <Animate isVisible={true} duration={300} delay={0} testId="animate">
+          <div>Content</div>
+        </Animate>
+      );
+
+      rerender(
+        <Animate isVisible={false} duration={300} delay={0} testId="animate">
+          <div>Content</div>
+        </Animate>
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+
+      const animate = screen.getByTestId('animate');
+      expect(animate).toHaveClass('is-animating-exit');
+
+      vi.useRealTimers();
+    });
+
+    it('should not apply animation class when disabled is true', () => {
+      render(
+        <Animate isVisible={true} disabled={true} type="slideDown" testId="animate">
+          <div>Content</div>
+        </Animate>
+      );
+
+      const animate = screen.getByTestId('animate');
+      expect(animate.className).not.toMatch(/ui-animate/);
+    });
+
+    it('should not apply maxHeight or transition styles when useHeightAnimation is false', () => {
+      render(
+        <Animate isVisible={true} testId="animate" duration={300}>
+          <div>Content</div>
+        </Animate>
+      );
+
+      const animate = screen.getByTestId('animate');
+      expect(animate.style.maxHeight).toBe('');
+      expect(animate.style.transition).toBe('');
+      expect(animate.style.willChange).toBe('');
     });
 
     it('should call onStart after delay and onEnd after duration', () => {
@@ -154,13 +298,11 @@ describe('Animate', () => {
 
       expect(onStart).not.toHaveBeenCalled();
 
-      // Before delay
       act(() => {
         vi.advanceTimersByTime(199);
       });
       expect(onStart).not.toHaveBeenCalled();
 
-      // At delay point
       act(() => {
         vi.advanceTimersByTime(1);
       });
@@ -168,7 +310,6 @@ describe('Animate', () => {
 
       expect(onEnd).not.toHaveBeenCalled();
 
-      // After animation duration
       act(() => {
         vi.advanceTimersByTime(500);
       });
@@ -183,11 +324,7 @@ describe('Animate', () => {
           <div>Content</div>
         </Animate>
       );
-
-      // Unmount before delay passes
       unmount();
-
-      // Expect both delay and animationTimeout (even undefined) to be cleared
       expect(clearTimeoutSpy).toHaveBeenCalledTimes(2);
     });
 
@@ -199,16 +336,10 @@ describe('Animate', () => {
           <div>Content</div>
         </Animate>
       );
-
-      // Advance past the delay to schedule animationTimeout
       act(() => {
         vi.advanceTimersByTime(100);
       });
-
-      // Unmount before animation completes
       unmount();
-
-      // Expect both timeouts to be cleared
       expect(clearTimeoutSpy).toHaveBeenCalledTimes(2);
     });
   });
