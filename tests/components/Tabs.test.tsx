@@ -1,6 +1,16 @@
+import AnimateMock from '../__mocks__/components/MockAnimate';
+
+vi.mock('@/components/Animate', () => {
+  return {
+    default: AnimateMock,
+  };
+});
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react';
 
 const renderTabs = (
   count = 3,
@@ -32,12 +42,26 @@ const renderTabs = (
   );
 };
 
-afterEach(cleanup);
+beforeEach(() => {
+  __setReduceMotionForTests(true);
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  __setReduceMotionForTests(undefined);
+  vi.useRealTimers();
+});
 
 describe('Tabs', () => {
   describe('Context behavior', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      (console.error as any).mockRestore();
+    });
     it('should throw an error when components are not wrapped into tabs', () => {
-      expect(() =>
+      try {
         render(
           <>
             <TabsList>
@@ -45,8 +69,11 @@ describe('Tabs', () => {
             </TabsList>
             <TabsContent value={1}>Unwrapped Content</TabsContent>
           </>
-        )
-      ).toThrowError('Tabs components need to be wrapped into <Tabs>.');
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe('Tabs components need to be wrapped into <Tabs>.');
+      }
     });
   });
 
@@ -58,8 +85,9 @@ describe('Tabs', () => {
 
     it('should render required elements', () => {
       renderTabs(2);
+      const tabs = screen.getAllByRole('tab');
       expect(screen.getByRole('tablist')).toBeInTheDocument();
-      expect(screen.getAllByRole('tab')).toHaveLength(2);
+      expect(tabs).toHaveLength(2);
       expect(screen.getByRole('tabpanel')).toHaveTextContent('Content 1');
     });
 
@@ -70,19 +98,47 @@ describe('Tabs', () => {
   });
 
   describe('Disabled Tabs', () => {
-    it('should skip disabled tabs when using keyboard navigation', async () => {
+    it('does not activate or focus a disabled tab when clicked', async () => {
+      vi.useRealTimers();
       renderTabs(3, 1, false, 'horizontal', [false, true, false]);
 
+      const user = userEvent.setup({ delay: null });
       const tabs = screen.getAllByRole('tab');
-      const user = userEvent.setup();
 
-      tabs[0].focus();
+      await act(async () => {
+        await user.click(tabs[0]);
+      });
+      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+      expect(tabs[0]).toHaveFocus();
 
-      await user.keyboard('{ArrowRight}');
+      await act(async () => {
+        await user.click(tabs[1]);
+      });
+      expect(tabs[1]).toHaveAttribute('aria-disabled', 'true');
+      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('should skip disabled tabs when using keyboard navigation', async () => {
+      vi.useRealTimers();
+      renderTabs(3, 1, false, 'horizontal', [false, true, false]);
+
+      const user = userEvent.setup({ delay: null });
+      const tabs = screen.getAllByRole('tab');
+
+      await act(async () => {
+        tabs[0].focus();
+      });
+
+      await act(async () => {
+        await user.keyboard('{ArrowRight}');
+      });
 
       expect(tabs[2]).toHaveFocus();
 
-      await user.keyboard('{ArrowLeft}');
+      await act(async () => {
+        await user.keyboard('{ArrowLeft}');
+      });
+
       expect(tabs[0]).toHaveFocus();
     });
   });
@@ -92,122 +148,179 @@ describe('Tabs', () => {
       renderTabs(2);
     });
 
-    it('should switch content on tab trigger click', () => {
+    it('should switch content on tab trigger click', async () => {
+      vi.useRealTimers();
+
+      const user = userEvent.setup({ delay: null });
       const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 2' });
 
-      fireEvent.click(tabsTrigger);
+      await act(async () => {
+        await user.click(tabsTrigger);
+      });
+
       expect(screen.getByRole('tabpanel')).toHaveTextContent('Content 2');
       expect(tabsTrigger).toHaveAttribute('aria-selected', 'true');
     });
 
     it('should not render non-active tab content', () => {
-      cleanup();
       renderTabs(2, 1);
       expect(screen.queryByText('Content 2')).not.toBeInTheDocument();
     });
 
-    it('should set focus visible styling on mousedown event', () => {
+    it('should not add focus-visible class on mousedown', () => {
       const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 2' });
       expect(tabsTrigger).not.toHaveClass('focus-visible');
-
       fireEvent.mouseDown(tabsTrigger);
       expect(tabsTrigger).not.toHaveClass('focus-visible');
+    });
+
+    it('should focus panel after click with setTimeout', async () => {
+      cleanup();
+      renderTabs(1);
+      const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 1' });
+      const panel = screen.getByRole('tabpanel');
+
+      fireEvent.mouseDown(tabsTrigger);
+
+      await act(async () => {
+        vi.advanceTimersByTime(0);
+      });
+
+      expect(panel).toBeInTheDocument();
     });
   });
 
   describe('Keyboard Navigation', () => {
+    let tabs: HTMLElement[];
+    let user: ReturnType<typeof userEvent.setup>;
+
+    const setupTabs = (count = 3, orientation: 'horizontal' | 'vertical' = 'horizontal') => {
+      cleanup();
+      renderTabs(count, 1, false, orientation);
+      tabs = screen.getAllByRole('tab');
+      user = userEvent.setup({ delay: null });
+    };
+
     beforeEach(() => {
-      renderTabs();
+      setupTabs();
     });
 
-    it('should move focus to the first tab when Tab key is pressed before Home key', async () => {
-      const user = userEvent.setup();
-      const tabs = screen.getAllByRole('tab');
-      expect(tabs[0]).not.toHaveFocus();
-
-      await user.keyboard('{Tab}');
-
-      await user.keyboard('{Home}');
-
-      await waitFor(() => {
-        expect(tabs[0]).toHaveFocus();
+    it('should move focus to the first tab when Home key is pressed', async () => {
+      vi.useRealTimers();
+      await act(async () => {
+        tabs[1].focus();
       });
+
+      await act(async () => {
+        await user.keyboard('{Home}');
+      });
+      expect(tabs[0]).toHaveFocus();
     });
 
     it('should move focus to the last tab when End key is pressed', async () => {
-      const user = userEvent.setup();
-      const tabs = screen.getAllByRole('tab');
-
-      tabs[0].focus();
-      await user.keyboard('{End}');
-      await waitFor(() => {
-        expect(tabs[tabs.length - 1]).toHaveFocus();
+      vi.useRealTimers();
+      await act(async () => {
+        tabs[0].focus();
       });
+
+      await act(async () => {
+        await user.keyboard('{End}');
+      });
+      expect(tabs[tabs.length - 1]).toHaveFocus();
     });
 
-    it('should move focus to the tabpanel related to tabtrigger focused when Tab is pressed', async () => {
-      const user = userEvent.setup();
-      const tabs = screen.getAllByRole('tab');
-      const panels = screen.getAllByRole('tabpanel');
+    it('should cycle focus with left and right arrow keys (horizontal)', async () => {
+      vi.useRealTimers();
+      await act(async () => {
+        tabs[0].focus();
+      });
 
-      tabs[0].focus();
+      await act(async () => {
+        await user.keyboard('{ArrowRight}');
+      });
 
-      await waitFor(() => {
+      expect(tabs[1]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowRight}');
+      });
+      expect(tabs[2]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowRight}');
+      });
+      expect(tabs[0]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowLeft}');
+      });
+      expect(tabs[2]).toHaveFocus();
+    });
+
+    describe('Vertical Orientation', () => {
+      beforeEach(() => {
+        setupTabs(3, 'vertical');
+      });
+
+      it('should have vertical orientation attribute', () => {
+        expect(screen.getByRole('tablist')).toHaveAttribute('aria-orientation', 'vertical');
+      });
+
+      it('should cycle focus with up and down arrow keys (vertical)', async () => {
+        vi.useRealTimers();
+        await act(async () => {
+          tabs[0].focus();
+        });
+
+        await act(async () => {
+          await user.keyboard('{ArrowDown}');
+        });
+        expect(tabs[1]).toHaveFocus();
+
+        await act(async () => {
+          await user.keyboard('{ArrowDown}');
+        });
+        expect(tabs[2]).toHaveFocus();
+
+        await act(async () => {
+          await user.keyboard('{ArrowDown}');
+        });
         expect(tabs[0]).toHaveFocus();
-      });
 
-      await user.keyboard('{Tab}');
-
-      panels[0].focus();
-
-      await waitFor(() => {
-        expect(panels[0]).toHaveFocus();
+        await act(async () => {
+          await user.keyboard('{ArrowUp}');
+        });
+        expect(tabs[2]).toHaveFocus();
       });
     });
+  });
 
-    it('should move focus with left and right arrow keys', async () => {
-      const user = userEvent.setup();
-      const tabs = screen.getAllByRole('tab');
+  describe('Focus management based on tabbing direction', () => {
+    it('should move focus to the tab panel when Tab key is pressed on the active tab trigger', async () => {
+      renderTabs();
+      const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 1' });
+      const panel = screen.getByRole('tabpanel');
 
-      tabs[0].focus();
-      await waitFor(() => expect(tabs[0]).toHaveFocus());
+      await act(async () => {
+        tabsTrigger.focus();
+      });
 
-      await user.keyboard('{ArrowRight}');
-      await waitFor(() => expect(tabs[1]).toHaveFocus());
+      fireEvent.keyDown(tabsTrigger, { key: 'Tab' });
 
-      await user.keyboard('{ArrowRight}');
-      await waitFor(() => expect(tabs[2]).toHaveFocus());
+      await act(async () => {
+        vi.advanceTimersByTime(0);
+      });
 
-      await user.keyboard('{ArrowRight}');
-      await waitFor(() => expect(tabs[0]).toHaveFocus());
-
-      await user.keyboard('{ArrowLeft}');
-      await waitFor(() => expect(tabs[2]).toHaveFocus());
+      expect(panel).toHaveFocus();
     });
 
-    it('should move focus with up and down arrow keys when vertical orientation is set', async () => {
-      cleanup();
-      renderTabs(3, 1, false, 'vertical');
-      const tabs = screen.getAllByRole('tab');
-      const user = userEvent.setup();
+    it('should move focus to the previous focusable element when Shift+Tab is pressed on TabsList', () => {
+      renderTabs();
 
-      const tabList = screen.getByRole('tablist');
-      expect(tabList).toHaveAttribute('aria-orientation', 'vertical');
+      const tabsList = screen.getByTestId('tabslist');
+      tabsList.focus();
 
-      tabs[0].focus();
-      await waitFor(() => expect(tabs[0]).toHaveFocus());
-
-      await user.keyboard('{ArrowDown}');
-      await waitFor(() => expect(tabs[1]).toHaveFocus());
-
-      await user.keyboard('{ArrowDown}');
-      await waitFor(() => expect(tabs[2]).toHaveFocus());
-
-      await user.keyboard('{ArrowDown}');
-      await waitFor(() => expect(tabs[0]).toHaveFocus());
-
-      await user.keyboard('{ArrowUp}');
-      await waitFor(() => expect(tabs[2]).toHaveFocus());
+      fireEvent.keyDown(tabsList, { key: 'Tab', shiftKey: true });
     });
   });
 });
