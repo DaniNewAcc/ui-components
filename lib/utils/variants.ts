@@ -441,6 +441,31 @@ export const LoaderVariants = cva('ui:rounded-full', {
   },
 });
 
+export const ScrollableVariants = cva('ui:overflow-auto', {
+  variants: {
+    direction: {
+      vertical: 'ui:overflow-x-hidden ui:overflow-y-auto',
+      horizontal: 'ui:overflow-x-auto ui:overflow-y-hidden ui:whitespace-nowrap',
+      both: 'ui:overflow-auto',
+    },
+    scrollBar: {
+      auto: 'ui:scrollbar ui:scrollbar-thumb-rounded ui:scrollbar-thumb-gray-400 ui:scrollbar-track-gray-100',
+      always:
+        'ui:scrollbar ui:scrollbar-thumb-rounded ui:scrollbar-thumb-gray-400 ui:scrollbar-track-gray-100 ui:scrollbar-visible',
+      hidden: 'ui:scrollbar-none',
+    },
+    smooth: {
+      true: 'ui:scroll-smooth',
+      false: '',
+    },
+  },
+  defaultVariants: {
+    direction: 'vertical',
+    scrollBar: 'auto',
+    smooth: false,
+  },
+});
+
 export const SeparatorVariants = cva('ui:bg-gray-400', {
   variants: {
     orientation: {
