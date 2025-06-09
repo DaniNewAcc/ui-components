@@ -16,6 +16,7 @@ export { default as Input } from '@components/Input';
 export { default as Label } from '@components/Label';
 export { default as Layout } from '@components/Layout';
 export { default as Loader } from '@components/Loader';
+export { default as Scrollable } from '@components/Scrollable';
 export { Select, SelectDropdown, SelectOption, SelectTrigger } from '@components/Select';
 export { default as Separator } from '@components/Separator';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/Tabs';
