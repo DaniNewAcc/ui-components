@@ -307,7 +307,6 @@ const TabsTrigger = ({
       aria-controls={contentId}
       aria-disabled={disabled}
       aria-selected={isActive}
-      disabled={disabled}
       id={triggerId}
       role="tab"
       tabIndex={disabled ? -1 : isFocused || isFirst ? 0 : -1}
