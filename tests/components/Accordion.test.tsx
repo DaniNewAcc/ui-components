@@ -1,3 +1,4 @@
+import { AnimateProps } from '@/components/Animate/Animate';
 import AnimateMock from '../__mocks__/components/MockAnimate';
 
 vi.mock('@/components/Animate', () => {
@@ -8,22 +9,30 @@ vi.mock('@/components/Animate', () => {
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react';
 
-const renderAccordion = (count = 3, defaultValue = 1, multiple = false) => {
+const renderAccordion = (
+  count = 3,
+  defaultValue: string | number | null = 1,
+  multiple = false,
+  options: { animateProps?: Partial<AnimateProps> } = {}
+) => {
+  const { animateProps } = options;
   return render(
     <Accordion
       items={count}
-      defaultValue={defaultValue}
+      defaultValue={defaultValue ?? undefined}
       multiple={multiple}
       testId="accordiongroup"
     >
       {Array.from({ length: count }, (_, i) => (
         <AccordionItem key={i} value={i + 1} testId="accordionItem">
           <AccordionTrigger testId="trigger">Trigger {i + 1}</AccordionTrigger>
-          <AccordionContent testId="content">Content {i + 1}</AccordionContent>
+          <AccordionContent testId="content" animateProps={animateProps}>
+            Content {i + 1}
+          </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
@@ -49,7 +58,7 @@ describe('Accordion', () => {
       (console.error as any).mockRestore();
     });
 
-    it('should throw an error when components are not wrapped into accordion', () => {
+    it('should throw an error when components are not wrapped into Accordion', () => {
       try {
         render(
           <>
@@ -102,46 +111,98 @@ describe('Accordion', () => {
       expect(content[0]).toBeVisible();
     });
 
-    it('should render correctly with no items', async () => {
-      renderAccordion(0);
+    it('should apply custom animate duration if provided', () => {
+      render(
+        <Accordion items={1} defaultValue={1}>
+          <AccordionItem value={1}>
+            <AccordionTrigger>Trigger</AccordionTrigger>
+            <AccordionContent testId="content" animateProps={{ duration: 500 }}>
+              Content
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      );
 
-      const content = screen.queryAllByTestId('content');
-      expect(content.length).toBe(0);
+      const content = screen.getByTestId('content');
+      expect(content).toHaveStyle(
+        'transition: max-height 500ms ease, opacity 500ms ease, visibility 500ms ease'
+      );
     });
   });
 
   describe('Interaction', () => {
+    it('should start with no items open when defaultValue is undefined and multiple is true', async () => {
+      vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
+      renderAccordion(3, null, true);
+
+      const trigger = screen.getAllByTestId('trigger');
+
+      expect(screen.queryByText('Content 1')).toBeNull();
+
+      await act(async () => {
+        await user.click(trigger[0]);
+      });
+
+      expect(screen.getByText('Content 1')).toBeVisible();
+
+      await act(async () => {
+        await user.click(trigger[0]);
+      });
+
+      expect(screen.queryByText('Content 1')).toBeNull();
+    });
+
+    it('should start with no items open when defaultValue is undefined and multiple is false', async () => {
+      vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
+      renderAccordion(3, null, false);
+
+      const trigger = screen.getAllByTestId('trigger');
+
+      expect(screen.queryByText('Content 1')).toBeNull();
+
+      await act(async () => {
+        await user.click(trigger[0]);
+      });
+
+      expect(screen.getByText('Content 1')).toBeVisible();
+
+      await act(async () => {
+        await user.click(trigger[0]);
+      });
+
+      expect(screen.queryByText('Content 1')).toBeNull();
+    });
+
     it('should not allow opening multiple items when multiple is false', async () => {
       vi.useRealTimers();
-
+      const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, false);
 
-      const triggers = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('trigger');
 
       expect(screen.getByText('Content 1')).toBeVisible();
       expect(screen.queryByText('Content 2')).toBeNull();
 
       await act(async () => {
-        await userEvent.click(triggers[1]);
+        await user.click(trigger[1]);
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Content 2')).toBeVisible();
-      });
+      expect(screen.getByText('Content 2')).toBeVisible();
       expect(screen.queryByText('Content 1')).toBeNull();
 
       await act(async () => {
-        await userEvent.click(triggers[0]);
+        await user.click(trigger[0]);
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Content 1')).toBeVisible();
-      });
+      expect(screen.getByText('Content 1')).toBeVisible();
       expect(screen.queryByText('Content 2')).toBeNull();
     });
 
     it('should allow opening multiple items when multiple is true', async () => {
       vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, true);
 
       const trigger = screen.getAllByTestId('trigger');
@@ -150,7 +211,7 @@ describe('Accordion', () => {
       expect(content[0]).toHaveTextContent('Content 1');
 
       await act(async () => {
-        await userEvent.click(trigger[1]);
+        await user.click(trigger[1]);
       });
 
       content = screen.queryAllByTestId('content');
@@ -158,7 +219,7 @@ describe('Accordion', () => {
       expect(content[1]).toHaveTextContent('Content 2');
 
       await act(async () => {
-        await userEvent.click(trigger[2]);
+        await user.click(trigger[2]);
       });
 
       content = screen.queryAllByTestId('content');
@@ -167,6 +228,7 @@ describe('Accordion', () => {
 
     it('should toggle an already open item when clicked again (multiple is true)', async () => {
       vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, true);
 
       const trigger = screen.getAllByTestId('trigger');
@@ -175,7 +237,7 @@ describe('Accordion', () => {
       expect(content[0]).toHaveTextContent('Content 1');
 
       await act(async () => {
-        await userEvent.click(trigger[1]);
+        await user.click(trigger[1]);
       });
 
       content = screen.queryAllByTestId('content');
@@ -183,7 +245,7 @@ describe('Accordion', () => {
       expect(content[1]).toHaveTextContent('Content 2');
 
       await act(async () => {
-        await userEvent.click(trigger[1]);
+        await user.click(trigger[1]);
       });
 
       content = screen.queryAllByTestId('content');
@@ -192,24 +254,19 @@ describe('Accordion', () => {
 
     it('should close an open item if clicked again when multiple is false', async () => {
       vi.useRealTimers();
+      const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, false);
 
       const trigger = screen.getAllByTestId('trigger');
 
-      await waitFor(() => {
-        expect(screen.getByText('Content 1')).toBeVisible();
-      });
+      expect(screen.getByText('Content 1')).toBeVisible();
 
       await act(async () => {
-        await userEvent.click(trigger[0]);
-      });
-
-      await waitFor(() => {
-        const content = screen.queryByText('Content 1');
-        expect(content).not.toBeInTheDocument();
+        await user.click(trigger[0]);
       });
 
       const content = screen.queryByText('Content 1');
+      expect(content).not.toBeInTheDocument();
       expect(content).toBeNull();
     });
   });
@@ -265,21 +322,25 @@ describe('Accordion', () => {
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
+
       expect(items[1]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
+
       expect(items[2]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
+
       expect(items[0]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{ArrowUp}');
       });
+
       expect(items[2]).toHaveFocus();
     });
 
