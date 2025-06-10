@@ -6,8 +6,11 @@ import React, { ComponentPropsWithRef, forwardRef, ReactNode } from 'react';
 type CardProps = ComponentPropsWithRef<'article'> &
   VariantProps<typeof CardVariants> & {
     testId?: string;
-    onClick?: React.MouseEventHandler;
+    focusable?: boolean;
+    role?: string;
+    tabIndex?: number;
     children: ReactNode;
+    onClick?: React.MouseEventHandler;
   };
 
 const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
@@ -18,6 +21,9 @@ const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
       padding,
       rounded,
       shadow,
+      focusable,
+      role,
+      tabIndex,
       testId,
       className,
       children,
@@ -29,9 +35,16 @@ const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
     return (
       <article
         ref={ref}
-        onClick={onClick}
         data-testid={testId}
-        className={cn(CardVariants({ border, hoverEffect, padding, rounded, shadow }), className)}
+        tabIndex={focusable ? (tabIndex ?? 0) : undefined}
+        role={focusable ? (role ?? 'button') : undefined}
+        className={cn(
+          CardVariants({ border, hoverEffect, padding, rounded, shadow }),
+          focusable &&
+            'ui:focus:outline-none ui:focus-visible:ring-2 ui:focus-visible:ring-primary-500',
+          className
+        )}
+        onClick={onClick}
         {...props}
       >
         {children}
