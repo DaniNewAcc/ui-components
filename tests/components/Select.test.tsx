@@ -6,8 +6,8 @@ vi.mock('@/components/Animate', () => {
   };
 });
 
+import { Select } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
-import { Select, SelectDropdown, SelectOption, SelectTrigger } from '@components/Select';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -30,16 +30,16 @@ const renderSelect = (props: Partial<React.ComponentProps<typeof Select>> = {}) 
       defaultValue={defaultValue ?? undefined}
       {...restProps}
     >
-      <SelectTrigger testId="select-trigger" placeholderText="Select an option...">
+      <Select.Trigger testId="select-trigger" placeholderText="Select an option...">
         Toggle
-      </SelectTrigger>
-      <SelectDropdown testId="select-dropdown">
+      </Select.Trigger>
+      <Select.Dropdown testId="select-dropdown">
         {options.map(option => (
-          <SelectOption key={option.id} value={option.id} testId={`option-${option.id}`}>
+          <Select.Option key={option.id} value={option.id} testId={`option-${option.id}`}>
             {option.name}
-          </SelectOption>
+          </Select.Option>
         ))}
-      </SelectDropdown>
+      </Select.Dropdown>
     </Select>
   );
 };
@@ -66,10 +66,10 @@ describe('Select', () => {
       try {
         render(
           <>
-            <SelectTrigger value={1}>Trigger 1</SelectTrigger>
-            <SelectDropdown>
-              <SelectOption value={1}>Option 1</SelectOption>
-            </SelectDropdown>
+            <Select.Trigger value={1}>Trigger 1</Select.Trigger>
+            <Select.Dropdown>
+              <Select.Option value={1}>Option 1</Select.Option>
+            </Select.Dropdown>
           </>
         );
       } catch (error) {
@@ -103,10 +103,10 @@ describe('Select', () => {
     it('should use provided animateProps duration in SelectDropdown', () => {
       render(
         <Select options={[{ id: 1, name: 'Option 1' }]} valueKey="id" labelKey="name">
-          <SelectTrigger>Trigger</SelectTrigger>
-          <SelectDropdown animateProps={{ duration: 500 }} testId="dropdown">
-            <SelectOption value={1}>Option 1</SelectOption>
-          </SelectDropdown>
+          <Select.Trigger>Trigger</Select.Trigger>
+          <Select.Dropdown animateProps={{ duration: 500 }} testId="dropdown">
+            <Select.Option value={1}>Option 1</Select.Option>
+          </Select.Dropdown>
         </Select>
       );
 
