@@ -115,6 +115,8 @@ const Accordion = ({
   );
 };
 
+Accordion.displayName = 'Accordion';
+
 // Helper function for using Accordion context
 
 function useAccordionContext() {
@@ -226,6 +228,9 @@ const AccordionItem = ({ testId, value, className, children, ...props }: Accordi
   );
 };
 
+Accordion.Item = AccordionItem;
+AccordionItem.displayName = 'AccordionItem';
+
 // Helper function for using AccordionItem context
 
 function useAccordionItemContext() {
@@ -268,6 +273,9 @@ const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTr
     </Flex>
   );
 };
+
+Accordion.Trigger = AccordionTrigger;
+AccordionTrigger.displayName = 'AccordionTrigger';
 
 // ------------ Content component
 
@@ -321,4 +329,7 @@ const AccordionContent = ({
   );
 };
 
-export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };
+Accordion.Content = AccordionContent;
+AccordionContent.displayName = 'AccordionContent';
+
+export default Accordion;
