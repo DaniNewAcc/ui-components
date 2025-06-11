@@ -167,6 +167,8 @@ const Select = ({
   );
 };
 
+Select.displayName = 'Select';
+
 // Helper function for using select context
 function useSelectContext() {
   const context = useContext(SelectContext);
@@ -255,6 +257,9 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
   }
 );
 
+Select.Trigger = SelectTrigger;
+SelectTrigger.displayName = 'SelectTrigger';
+
 // ------------ Dropdown component
 type SelectDropdownProps = ComponentProps<'ul'> & {
   animateProps?: Partial<AnimateProps>;
@@ -340,6 +345,9 @@ const SelectDropdown = ({
   );
 };
 
+Select.Dropdown = SelectDropdown;
+SelectDropdown.displayName = 'SelectDropdown';
+
 // ------------ Option component
 type SelectOptionProps = ComponentProps<'li'> & {
   testId?: string;
@@ -377,4 +385,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
   );
 };
 
-export { Select, SelectDropdown, SelectOption, SelectTrigger };
+Select.Option = SelectOption;
+SelectOption.displayName = 'SelectOption';
+
+export default Select;
