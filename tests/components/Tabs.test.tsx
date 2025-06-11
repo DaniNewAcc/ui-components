@@ -6,7 +6,7 @@ vi.mock('@/components/Animate', () => {
   };
 });
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components';
+import { Tabs } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,17 +26,17 @@ const renderTabs = (
       orientation={orientation}
       testId="tabsgroup"
     >
-      <TabsList testId="tabslist">
+      <Tabs.List testId="tabslist">
         {Array.from({ length: count }, (_, i) => (
-          <TabsTrigger key={i} value={i + 1} disabled={disabledTabs[i]}>
+          <Tabs.Trigger key={i} value={i + 1} disabled={disabledTabs[i]}>
             Trigger {i + 1}
-          </TabsTrigger>
+          </Tabs.Trigger>
         ))}
-      </TabsList>
+      </Tabs.List>
       {Array.from({ length: count }, (_, i) => (
-        <TabsContent key={i} value={i + 1}>
+        <Tabs.Content key={i} value={i + 1}>
           Content {i + 1}
-        </TabsContent>
+        </Tabs.Content>
       ))}
     </Tabs>
   );
@@ -64,10 +64,10 @@ describe('Tabs', () => {
       try {
         render(
           <>
-            <TabsList>
-              <TabsTrigger value={1}>Unwrapped Trigger</TabsTrigger>
-            </TabsList>
-            <TabsContent value={1}>Unwrapped Content</TabsContent>
+            <Tabs.List>
+              <Tabs.Trigger value={1}>Unwrapped Trigger</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value={1}>Unwrapped Content</Tabs.Content>
           </>
         );
       } catch (error) {
