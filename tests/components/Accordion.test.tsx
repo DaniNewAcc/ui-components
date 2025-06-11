@@ -7,7 +7,7 @@ vi.mock('@/components/Animate', () => {
   };
 });
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components';
+import { Accordion } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,12 +28,12 @@ const renderAccordion = (
       testId="accordiongroup"
     >
       {Array.from({ length: count }, (_, i) => (
-        <AccordionItem key={i} value={i + 1} testId="accordionItem">
-          <AccordionTrigger testId="trigger">Trigger {i + 1}</AccordionTrigger>
-          <AccordionContent testId="content" animateProps={animateProps}>
+        <Accordion.Item key={i} value={i + 1} testId="accordionItem">
+          <Accordion.Trigger testId="trigger">Trigger {i + 1}</Accordion.Trigger>
+          <Accordion.Content testId="content" animateProps={animateProps}>
             Content {i + 1}
-          </AccordionContent>
-        </AccordionItem>
+          </Accordion.Content>
+        </Accordion.Item>
       ))}
     </Accordion>
   );
@@ -62,10 +62,10 @@ describe('Accordion', () => {
       try {
         render(
           <>
-            <AccordionItem value={0}>
-              <AccordionTrigger>Trigger 1</AccordionTrigger>
-              <AccordionContent>Content 1</AccordionContent>
-            </AccordionItem>
+            <Accordion.Item value={0}>
+              <Accordion.Trigger>Trigger 1</Accordion.Trigger>
+              <Accordion.Content>Content 1</Accordion.Content>
+            </Accordion.Item>
           </>
         );
         throw new Error('Expected error was not thrown');
@@ -81,10 +81,10 @@ describe('Accordion', () => {
       try {
         render(
           <Accordion items={1} defaultValue={0}>
-            <AccordionItem value={0}>
-              <AccordionTrigger>Trigger 1</AccordionTrigger>
-            </AccordionItem>
-            <AccordionContent>Content 1</AccordionContent>
+            <Accordion.Item value={0}>
+              <Accordion.Trigger>Trigger 1</Accordion.Trigger>
+            </Accordion.Item>
+            <Accordion.Content>Content 1</Accordion.Content>
           </Accordion>
         );
         throw new Error('Expected error was not thrown');
@@ -114,12 +114,12 @@ describe('Accordion', () => {
     it('should apply custom animate duration if provided', () => {
       render(
         <Accordion items={1} defaultValue={1}>
-          <AccordionItem value={1}>
-            <AccordionTrigger>Trigger</AccordionTrigger>
-            <AccordionContent testId="content" animateProps={{ duration: 500 }}>
+          <Accordion.Item value={1}>
+            <Accordion.Trigger>Trigger</Accordion.Trigger>
+            <Accordion.Content testId="content" animateProps={{ duration: 500 }}>
               Content
-            </AccordionContent>
-          </AccordionItem>
+            </Accordion.Content>
+          </Accordion.Item>
         </Accordion>
       );
 
