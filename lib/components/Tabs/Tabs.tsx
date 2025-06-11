@@ -111,6 +111,8 @@ const Tabs = ({
   );
 };
 
+Tabs.displayName = 'Tabs';
+
 // helper function for using Tabs context
 
 function useTabsContext() {
@@ -221,6 +223,9 @@ const TabsList = ({ variant, className, children, testId, ...props }: TabsListPr
     </div>
   );
 };
+
+Tabs.List = TabsList;
+TabsList.displayName = 'TabsList';
 
 // ------------ Trigger component
 
@@ -334,6 +339,9 @@ const TabsTrigger = ({
   );
 };
 
+Tabs.Trigger = TabsTrigger;
+TabsTrigger.displayName = 'TabsTrigger';
+
 // ------------ Content component
 
 type TabsContentProps = ComponentProps<'div'> & {
@@ -392,4 +400,7 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
   );
 };
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+Tabs.Content = TabsContent;
+TabsContent.displayName = 'TabsContent';
+
+export default Tabs;
