@@ -1,9 +1,4 @@
-export {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@components/Accordion';
+export { default as Accordion } from '@components/Accordion';
 export { default as Animate } from '@components/Animate';
 export { default as Button } from '@components/Button';
 export { default as Card } from '@components/Card';
@@ -17,7 +12,7 @@ export { default as Label } from '@components/Label';
 export { default as Layout } from '@components/Layout';
 export { default as Loader } from '@components/Loader';
 export { default as Scrollable } from '@components/Scrollable';
-export { Select, SelectDropdown, SelectOption, SelectTrigger } from '@components/Select';
+export { default as Select } from '@components/Select';
 export { default as Separator } from '@components/Separator';
-export { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/Tabs';
+export { default as Tabs } from '@components/Tabs';
 export { default as Text } from '@components/Text';
