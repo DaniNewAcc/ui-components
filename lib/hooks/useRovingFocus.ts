@@ -41,6 +41,7 @@
  * - `registeredCount` tracks how many focusable elements have been registered via setFocusRef.
  */
 
+import { isElementFocusable } from '@/utils/helpers';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SetFocusRefProps = {
@@ -72,23 +73,6 @@ function useRovingFocus(
 
   const elementsRef = useRef<Map<string | number, HTMLElement | null>>(new Map());
   const [registeredCount, setRegisteredCount] = useState<number>(0);
-
-  const isElementDisabled = (el: HTMLElement | null): boolean =>
-    !el || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
-
-  const isElementVisible = (el: HTMLElement | null): boolean => {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    return !(
-      style.display === 'none' ||
-      style.visibility === 'hidden' ||
-      el.getAttribute('aria-hidden') === 'true'
-    );
-  };
-
-  const isElementFocusable = (el: HTMLElement | null | undefined): el is HTMLElement => {
-    return !!el && !isElementDisabled(el) && isElementVisible(el);
-  };
 
   const setFocusRef = useCallback(({ index, element }: SetFocusRefProps) => {
     if (element != null && isElementFocusable(element)) {
