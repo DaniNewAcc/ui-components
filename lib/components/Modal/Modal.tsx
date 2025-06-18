@@ -1,8 +1,12 @@
+import useComponentIds from '@/hooks/useComponentIds';
 import usePortal from '@/hooks/usePortal';
 import useScrollLock from '@/hooks/useScrollLock';
 import { cn } from '@/utils/cn';
-import { ComponentProps, createContext, ReactNode, useCallback, useContext } from 'react';
+import { ButtonVariants } from '@/utils/variants';
+import { VariantProps } from 'class-variance-authority';
+import { ComponentPropsWithoutRef, createContext, ReactNode, useCallback, useContext } from 'react';
 import { createPortal } from 'react-dom';
+import Button from '../Button';
 import Text from '../Text';
 
 type ModalProps = {
@@ -18,6 +22,10 @@ type ModalContextProps = {
   containerId?: string;
   isOpen: boolean;
   closeOnClickOutside?: boolean;
+  ids: {
+    title: string;
+    description: string;
+  };
   onClose: () => void;
 };
 
@@ -31,11 +39,17 @@ const Modal = ({
   children,
   onClose,
 }: ModalProps) => {
+  const ids = useComponentIds('modal', ['title', 'description']) as {
+    title: string;
+    description: string;
+  };
+
   const contextValue = {
     containerId,
     isOpen,
     closeOnClickOutside,
     onClose,
+    ids,
   };
 
   useScrollLock(isOpen);
@@ -60,12 +74,12 @@ function useModalContext() {
 
 // ------------ Portal component
 
-type ModalPortalProps = ComponentProps<'div'> & {
+type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
 const ModalPortal = ({ className, testId, children, ...props }: ModalPortalProps) => {
-  const { containerId, isOpen } = useModalContext();
+  const { containerId, isOpen, ids } = useModalContext();
   const container = usePortal(containerId);
   if (!container) return null;
 
@@ -73,8 +87,8 @@ const ModalPortal = ({ className, testId, children, ...props }: ModalPortalProps
     <div
       data-testid={testId}
       aria-modal="true"
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
+      aria-labelledby={ids.title}
+      aria-describedby={ids.description}
       role="dialog"
       className={cn(
         'ui:fixed ui:inset-0 ui:z-50 ui:flex ui:items-center ui:justify-center',
@@ -94,7 +108,7 @@ Modal.Portal = ModalPortal;
 
 // ------------ Overlay component
 
-type ModalOverlayProps = ComponentProps<'div'> & {};
+type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {};
 
 const ModalOverlay = ({ className, ...props }: ModalOverlayProps) => {
   const { closeOnClickOutside, onClose } = useModalContext();
@@ -120,7 +134,7 @@ Modal.Overlay = ModalOverlay;
 
 // ------------ Content component
 
-type ModalContentProps = ComponentProps<'div'> & {
+type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
@@ -130,7 +144,7 @@ const ModalContent = ({ className, testId, children, ...props }: ModalContentPro
       data-testid={testId}
       role="document"
       className={cn(
-        'ui:z-50 ui:w-full ui:max-w-lg ui:rounded ui:bg-white ui:p-6 ui:shadow-lg',
+        'ui:relative ui:z-50 ui:w-full ui:max-w-lg ui:rounded ui:bg-white ui:p-6 ui:shadow-lg',
         className
       )}
       {...props}
@@ -145,13 +159,14 @@ Modal.Content = ModalContent;
 
 // ------------ Title component
 
-type ModalTitleProps = ComponentProps<'h2'> & {
+type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
   testId?: string;
 };
 
 const ModalTitle = ({ className, testId, children, ...props }: ModalTitleProps) => {
+  const { ids } = useModalContext();
   return (
-    <Text as="h2" testId={testId} className={cn('', className)} {...props}>
+    <Text as="h2" id={ids.title} testId={testId} className={cn('', className)} {...props}>
       {children}
     </Text>
   );
@@ -162,13 +177,14 @@ Modal.Title = ModalTitle;
 
 // ------------ Description component
 
-type ModalDescriptionProps = ComponentProps<'p'> & {
+type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
   testId?: string;
 };
 
 const ModalDescription = ({ className, testId, children, ...props }: ModalDescriptionProps) => {
+  const { ids } = useModalContext();
   return (
-    <Text as="p" testId={testId} className={cn('', className)} {...props}>
+    <Text as="p" id={ids.description} testId={testId} className={cn('', className)} {...props}>
       {children}
     </Text>
   );
@@ -179,7 +195,7 @@ Modal.Description = ModalDescription;
 
 // ------------ Footer component
 
-type ModalFooterProps = ComponentProps<'div'> & {
+type ModalFooterProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
@@ -199,5 +215,47 @@ ModalFooter.displayName = 'ModalFooter';
 Modal.Footer = ModalFooter;
 
 // ------------ Close component
+
+type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
+  VariantProps<typeof ButtonVariants> & {
+    testId?: string;
+  };
+
+const ModalClose = ({
+  variant,
+  size,
+  intent,
+  rounded,
+  testId,
+  className,
+  children,
+  ...props
+}: ModalCloseProps) => {
+  const { onClose } = useModalContext();
+
+  return (
+    <Button
+      type="button"
+      intent={'icon'}
+      rounded={'full'}
+      size={'sm'}
+      variant={'unstyled'}
+      aria-label="Close modal"
+      onClick={onClose}
+      data-testid={testId}
+      className={cn(
+        ButtonVariants({ variant, size, intent, rounded }),
+        'ui:absolute ui:top-4 ui:right-4 ui:z-60 ui:text-gray-500 ui:hover:bg-gray-100',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+};
+
+ModalClose.displayName = 'ModalClose';
+Modal.Close = ModalClose;
 
 export default Modal;
