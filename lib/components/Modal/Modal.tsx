@@ -4,7 +4,15 @@ import useScrollLock from '@/hooks/useScrollLock';
 import { cn } from '@/utils/cn';
 import { ButtonVariants } from '@/utils/variants';
 import { VariantProps } from 'class-variance-authority';
-import { ComponentPropsWithoutRef, createContext, ReactNode, useCallback, useContext } from 'react';
+import React, {
+  ComponentPropsWithoutRef,
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../Button';
 import Text from '../Text';
@@ -12,10 +20,9 @@ import Text from '../Text';
 type ModalProps = {
   containerId?: string;
   closeOnClickOutside?: boolean;
-  testId?: string;
-  isOpen: boolean;
+  isOpen?: boolean;
   children: ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 type ModalContextProps = {
@@ -27,13 +34,14 @@ type ModalContextProps = {
     description: string;
   };
   onClose: () => void;
+  open: () => void;
+  close: () => void;
 };
 
 const ModalContext = createContext<ModalContextProps | null>(null);
 
 const Modal = ({
   containerId,
-  testId,
   closeOnClickOutside = false,
   isOpen,
   children,
@@ -44,21 +52,39 @@ const Modal = ({
     description: string;
   };
 
-  const contextValue = {
-    containerId,
-    isOpen,
-    closeOnClickOutside,
-    onClose,
-    ids,
-  };
+  const isControlled = isOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
 
-  useScrollLock(isOpen);
+  const actualIsOpen = isControlled ? isOpen : internalOpen;
 
-  return (
-    <ModalContext.Provider value={contextValue}>
-      <Modal.Portal testId={testId}>{children}</Modal.Portal>
-    </ModalContext.Provider>
+  const open = useCallback(() => {
+    if (!isControlled) setInternalOpen(true);
+  }, [isControlled]);
+
+  const close = useCallback(() => {
+    if (isControlled) {
+      onClose?.();
+    } else {
+      setInternalOpen(false);
+    }
+  }, [isControlled, onClose]);
+
+  const contextValue = useMemo(
+    () => ({
+      containerId,
+      isOpen: actualIsOpen,
+      closeOnClickOutside,
+      ids,
+      open,
+      close,
+      onClose: close,
+    }),
+    [containerId, actualIsOpen, closeOnClickOutside, close, open]
   );
+
+  useScrollLock(actualIsOpen);
+
+  return <ModalContext.Provider value={contextValue}>{children}</ModalContext.Provider>;
 };
 
 Modal.displayName = 'Modal';
@@ -105,6 +131,26 @@ const ModalPortal = ({ className, testId, children, ...props }: ModalPortalProps
 
 ModalPortal.displayName = 'ModalPortal';
 Modal.Portal = ModalPortal;
+
+// ------------ Trigger component
+
+type ModalTriggerProps = {
+  children: React.ReactElement;
+};
+
+const ModalTrigger = ({ children }: ModalTriggerProps) => {
+  const { open } = useModalContext();
+
+  return React.cloneElement(children, {
+    onClick: (e: React.MouseEvent) => {
+      children.props.onClick?.(e);
+      open();
+    },
+  });
+};
+
+ModalTrigger.displayName = 'ModalTrigger';
+Modal.Trigger = ModalTrigger;
 
 // ------------ Overlay component
 
