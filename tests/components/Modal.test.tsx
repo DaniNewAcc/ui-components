@@ -27,8 +27,10 @@ describe('Modal', () => {
   describe('Rendering', () => {
     it('should render modal when isOpen is true', () => {
       render(
-        <Modal isOpen={true} onClose={() => {}} testId="modal">
-          <Modal.Content>Visible Content</Modal.Content>
+        <Modal isOpen={true} onClose={() => {}}>
+          <Modal.Portal testId="modal">
+            <Modal.Content>Visible Content</Modal.Content>
+          </Modal.Portal>
         </Modal>
       );
 
@@ -44,8 +46,10 @@ describe('Modal', () => {
 
       render(
         <Modal isOpen={true} onClose={onClose} closeOnClickOutside={true}>
-          <Modal.Overlay data-testid="overlay" />
-          <Modal.Content>Modal Content</Modal.Content>
+          <Modal.Portal>
+            <Modal.Overlay data-testid="overlay" />
+            <Modal.Content>Modal Content</Modal.Content>
+          </Modal.Portal>
         </Modal>
       );
 
@@ -58,8 +62,10 @@ describe('Modal', () => {
 
       render(
         <Modal isOpen={true} onClose={onClose} closeOnClickOutside={false}>
-          <Modal.Overlay data-testid="overlay" />
-          <Modal.Content>Modal Content</Modal.Content>
+          <Modal.Portal>
+            <Modal.Overlay data-testid="overlay" />
+            <Modal.Content>Modal Content</Modal.Content>
+          </Modal.Portal>
         </Modal>
       );
       const overlay = screen.getByTestId('overlay');
