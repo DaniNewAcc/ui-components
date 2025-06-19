@@ -4,6 +4,7 @@ import useScrollLock from '@/hooks/useScrollLock';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import { ButtonVariants } from '@/utils/variants';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
 import React, {
   ComponentPropsWithoutRef,
@@ -326,7 +327,7 @@ const ModalClose = ({
       )}
       {...props}
     >
-      {children}
+      <XMarkIcon className="ui:h-5 ui:w-5" aria-hidden="true" />
     </Button>
   );
 };
