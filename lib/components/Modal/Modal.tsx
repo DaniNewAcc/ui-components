@@ -1,6 +1,7 @@
 import useComponentIds from '@/hooks/useComponentIds';
 import usePortal from '@/hooks/usePortal';
 import useScrollLock from '@/hooks/useScrollLock';
+import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import { ButtonVariants } from '@/utils/variants';
 import { VariantProps } from 'class-variance-authority';
@@ -14,6 +15,8 @@ import React, {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import Animate from '../Animate';
+import { AnimateProps } from '../Animate/Animate';
 import Button from '../Button';
 import Text from '../Text';
 
@@ -181,22 +184,49 @@ Modal.Overlay = ModalOverlay;
 // ------------ Content component
 
 type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
+  AnimateProps?: Partial<AnimateProps>;
   testId?: string;
 };
 
-const ModalContent = ({ className, testId, children, ...props }: ModalContentProps) => {
+const ModalContent = ({
+  AnimateProps,
+  className,
+  testId,
+  children,
+  ...props
+}: ModalContentProps) => {
+  const { isOpen } = useModalContext();
+  const duration = AnimateProps?.duration ?? 300;
+  const { ref, shouldRender, maxHeight } = useSyncAnimation({
+    isOpen: isOpen,
+    duration,
+  });
   return (
-    <div
-      data-testid={testId}
-      role="document"
+    <Animate
+      isVisible={isOpen}
+      preset="modal"
       className={cn(
         'ui:relative ui:z-50 ui:w-full ui:max-w-lg ui:rounded ui:bg-white ui:p-6 ui:shadow-lg',
         className
       )}
-      {...props}
     >
-      {children}
-    </div>
+      {shouldRender ? (
+        <div
+          ref={ref}
+          data-testid={testId}
+          role="document"
+          style={{
+            maxHeight: `${maxHeight}px`,
+            transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+            opacity: isOpen ? 1 : 0,
+            visibility: isOpen ? 'visible' : 'hidden',
+          }}
+          {...props}
+        >
+          {children}
+        </div>
+      ) : null}
+    </Animate>
   );
 };
 
