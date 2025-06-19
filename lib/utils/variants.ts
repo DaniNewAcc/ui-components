@@ -35,6 +35,8 @@ export const ButtonVariants = cva(
         default: 'ui:border-transparent ui:bg-primary-600 ui:text-primary-50',
         outlined: 'ui:border-primary-700 ui:bg-transparent ui:text-primary-600',
         transparent: 'ui:border-transparent ui:bg-transparent ui:text-primary-600 ui:shadow-none',
+        success: 'ui:border-transparent ui:bg-green-200 ui:text-green-600',
+        destructive: 'ui:border-transparent ui:bg-red-200 ui:text-red-600',
       },
       size: {
         sm: 'ui:px-2 ui:py-1 ui:text-sm',
@@ -72,6 +74,20 @@ export const ButtonVariants = cva(
         size: ['sm', 'md', 'lg'],
         variant: 'transparent',
         class: 'ui:hover:border-primary-500 ui:focus:ring-primary-500 ui:active:border-primary-500',
+      },
+      {
+        intent: ['icon', 'btn'],
+        size: ['sm', 'md', 'lg'],
+        variant: 'destructive',
+        class:
+          'ui:hover:bg-red-300 ui:hover:text-red-700 ui:focus:ring-red-500 ui:active:bg-red-300',
+      },
+      {
+        intent: ['icon', 'btn'],
+        size: ['sm', 'md', 'lg'],
+        variant: 'success',
+        class:
+          'ui:hover:bg-green-300 ui:hover:text-green-700 ui:focus:ring-green-500 ui:active:bg-green-300',
       },
       {
         intent: 'icon',
