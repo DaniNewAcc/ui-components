@@ -1,5 +1,14 @@
 import { Modal } from '@/components';
+import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { fireEvent, render, screen } from '@testing-library/react';
+
+beforeEach(() => {
+  __setReduceMotionForTests(true);
+});
+
+afterEach(() => {
+  __setReduceMotionForTests(undefined);
+});
 
 describe('Modal', () => {
   describe('Context Behavior', () => {
