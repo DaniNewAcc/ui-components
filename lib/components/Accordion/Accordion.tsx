@@ -1,6 +1,7 @@
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   ComponentProps,
   createContext,
@@ -247,10 +248,17 @@ function useAccordionItemContext() {
 
 type AccordionTriggerProps = ComponentProps<'div'> & {
   testId?: string;
+  iconProps?: React.ComponentProps<typeof ChevronDownIcon>;
   children: ReactNode;
 };
 
-const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTriggerProps) => {
+const AccordionTrigger = ({
+  iconProps,
+  testId,
+  className,
+  children,
+  ...props
+}: AccordionTriggerProps) => {
   const { activeItems, handleAccordion } = useAccordionContext();
   const { value } = useAccordionItemContext();
 
@@ -270,6 +278,14 @@ const AccordionTrigger = ({ testId, className, children, ...props }: AccordionTr
       onClick={() => handleAccordion(value)}
     >
       {children}
+      <ChevronDownIcon
+        className={cn(
+          'ui:h-5 ui:w-5 ui:transform ui:transition-transform ui:duration-300',
+          { 'ui:rotate-180': isOpen },
+          iconProps?.className
+        )}
+        {...iconProps}
+      />
     </Flex>
   );
 };
