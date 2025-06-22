@@ -1,8 +1,11 @@
 import useComponentIds from '@/hooks/useComponentIds';
+import { useMergedRefs } from '@/hooks/useMergedRefs';
 import usePortal from '@/hooks/usePortal';
 import useScrollLock from '@/hooks/useScrollLock';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
+import useTrapFocus from '@/hooks/useTrapFocus';
 import { cn } from '@/utils/cn';
+import { getFocusableElements } from '@/utils/helpers';
 import { ButtonVariants } from '@/utils/variants';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
@@ -12,7 +15,10 @@ import React, {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
@@ -55,7 +61,6 @@ const Modal = ({
     title: string;
     description: string;
   };
-
   const isControlled = isOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -196,12 +201,60 @@ const ModalContent = ({
   children,
   ...props
 }: ModalContentProps) => {
-  const { isOpen } = useModalContext();
+  const { isOpen, onClose } = useModalContext();
   const duration = AnimateProps?.duration ?? 300;
-  const { ref, shouldRender, maxHeight } = useSyncAnimation({
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { moveFocus } = useTrapFocus({ containerRef, loop: true });
+  const {
+    ref: animationRef,
+    shouldRender,
+    maxHeight,
+  } = useSyncAnimation({
     isOpen: isOpen,
     duration,
   });
+
+  const mergedRefs = useMergedRefs(animationRef, containerRef);
+
+  useLayoutEffect(() => {
+    if (isOpen && shouldRender && containerRef.current) {
+      const focusables = getFocusableElements(containerRef.current);
+
+      if (focusables.length > 0 && document.activeElement !== focusables[0]) {
+        const timer = setTimeout(() => {
+          focusables[0].focus();
+        }, 0);
+        return () => clearTimeout(timer);
+      } else {
+        containerRef.current.focus();
+      }
+    }
+  }, [isOpen, shouldRender]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        moveFocus(e.shiftKey ? 'previous' : 'next');
+      }
+    },
+    [moveFocus, onClose]
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen, handleKeyDown]);
+
   return (
     <Animate
       isVisible={isOpen}
@@ -213,7 +266,7 @@ const ModalContent = ({
     >
       {shouldRender ? (
         <div
-          ref={ref}
+          ref={mergedRefs}
           data-testid={testId}
           role="document"
           style={{
@@ -222,6 +275,7 @@ const ModalContent = ({
             opacity: isOpen ? 1 : 0,
             visibility: isOpen ? 'visible' : 'hidden',
           }}
+          tabIndex={-1}
           {...props}
         >
           {children}
