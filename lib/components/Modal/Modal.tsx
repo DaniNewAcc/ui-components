@@ -1,3 +1,4 @@
+import useAutoFocus from '@/hooks/useAutoFocus';
 import useComponentIds from '@/hooks/useComponentIds';
 import { useMergedRefs } from '@/hooks/useMergedRefs';
 import usePortal from '@/hooks/usePortal';
@@ -5,7 +6,6 @@ import useScrollLock from '@/hooks/useScrollLock';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import useTrapFocus from '@/hooks/useTrapFocus';
 import { cn } from '@/utils/cn';
-import { getFocusableElements } from '@/utils/helpers';
 import { ButtonVariants } from '@/utils/variants';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
@@ -16,7 +16,6 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -213,23 +212,8 @@ const ModalContent = ({
     isOpen: isOpen,
     duration,
   });
-
   const mergedRefs = useMergedRefs(animationRef, containerRef);
-
-  useLayoutEffect(() => {
-    if (isOpen && shouldRender && containerRef.current) {
-      const focusables = getFocusableElements(containerRef.current);
-
-      if (focusables.length > 0 && document.activeElement !== focusables[0]) {
-        const timer = setTimeout(() => {
-          focusables[0].focus();
-        }, 0);
-        return () => clearTimeout(timer);
-      } else {
-        containerRef.current.focus();
-      }
-    }
-  }, [isOpen, shouldRender]);
+  useAutoFocus(isOpen && shouldRender, containerRef);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -237,7 +221,6 @@ const ModalContent = ({
         e.stopPropagation();
         onClose();
       }
-
       if (e.key === 'Tab') {
         e.preventDefault();
         moveFocus(e.shiftKey ? 'previous' : 'next');
