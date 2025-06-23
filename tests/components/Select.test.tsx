@@ -141,12 +141,12 @@ describe('Select', () => {
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
     });
 
-    it('should reset selection when "Clear" is clicked', () => {
+    it('should reset selection when clear button is clicked', () => {
       renderSelect({ defaultValue: 1 });
 
       expect(screen.getByText('Option 1')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Clear'));
+      fireEvent.click(screen.getByTestId('clear'));
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       expect(screen.getByText('Select an option...')).toBeInTheDocument();
