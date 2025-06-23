@@ -3,6 +3,7 @@ import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
+import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import React, {
   ComponentProps,
   createContext,
@@ -184,7 +185,6 @@ function useSelectContext() {
 type SelectTriggerProps = ComponentProps<'button'> & {
   testId?: string;
   placeholderText?: string;
-  children: ReactNode;
 };
 
 const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
@@ -238,7 +238,7 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
         aria-controls="dropdown"
         aria-activedescendant={focusedIndex !== null ? `option-${focusedIndex}` : undefined}
         className={cn(
-          'ui:flex ui:w-full ui:cursor-pointer ui:justify-between ui:gap-4 ui:rounded-md ui:border-2 ui:px-4 ui:py-1 ui:focus:outline-none ui:focus-visible:border-primary-500',
+          'ui:flex ui:w-full ui:cursor-pointer ui:items-center ui:justify-between ui:gap-4 ui:rounded-md ui:border-2 ui:px-3 ui:py-2 ui:focus-visible:border-primary-500 ui:focus-visible:outline-none',
           { 'ui:rounded-b-none ui:border-primary-500': isDropdownOpen },
           className
         )}
@@ -248,9 +248,19 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
         {...props}
       >
         <span>{activeOption ? selectedOption?.[labelKey] : placeholderText}</span>
-        <div className="ui:flex ui:items-end ui:gap-2">
-          {activeOption ? <span onClick={e => handleReset(e)}>Clear</span> : null}
-          <span>{children}</span>
+        <div className="ui:flex ui:items-center ui:gap-2 ui:pt-1">
+          {activeOption ? (
+            <span className="ui:h-4 ui:w-4" onClick={e => handleReset(e)}>
+              <XMarkIcon />
+            </span>
+          ) : null}
+          <span
+            className={cn('ui:h-4 ui:w-4 ui:transform ui:transition-transform ui:duration-300', {
+              'ui:rotate-180': isDropdownOpen,
+            })}
+          >
+            <ChevronDownIcon />
+          </span>
         </div>
       </button>
     );
@@ -372,7 +382,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
       id={`option-${value}`}
       className={cn(
         { 'ui:bg-primary-600 ui:text-white': isFocused },
-        'ui:cursor-pointer ui:px-4 ui:pt-1 ui:pb-2 ui:last:rounded-b-md ui:focus:outline-none',
+        'ui:cursor-pointer ui:px-3 ui:pt-1 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
         className
       )}
       role="option"
