@@ -13,13 +13,14 @@ export const ButtonVariants = cva(
     'ui:shadow-sm',
     'ui:whitespace-nowrap',
     'ui:cursor-pointer',
-    'ui:transition-all',
+    'ui:transition-colors',
     'ui:duration-200',
     'ui:active:shadow-none',
-    'ui:focus:transition-none',
-    'ui:focus:duration-initial',
-    'ui:focus:outline-hidden',
-    'ui:focus-visible:ring',
+    'ui:focus-visible:transition-none',
+    'ui:focus-visible:duration-initial',
+    'ui:focus-visible:outline-hidden',
+    'ui:focus-visible:ring-2',
+    'ui:focus-visible:ring-primary-600',
     'ui:disabled:pointer-events-none',
     'ui:disabled:opacity-50',
     'ui:disabled:shadow-none',
@@ -60,34 +61,35 @@ export const ButtonVariants = cva(
         size: ['sm', 'md', 'lg'],
         variant: 'default',
         class:
-          'ui:hover:border-primary-900 ui:hover:bg-primary-700 ui:focus:ring-primary-800 ui:active:border-primary-900 ui:active:bg-primary-700 ui:active:text-primary-50',
+          'ui:hover:border-primary-900 ui:hover:bg-primary-700 ui:focus-visible:ring-primary-800 ui:active:border-primary-900 ui:active:bg-primary-700 ui:active:text-primary-50',
       },
       {
         intent: ['icon', 'btn'],
         size: ['sm', 'md', 'lg'],
         variant: 'outlined',
         class:
-          'ui:hover:border-transparent ui:hover:bg-primary-600 ui:hover:text-primary-50 ui:focus:border-transparent ui:focus:bg-primary-600 ui:focus:text-primary-50 ui:focus:ring-primary-800 ui:active:border-transparent ui:active:bg-primary-700 ui:active:text-primary-50',
+          'ui:hover:border-transparent ui:hover:bg-primary-600 ui:hover:text-primary-50 ui:focus-visible:border-transparent ui:focus-visible:bg-primary-600 ui:focus-visible:text-primary-50 ui:focus-visible:ring-primary-800 ui:active:border-transparent ui:active:bg-primary-700 ui:active:text-primary-50',
       },
       {
         intent: ['icon', 'btn'],
         size: ['sm', 'md', 'lg'],
         variant: 'transparent',
-        class: 'ui:hover:border-primary-500 ui:focus:ring-primary-500 ui:active:border-primary-500',
+        class:
+          'ui:hover:border-primary-500 ui:focus-visible:ring-primary-500 ui:active:border-primary-500',
       },
       {
         intent: ['icon', 'btn'],
         size: ['sm', 'md', 'lg'],
         variant: 'destructive',
         class:
-          'ui:hover:bg-red-300 ui:hover:text-red-700 ui:focus:ring-red-500 ui:active:bg-red-300',
+          'ui:hover:bg-red-300 ui:hover:text-red-700 ui:focus-visible:ring-red-500 ui:active:bg-red-300',
       },
       {
         intent: ['icon', 'btn'],
         size: ['sm', 'md', 'lg'],
         variant: 'success',
         class:
-          'ui:hover:bg-green-300 ui:hover:text-green-700 ui:focus:ring-green-500 ui:active:bg-green-300',
+          'ui:hover:bg-green-300 ui:hover:text-green-700 ui:focus-visible:ring-green-500 ui:active:bg-green-300',
       },
       {
         intent: 'icon',
