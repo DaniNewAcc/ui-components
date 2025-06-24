@@ -32,6 +32,7 @@ type SelectProps = ComponentProps<'div'> & {
   valueKey: string;
   labelKey: string;
   loop?: boolean;
+  clearable?: boolean;
   children: ReactNode;
 };
 
@@ -41,6 +42,7 @@ type SelectContextProps = {
   valueKey: string;
   labelKey: string;
   isDropdownOpen: boolean;
+  clearable: boolean;
   focusedIndex: number | string | null;
   triggerRef: React.RefObject<HTMLButtonElement>;
   moveFocus: (direction: 'next' | 'previous') => void;
@@ -51,7 +53,7 @@ type SelectContextProps = {
   setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveOption: React.Dispatch<React.SetStateAction<ActiveOption>>;
   handleDropdown: () => void;
-  handleReset: (e: React.MouseEvent<HTMLSpanElement>) => void;
+  handleReset: (e: React.MouseEvent<HTMLButtonElement>) => void;
   handleOptions: (value: string | number) => void;
 };
 
@@ -65,6 +67,7 @@ const Select = ({
   valueKey,
   labelKey,
   loop = false,
+  clearable = false,
   children,
   ...props
 }: SelectProps) => {
@@ -86,7 +89,7 @@ const Select = ({
     setIsDropdownOpen(prev => !prev);
   }, []);
 
-  const handleReset = useCallback((e: React.MouseEvent<HTMLSpanElement>) => {
+  const handleReset = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setActiveOption(null);
     setIsDropdownOpen(false);
@@ -116,6 +119,7 @@ const Select = ({
       labelKey,
       focusedIndex,
       triggerRef,
+      clearable,
       setFocusedIndex,
       moveFocus,
       moveToStart,
@@ -201,6 +205,7 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
       triggerRef,
       valueKey,
       labelKey,
+      clearable,
       isDropdownOpen,
       setIsDropdownOpen,
       moveToStart,
@@ -210,6 +215,9 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+
+        if (target.getAttribute('aria-label') === 'Clear') return;
         switch (e.key) {
           case 'ArrowDown':
           case 'ArrowUp':
@@ -230,39 +238,55 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
 
     const selectedOption = options.find(opt => opt[valueKey] === activeOption);
     return (
-      <button
-        ref={mergedRefs}
-        data-testid={testId}
-        aria-haspopup="listbox"
-        aria-expanded={isDropdownOpen}
-        aria-controls="dropdown"
-        aria-activedescendant={focusedIndex !== null ? `option-${focusedIndex}` : undefined}
+      <div
         className={cn(
-          'ui:flex ui:w-full ui:cursor-pointer ui:items-center ui:justify-between ui:gap-4 ui:rounded-md ui:border-2 ui:px-3 ui:py-2 ui:focus-visible:border-primary-500 ui:focus-visible:outline-none',
-          { 'ui:rounded-b-none ui:border-primary-500': isDropdownOpen },
+          'ui:relative ui:flex ui:w-full ui:items-center ui:justify-between ui:gap-2 ui:rounded-md ui:border-2 ui:focus-within:border-primary-500 ui:focus-within:outline-none',
+          {
+            'ui:rounded-b-none ui:border-primary-500': isDropdownOpen,
+          },
           className
         )}
-        role="combobox"
-        onKeyDown={handleKeyDown}
-        onClick={handleDropdown}
-        {...props}
       >
-        <span>{activeOption ? selectedOption?.[labelKey] : placeholderText}</span>
-        <div className="ui:flex ui:items-center ui:gap-2 ui:pt-1">
-          {activeOption ? (
-            <span className="ui:h-4 ui:w-4" onClick={e => handleReset(e)}>
-              <XMarkIcon />
-            </span>
-          ) : null}
+        <button
+          ref={mergedRefs}
+          data-testid={testId}
+          aria-haspopup="listbox"
+          aria-expanded={isDropdownOpen}
+          aria-controls="dropdown"
+          aria-activedescendant={focusedIndex !== null ? `option-${focusedIndex}` : undefined}
+          role="combobox"
+          className="ui:flex ui:w-full ui:cursor-pointer ui:items-center ui:justify-between ui:truncate ui:py-2 ui:ps-3 ui:pe-10 ui:text-left ui:ring-0 ui:outline-none"
+          onKeyDown={handleKeyDown}
+          onClick={handleDropdown}
+          {...props}
+        >
+          <span className="ui:flex-1 ui:truncate ui:text-left">
+            {activeOption ? selectedOption?.[labelKey] : placeholderText}
+          </span>
           <span
-            className={cn('ui:h-4 ui:w-4 ui:transform ui:transition-transform ui:duration-300', {
-              'ui:rotate-180': isDropdownOpen,
-            })}
+            aria-hidden="true"
+            className={cn(
+              'ui:absolute ui:end-1.5 ui:h-4 ui:w-4 ui:transform ui:text-end ui:align-middle ui:transition-transform ui:duration-300',
+              {
+                'ui:rotate-180': isDropdownOpen,
+              }
+            )}
           >
             <ChevronDownIcon />
           </span>
-        </div>
-      </button>
+        </button>
+        {clearable && activeOption ? (
+          <button
+            type="button"
+            data-testid="clear-btn"
+            aria-label="Clear"
+            onClick={handleReset}
+            className="ui:absolute ui:end-6 ui:flex ui:h-6 ui:w-6 ui:items-center ui:justify-center ui:rounded-full ui:outline-none ui:focus-visible:ring-2 ui:focus-visible:ring-primary-600"
+          >
+            <XMarkIcon className="ui:pointer-events-none ui:h-5 ui:w-5" />
+          </button>
+        ) : null}
+      </div>
     );
   }
 );
@@ -366,8 +390,10 @@ type SelectOptionProps = ComponentProps<'li'> & {
 };
 
 const SelectOption = ({ value, className, children, testId, ...props }: SelectOptionProps) => {
-  const { isDropdownOpen, focusedIndex, handleOptions, setFocusRef } = useSelectContext();
+  const { isDropdownOpen, focusedIndex, activeOption, handleOptions, setFocusRef } =
+    useSelectContext();
   const optionRef = useRef<HTMLLIElement | null>(null);
+  const isSelected = activeOption === value;
   const isFocused = focusedIndex === value;
 
   useEffect(() => {
@@ -378,11 +404,12 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
     <li
       ref={optionRef}
       data-testid={testId}
-      aria-selected={isFocused ? 'true' : 'false'}
+      aria-selected={isSelected ? 'true' : 'false'}
       id={`option-${value}`}
       className={cn(
         { 'ui:bg-primary-600 ui:text-white': isFocused },
-        'ui:cursor-pointer ui:px-3 ui:pt-1 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
+        { 'ui:pt-1': !activeOption },
+        'ui:cursor-pointer ui:px-3 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
         className
       )}
       role="option"
