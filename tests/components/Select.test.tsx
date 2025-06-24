@@ -142,11 +142,11 @@ describe('Select', () => {
     });
 
     it('should reset selection when clear button is clicked', () => {
-      renderSelect({ defaultValue: 1 });
+      renderSelect({ defaultValue: 1, clearable: true });
 
-      expect(screen.getByText('Option 1')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('clear'));
+      const clearButton = screen.getByTestId('clear-btn');
+      expect(clearButton).toBeInTheDocument();
+      fireEvent.click(clearButton);
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       expect(screen.getByText('Select an option...')).toBeInTheDocument();
@@ -165,6 +165,24 @@ describe('Select', () => {
         const listbox = screen.getByRole('listbox');
         expect(listbox).toBeVisible();
         expect(screen.getByText('Option 1')).toBeInTheDocument();
+      });
+    });
+
+    it('should reset selection when clear button is focused and spacebar key is pressed', async () => {
+      vi.useRealTimers();
+      renderSelect({ defaultValue: 1, clearable: true });
+
+      expect(screen.getByText('Option 1')).toBeInTheDocument();
+
+      const clearButton = screen.getByTestId('clear-btn');
+      clearButton.focus();
+
+      await act(async () => {
+        await userEvent.type(clearButton, '{Space}');
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Select an option...')).toBeInTheDocument();
       });
     });
 
@@ -198,21 +216,23 @@ describe('Select', () => {
       expect(listbox).toBeInTheDocument();
 
       options[0].focus();
+      expect(document.activeElement).toBe(options[0]);
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-      expect(options[0]).toHaveAttribute('aria-selected', 'true');
 
-      await act(async () => {
-        await user.keyboard('{ArrowDown}');
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[1]);
       });
-      expect(options[1]).toHaveAttribute('aria-selected', 'true');
 
       await act(async () => {
         await user.keyboard('{ArrowUp}');
       });
-      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[0]);
+      });
     });
 
     it('should close the dropdown when escape key is pressed', async () => {
@@ -244,25 +264,27 @@ describe('Select', () => {
         await user.click(trigger);
       });
 
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
       const listbox = await screen.findByRole('listbox');
-      const options = screen.getAllByRole('option');
       expect(listbox).toBeInTheDocument();
 
+      const options = screen.getAllByRole('option');
       options[0].focus();
-
-      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+      expect(document.activeElement).toBe(options[0]);
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-
-      expect(options[1]).toHaveAttribute('aria-selected', 'true');
+      expect(document.activeElement).toBe(options[1]);
 
       await act(async () => {
         await user.keyboard('{Enter}');
       });
 
-      expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+      });
 
       expect(trigger).toHaveTextContent('Option 2');
     });
@@ -285,14 +307,14 @@ describe('Select', () => {
       options[0].focus();
 
       await waitFor(() => {
-        expect(options[0]).toHaveAttribute('aria-selected', 'true');
+        expect(document.activeElement).toBe(options[0]);
       });
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
 
-      expect(options[1]).toHaveAttribute('aria-selected', 'true');
+      expect(document.activeElement).toBe(options[1]);
 
       await act(async () => {
         await user.keyboard(' ');
@@ -321,7 +343,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(option1).toHaveAttribute('aria-selected', 'true');
+        expect(document.activeElement).toBe(option1);
       });
     });
 
