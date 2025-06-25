@@ -17,7 +17,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
       <button
         aria-controls="content-1"
         aria-selected="true"
-        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:transition-none ui:focus:duration-initial ui:focus:outline-hidden ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:bg-primary-50 ui:text-primary-600 ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:bg-primary-50 ui:text-primary-600 ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
         id="trigger-1"
         role="tab"
         tabindex="0"
@@ -33,7 +33,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
       <button
         aria-controls="content-2"
         aria-selected="false"
-        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-all ui:duration-200 ui:active:shadow-none ui:focus:transition-none ui:focus:duration-initial ui:focus:outline-hidden ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
         id="trigger-2"
         role="tab"
         tabindex="-1"
