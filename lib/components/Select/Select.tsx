@@ -152,14 +152,20 @@ const Select = ({
   );
 
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     if (isDropdownOpen && registeredCount === options.length) {
-      requestAnimationFrame(() => {
+      timeout = setTimeout(() => {
         moveToStart();
-      });
+      }, 0);
     } else if (!isDropdownOpen) {
       clearFocusRefs();
       setFocusedIndex(null);
     }
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [isDropdownOpen, registeredCount, options.length]);
 
   const ref = useClickOutside<HTMLDivElement>(() => setIsDropdownOpen(false), isDropdownOpen);
@@ -254,6 +260,7 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
           aria-expanded={isDropdownOpen}
           aria-controls="dropdown"
           aria-activedescendant={focusedIndex !== null ? `option-${focusedIndex}` : undefined}
+          aria-label="Select an option"
           role="combobox"
           className="ui:flex ui:w-full ui:cursor-pointer ui:items-center ui:justify-between ui:truncate ui:py-2 ui:ps-3 ui:pe-10 ui:text-left ui:ring-0 ui:outline-none"
           onKeyDown={handleKeyDown}
@@ -407,9 +414,9 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
       aria-selected={isSelected ? 'true' : 'false'}
       id={`option-${value}`}
       className={cn(
+        'ui:flex ui:cursor-pointer ui:items-center ui:px-3 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
         { 'ui:bg-primary-600 ui:text-white': isFocused },
         { 'ui:pt-1': !activeOption },
-        'ui:cursor-pointer ui:px-3 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
         className
       )}
       role="option"
@@ -417,7 +424,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
       onClick={() => handleOptions(value)}
       {...props}
     >
-      {children}
+      <span className="ui:flex-1 ui:truncate">{children}</span>
     </li>
   );
 };
