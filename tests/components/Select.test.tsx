@@ -9,7 +9,7 @@ vi.mock('@/components/Animate', () => {
 import { Select } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react';
 
@@ -52,6 +52,7 @@ beforeEach(() => {
 afterEach(() => {
   __setReduceMotionForTests(undefined);
   vi.useRealTimers();
+  cleanup();
 });
 
 describe('Select', () => {
@@ -216,7 +217,9 @@ describe('Select', () => {
       expect(listbox).toBeInTheDocument();
 
       options[0].focus();
-      expect(document.activeElement).toBe(options[0]);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[0]);
+      });
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
@@ -314,7 +317,9 @@ describe('Select', () => {
         await user.keyboard('{ArrowDown}');
       });
 
-      expect(document.activeElement).toBe(options[1]);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[1]);
+      });
 
       await act(async () => {
         await user.keyboard(' ');
