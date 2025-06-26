@@ -10,8 +10,10 @@ import { ButtonVariants } from '@/utils/variants';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
 import React, {
+  cloneElement,
   ComponentPropsWithoutRef,
   createContext,
+  isValidElement,
   ReactNode,
   useCallback,
   useContext,
@@ -143,10 +145,11 @@ Modal.Portal = ModalPortal;
 // ------------ Trigger component
 
 type ModalTriggerProps = {
+  testId?: string;
   children: React.ReactElement;
 };
 
-const ModalTrigger = ({ children }: ModalTriggerProps) => {
+const ModalTrigger = ({ children, testId }: ModalTriggerProps) => {
   const { open } = useModalContext();
 
   return React.cloneElement(children, {
@@ -154,6 +157,7 @@ const ModalTrigger = ({ children }: ModalTriggerProps) => {
       children.props.onClick?.(e);
       open();
     },
+    ...(testId && { 'data-testid': testId }),
   });
 };
 
@@ -247,7 +251,7 @@ const ModalContent = ({
         className
       )}
     >
-      {shouldRender ? (
+      {shouldRender && (
         <div
           ref={mergedRefs}
           data-testid={testId}
@@ -263,7 +267,7 @@ const ModalContent = ({
         >
           {children}
         </div>
-      ) : null}
+      )}
     </Animate>
   );
 };
@@ -333,6 +337,7 @@ Modal.Footer = ModalFooter;
 type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     testId?: string;
+    asChild?: boolean;
   };
 
 const ModalClose = ({
@@ -342,10 +347,25 @@ const ModalClose = ({
   rounded,
   testId,
   className,
+  asChild = false,
   children,
   ...props
 }: ModalCloseProps) => {
   const { onClose } = useModalContext();
+
+  const handleClick = (e: React.MouseEvent) => {
+    onClose();
+    if (isValidElement(children) && typeof children.props?.onClick === 'function') {
+      children.props.onClick(e);
+    }
+  };
+
+  if (asChild && isValidElement(children)) {
+    return cloneElement(children, {
+      onClick: handleClick,
+      ...props,
+    });
+  }
 
   return (
     <Button
