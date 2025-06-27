@@ -13,16 +13,21 @@ const Separator = <C extends React.ElementType = 'hr'>({
   className,
   ...props
 }: SeparatorProps<C>) => {
-  let Tag = as ?? (orientation === 'vertical' ? 'div' : 'hr');
+  let Tag = as ?? (orientation === 'horizontal' ? 'hr' : 'div');
+
+  const isSemantic = 'aria-label' in props || 'aria-labelledby' in props;
+  const isDecorative = orientation === 'diagonal' || !isSemantic;
   return (
     <Tag
       data-testid={testId}
       role="separator"
-      aria-hidden="true"
+      aria-hidden={isDecorative ? true : undefined}
       className={cn(SeparatorVariants({ orientation }), className)}
       {...props}
     />
   );
 };
+
+Separator.displayName = 'Separator';
 
 export default Separator;
