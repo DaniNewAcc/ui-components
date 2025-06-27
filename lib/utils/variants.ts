@@ -543,10 +543,20 @@ export const TextVariants = cva('', {
       bottom: 'ui:border-b ui:pb-2',
       left: 'ui:border-l ui:pl-4',
     },
+    truncate: {
+      true: 'ui:overflow-hidden ui:text-ellipsis ui:whitespace-nowrap',
+    },
+    clamp: {
+      none: '',
+      1: 'ui:line-clamp-1',
+      2: 'ui:line-clamp-2',
+      3: 'ui:line-clamp-3',
+    },
   },
   defaultVariants: {
     variant: 'unstyled',
     border: 'unstyled',
+    clamp: 'none',
   },
 });
 

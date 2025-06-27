@@ -10,6 +10,8 @@ const Text = <C extends React.ElementType = 'span'>({
   as,
   border,
   variant,
+  truncate,
+  clamp,
   className,
   testId,
   children,
@@ -19,7 +21,7 @@ const Text = <C extends React.ElementType = 'span'>({
   return (
     <Tag
       data-testid={testId}
-      className={cn(TextVariants({ variant, border }), className)}
+      className={cn(TextVariants({ variant, border, truncate, clamp }), className)}
       {...props}
     >
       {children}
