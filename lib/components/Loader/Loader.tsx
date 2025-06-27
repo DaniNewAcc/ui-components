@@ -10,14 +10,19 @@ type LoaderProps = ComponentProps<'div'> &
   VariantProps<typeof FlexVariants> & {
     testId?: string;
     children?: ReactNode;
+    loaderClassName?: string;
   };
 
 const Loader = ({
   loaderType,
   size,
   borderColor,
-  testId,
+  align,
+  gap,
+  justify,
+  testId = 'loader',
   className,
+  loaderClassName,
   children,
   ...props
 }: LoaderProps) => {
@@ -25,7 +30,7 @@ const Loader = ({
 
   const createDots = () =>
     Array.from({ length: 3 }).map((_, i) => (
-      <span key={i} className={cn(loaderClass, className)} />
+      <span key={i} className={cn(loaderClass, loaderClassName)} />
     ));
 
   return (
@@ -36,15 +41,21 @@ const Loader = ({
       data-testid={testId}
       role="status"
       aria-busy="true"
-      className={cn(FlexVariants({ align: 'center', gap: 'sm', justify: 'center' }), className)}
+      className={cn(FlexVariants({ align, gap, justify }), className)}
       {...props}
     >
       <Flex gap={'sm'}>
-        {loaderType === 'dots' ? createDots() : <span className={cn(loaderClass, className)} />}
+        {loaderType === 'dots' ? (
+          createDots()
+        ) : (
+          <span className={cn(loaderClass, loaderClassName)} />
+        )}
       </Flex>
       {children}
     </Flex>
   );
 };
+
+Loader.displayName = 'Loader';
 
 export default Loader;
