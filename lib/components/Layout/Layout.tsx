@@ -8,7 +8,7 @@ type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
 
 const Layout = <C extends React.ElementType = 'div'>({
   as,
-  testId,
+  testId = 'layout',
   className,
   isCentered = true,
   overflowHidden = false,
@@ -20,7 +20,6 @@ const Layout = <C extends React.ElementType = 'div'>({
   return (
     <Tag
       data-testid={testId}
-      role={as === 'main' ? 'main' : undefined}
       className={cn(
         'ui:flex ui:min-h-screen ui:w-full ui:grow-0 ui:flex-col',
         isCentered ? 'ui:items-center ui:justify-center' : 'ui:items-start ui:justify-start',
@@ -33,5 +32,7 @@ const Layout = <C extends React.ElementType = 'div'>({
     </Tag>
   );
 };
+
+Layout.displayName = 'Layout';
 
 export default Layout;
