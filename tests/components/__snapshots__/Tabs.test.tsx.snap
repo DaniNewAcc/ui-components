@@ -7,7 +7,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
     data-testid="tabsgroup"
   >
     <div
-      aria-activedescendant="tab-1"
+      aria-activedescendant="trigger-1"
       aria-label="Tabs"
       aria-orientation="horizontal"
       class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent ui:flex-row"
@@ -50,7 +50,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
     <div
       aria-labelledby="trigger-1"
       class="ui:flex-1 ui:overflow-y-auto"
-      id="panel-1"
+      id="content-1"
       role="tabpanel"
       tabindex="0"
     >
