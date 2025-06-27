@@ -489,6 +489,7 @@ export const SeparatorVariants = cva('ui:bg-gray-400', {
     orientation: {
       horizontal: 'ui:h-[1px] ui:w-full',
       vertical: 'ui:h-full ui:w-[1px]',
+      diagonal: 'ui:h-[1px] ui:rotate-45',
     },
   },
   defaultVariants: {
