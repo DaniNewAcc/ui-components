@@ -207,7 +207,7 @@ const TabsList = ({ variant, className, children, testId, ...props }: TabsListPr
     <div
       data-testid={testId}
       role="tablist"
-      aria-activedescendant={`tab-${activeTab}`}
+      aria-activedescendant={`trigger-${activeTab}`}
       aria-orientation={orientation}
       aria-label="Tabs"
       className={cn(
@@ -353,7 +353,7 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
   const { panelRefs, activeTab, tabbingDirection, focusedIndex, orientation, setTabbingDirection } =
     useTabsContext();
   const triggerId = `trigger-${value}`;
-  const contentId = `panel-${value}`;
+  const contentId = `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
 
@@ -366,7 +366,7 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
         panelRef.current?.focus();
       }, 0);
     }
-  }, [panelRefs, activeTab, isFocused, isActive, tabbingDirection]);
+  }, [activeTab, isFocused, isActive, tabbingDirection]);
 
   const handleFocus = useCallback(() => {
     setTabbingDirection(null);
