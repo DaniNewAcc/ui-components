@@ -1,14 +1,14 @@
-import { Header } from "@/components";
-import { render, screen } from "@testing-library/react";
+import { Header } from '@/components';
+import { render, screen } from '@testing-library/react';
 
-describe("Header", () => {
-  it("should render", () => {
+describe('Header', () => {
+  it('should render', () => {
     render(
       <Header>
         <div></div>
-      </Header>,
+      </Header>
     );
-    const header = screen.getByRole("banner");
+    const header = screen.getByTestId('header');
     expect(header.hasChildNodes);
     expect(header).toBeInTheDocument();
   });
