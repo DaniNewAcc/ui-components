@@ -7,18 +7,24 @@ import Scrollable from '../Scrollable/Scrollable';
 type FlexProps<C extends React.ElementType> = VariantProps<typeof FlexVariants> &
   PolymorphicComponent<
     C,
-    { as?: C; testId?: string; scrollable?: boolean | React.ComponentProps<typeof Scrollable> }
+    {
+      as?: C;
+      testId?: string;
+      scrollable?: boolean;
+      scrollableProps?: React.ComponentProps<typeof Scrollable>;
+    }
   >;
 
 const Flex = <C extends React.ElementType = 'div'>({
   as,
   scrollable = false,
+  scrollableProps,
   align,
   direction,
   flexWrap,
   gap,
   justify,
-  testId,
+  testId = 'flex',
   className,
   children,
   ...props
@@ -34,12 +40,19 @@ const Flex = <C extends React.ElementType = 'div'>({
   );
 
   if (scrollable) {
-    const scrollableProps =
-      typeof scrollable === 'object' ? scrollable : { className: 'ui:max-h-[300px]' };
-    return <Scrollable {...scrollableProps}>{flexContent}</Scrollable>;
+    const defaultScrollableClassName = 'ui:max-h-[300px]';
+    const mergedScrollableClassName = cn(defaultScrollableClassName, scrollableProps?.className);
+
+    return (
+      <Scrollable {...scrollableProps} className={mergedScrollableClassName}>
+        {flexContent}
+      </Scrollable>
+    );
   }
 
   return flexContent;
 };
+
+Flex.displayName = 'Flex';
 
 export default Flex;
