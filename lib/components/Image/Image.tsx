@@ -3,16 +3,11 @@ import { cn } from '@utils/cn';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef } from 'react';
 
-type ImageProps = ComponentPropsWithoutRef<'img'> &
+type ImageProps = Omit<ComponentPropsWithoutRef<'img'>, 'width' | 'height' | 'alt'> &
   VariantProps<typeof ImageVariants> & {
     width?: string | number;
     height?: string | number;
-    loading?: 'lazy' | 'eager';
-    src?: string;
-    srcSet?: string;
-    altText?: string;
-    sizes?: string;
-    zoom?: boolean;
+    alt?: string;
     testId?: string;
   };
 
@@ -28,17 +23,15 @@ const Image = forwardRef<React.ElementRef<'img'>, ImageProps>(
       src,
       srcSet,
       sizes,
-      altText = 'Image',
-      width,
-      height,
+      alt = 'Image',
+      width = '100%',
+      height = 'auto',
       className,
-      testId,
+      testId = 'image',
       ...props
     },
     ref
   ) => {
-    width = width || '100%';
-    height = height || 'auto';
     return (
       <img
         data-testid={testId}
@@ -46,15 +39,17 @@ const Image = forwardRef<React.ElementRef<'img'>, ImageProps>(
         loading={loading}
         src={src}
         srcSet={srcSet}
-        alt={altText}
+        alt={alt}
         sizes={sizes}
-        height={height}
         width={width}
+        height={height}
         className={cn(ImageVariants({ border, borderColor, fit, rounded, zoom }), className)}
         {...props}
       />
     );
   }
 );
+
+Image.displayName = 'Image';
 
 export default Image;
