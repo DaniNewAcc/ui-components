@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn';
 import { PolymorphicComponent } from '@/utils/types';
 import { ScrollableVariants } from '@/utils/variants';
 import { VariantProps } from 'class-variance-authority';
-import { UIEvent } from 'react';
+import { UIEvent, useCallback } from 'react';
 
 type ScrollableProps<C extends React.ElementType> = VariantProps<typeof ScrollableVariants> &
   PolymorphicComponent<
@@ -11,9 +11,6 @@ type ScrollableProps<C extends React.ElementType> = VariantProps<typeof Scrollab
     {
       as?: C;
       testId?: string;
-      direction?: string;
-      scrollBar?: string;
-      smooth?: boolean;
       scrollThreshold?: number;
       onScroll?: (e: UIEvent<HTMLElement>) => void;
       onReachTop?: () => void;
@@ -32,26 +29,31 @@ const Scrollable = <C extends React.ElementType = 'div'>({
   onReachBottom,
   className,
   children,
-  testId,
+  testId = 'scrollable',
   ...props
 }: ScrollableProps<C>) => {
   const Tag = as || 'div';
 
-  const handleScroll = useThrottle((e: UIEvent<HTMLElement>) => {
-    onScroll?.(e);
-    const target = e.currentTarget;
-    const scrollTop = target.scrollTop;
-    const scrollHeight = target.scrollHeight;
-    const clientHeight = target.clientHeight;
+  const internalScrollHandler = useCallback(
+    (e: UIEvent<HTMLElement>) => {
+      onScroll?.(e);
+      const target = e.currentTarget;
+      const scrollTop = target.scrollTop;
+      const scrollHeight = target.scrollHeight;
+      const clientHeight = target.clientHeight;
 
-    if (onReachTop && scrollTop <= scrollThreshold) {
-      onReachTop();
-    }
+      if (onReachTop && scrollTop <= scrollThreshold) {
+        onReachTop();
+      }
 
-    if (onReachBottom && scrollTop + clientHeight >= scrollHeight - scrollThreshold) {
-      onReachBottom();
-    }
-  }, 100);
+      if (onReachBottom && scrollTop + clientHeight >= scrollHeight - scrollThreshold) {
+        onReachBottom();
+      }
+    },
+    [scrollThreshold, onScroll, onReachTop, onReachBottom]
+  );
+
+  const handleScroll = useThrottle(internalScrollHandler, 100);
 
   return (
     <Tag
@@ -64,5 +66,7 @@ const Scrollable = <C extends React.ElementType = 'div'>({
     </Tag>
   );
 };
+
+Scrollable.displayName = 'Scrollable';
 
 export default Scrollable;
