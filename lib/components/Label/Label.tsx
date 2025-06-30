@@ -2,13 +2,12 @@ import { cn } from '@/utils/cn';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
 type LabelProps = ComponentPropsWithoutRef<'label'> & {
-  htmlFor?: string;
   testId?: string;
   children?: ReactNode;
 };
 
 const Label = forwardRef<React.ElementRef<'label'>, LabelProps>(
-  ({ testId, children, className, ...props }, ref) => {
+  ({ testId = 'label', children, className, ...props }, ref) => {
     return (
       <label
         data-testid={testId}
@@ -21,5 +20,7 @@ const Label = forwardRef<React.ElementRef<'label'>, LabelProps>(
     );
   }
 );
+
+Label.displayName = 'Label';
 
 export default Label;
