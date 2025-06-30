@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 describe('Card', () => {
   it('should render', () => {
     render(
-      <Card testId="card">
+      <Card>
         <h3>title</h3>
         <p>paragraph</p>
       </Card>
@@ -17,7 +17,7 @@ describe('Card', () => {
 
 it('should apply focusable styles when focusable is true', () => {
   render(
-    <Card focusable testId="card">
+    <Card focusable>
       <p>Focusable</p>
     </Card>
   );
@@ -30,7 +30,7 @@ it('should apply focusable styles when focusable is true', () => {
 
 it('should not apply focusable styles when focusable is false', () => {
   render(
-    <Card focusable={false} testId="card">
+    <Card focusable={false}>
       <p>Not focusable</p>
     </Card>
   );
