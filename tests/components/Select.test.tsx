@@ -30,10 +30,8 @@ const renderSelect = (props: Partial<React.ComponentProps<typeof Select>> = {}) 
       defaultValue={defaultValue ?? undefined}
       {...restProps}
     >
-      <Select.Trigger testId="select-trigger" placeholderText="Select an option...">
-        Toggle
-      </Select.Trigger>
-      <Select.Dropdown testId="select-dropdown">
+      <Select.Trigger placeholderText="Select an option...">Toggle</Select.Trigger>
+      <Select.Dropdown>
         {options.map(option => (
           <Select.Option key={option.id} value={option.id} testId={`option-${option.id}`}>
             {option.name}
@@ -105,7 +103,7 @@ describe('Select', () => {
       render(
         <Select options={[{ id: 1, name: 'Option 1' }]} valueKey="id" labelKey="name">
           <Select.Trigger>Trigger</Select.Trigger>
-          <Select.Dropdown animateProps={{ duration: 500 }} testId="dropdown">
+          <Select.Dropdown animateProps={{ duration: 500 }}>
             <Select.Option value={1}>Option 1</Select.Option>
           </Select.Dropdown>
         </Select>
@@ -114,7 +112,7 @@ describe('Select', () => {
       const trigger = screen.getByRole('combobox');
       fireEvent.click(trigger);
 
-      const dropdown = screen.getByTestId('dropdown');
+      const dropdown = screen.getByTestId('select-dropdown');
       expect(dropdown).toHaveStyle(
         'transition: max-height 500ms ease, opacity 500ms ease, visibility 500ms ease'
       );
@@ -286,7 +284,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       });
 
       expect(trigger).toHaveTextContent('Option 2');
@@ -325,7 +323,7 @@ describe('Select', () => {
         await user.keyboard(' ');
       });
 
-      expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
 
       expect(trigger).toHaveTextContent('Option 2');
     });
