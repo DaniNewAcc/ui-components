@@ -1,4 +1,5 @@
 import { useClickOutside } from '@/hooks/useClickOutside';
+import useComponentIds from '@/hooks/useComponentIds';
 import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
@@ -45,6 +46,7 @@ type SelectContextProps = {
   clearable: boolean;
   focusedIndex: number | string | null;
   triggerRef: React.RefObject<HTMLButtonElement>;
+  idMap: Record<string, string>;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -63,7 +65,7 @@ const Select = ({
   options,
   defaultValue,
   className,
-  testId,
+  testId = 'select',
   valueKey,
   labelKey,
   loop = false,
@@ -84,6 +86,13 @@ const Select = ({
   const [activeOption, setActiveOption] = useState<ActiveOption>(defaultValue);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const idKeys = useMemo(
+    () => ['trigger', 'list', ...options.map(opt => `option-${opt[valueKey]}`)],
+    [options, valueKey]
+  );
+
+  const idMap = useComponentIds('select', idKeys);
 
   const handleDropdown = useCallback(() => {
     setIsDropdownOpen(prev => !prev);
@@ -120,6 +129,7 @@ const Select = ({
       focusedIndex,
       triggerRef,
       clearable,
+      idMap,
       setFocusedIndex,
       moveFocus,
       moveToStart,
@@ -137,6 +147,7 @@ const Select = ({
       isDropdownOpen,
       valueKey,
       labelKey,
+      idMap,
       focusedIndex,
       setFocusedIndex,
       moveFocus,
@@ -199,7 +210,13 @@ type SelectTriggerProps = ComponentProps<'button'> & {
 
 const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
   (
-    { placeholderText = 'Select an option...', className, children, testId, ...props },
+    {
+      placeholderText = 'Select an option...',
+      className,
+      children,
+      testId = 'select-trigger',
+      ...props
+    },
     externalRef
   ) => {
     const {
@@ -208,6 +225,7 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
       focusedIndex,
       handleReset,
       handleDropdown,
+      idMap,
       triggerRef,
       valueKey,
       labelKey,
@@ -258,9 +276,12 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
           data-testid={testId}
           aria-haspopup="listbox"
           aria-expanded={isDropdownOpen}
-          aria-controls="dropdown"
-          aria-activedescendant={focusedIndex !== null ? `option-${focusedIndex}` : undefined}
+          aria-controls={idMap.list}
+          aria-activedescendant={
+            focusedIndex !== null ? idMap[`option-${focusedIndex}`] : undefined
+          }
           aria-label="Select an option"
+          id={idMap.trigger}
           role="combobox"
           className="ui:flex ui:w-full ui:cursor-pointer ui:items-center ui:justify-between ui:truncate ui:py-2 ui:ps-3 ui:pe-10 ui:text-left ui:ring-0 ui:outline-none"
           onKeyDown={handleKeyDown}
@@ -310,13 +331,20 @@ type SelectDropdownProps = ComponentProps<'ul'> & {
 
 const SelectDropdown = ({
   animateProps,
-  testId,
+  testId = 'select-dropdown',
   className,
   children,
   ...props
 }: SelectDropdownProps) => {
-  const { isDropdownOpen, triggerRef, focusedIndex, setIsDropdownOpen, handleOptions, moveFocus } =
-    useSelectContext();
+  const {
+    isDropdownOpen,
+    triggerRef,
+    focusedIndex,
+    idMap,
+    setIsDropdownOpen,
+    handleOptions,
+    moveFocus,
+  } = useSelectContext();
   const duration = animateProps?.duration ?? 300;
 
   const handleKeyDown = useCallback(
@@ -362,7 +390,7 @@ const SelectDropdown = ({
         <ul
           ref={ref}
           data-testid={testId}
-          id="dropdown"
+          id={idMap.list}
           className={cn(
             'ui:mt-[-2px] ui:flex ui:flex-col ui:rounded-md ui:border-2 ui:shadow-md',
             { 'ui:rounded-t-none ui:border-primary-500': isDropdownOpen },
@@ -396,9 +424,14 @@ type SelectOptionProps = ComponentProps<'li'> & {
   children: ReactNode;
 };
 
-const SelectOption = ({ value, className, children, testId, ...props }: SelectOptionProps) => {
-  const { isDropdownOpen, focusedIndex, activeOption, handleOptions, setFocusRef } =
-    useSelectContext();
+const SelectOption = ({
+  value,
+  className,
+  children,
+  testId = 'select-option',
+  ...props
+}: SelectOptionProps) => {
+  const { focusedIndex, activeOption, idMap, handleOptions, setFocusRef } = useSelectContext();
   const optionRef = useRef<HTMLLIElement | null>(null);
   const isSelected = activeOption === value;
   const isFocused = focusedIndex === value;
@@ -412,7 +445,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
       ref={optionRef}
       data-testid={testId}
       aria-selected={isSelected ? 'true' : 'false'}
-      id={`option-${value}`}
+      id={idMap[`option-${value}`]}
       className={cn(
         'ui:flex ui:cursor-pointer ui:items-center ui:px-3 ui:pb-2 ui:last:rounded-b-md ui:focus-visible:outline-none',
         { 'ui:bg-primary-600 ui:text-white': isFocused },
@@ -420,7 +453,7 @@ const SelectOption = ({ value, className, children, testId, ...props }: SelectOp
         className
       )}
       role="option"
-      tabIndex={isDropdownOpen && isFocused ? 0 : -1}
+      tabIndex={isFocused ? 0 : -1}
       onClick={() => handleOptions(value)}
       {...props}
     >
