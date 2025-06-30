@@ -8,19 +8,25 @@ import Scrollable from '../Scrollable/Scrollable';
 type GridProps<C extends React.ElementType> = VariantProps<typeof GridVariants> &
   PolymorphicComponent<
     C,
-    { as?: C; testId?: string; scrollable?: boolean | React.ComponentProps<typeof Scrollable> }
+    {
+      as?: C;
+      testId?: string;
+      scrollable?: boolean;
+      scrollableProps?: React.ComponentProps<typeof Scrollable>;
+    }
   >;
 
 const Grid = <C extends ElementType = 'div'>({
   as,
   scrollable = false,
+  scrollableProps,
   display,
   gap,
   colGap,
   rowGap,
   gridCol,
   gridRow,
-  testId,
+  testId = 'grid',
   className,
   children,
   ...props
@@ -39,12 +45,19 @@ const Grid = <C extends ElementType = 'div'>({
   );
 
   if (scrollable) {
-    const scrollableProps =
-      typeof scrollable === 'object' ? scrollable : { className: 'ui:max-h-[300px]' };
-    return <Scrollable {...scrollableProps}>{gridContent}</Scrollable>;
+    const defaultScrollableClassName = 'ui:max-h-[300px]';
+    const mergedScrollableClassName = cn(defaultScrollableClassName, scrollableProps?.className);
+
+    return (
+      <Scrollable {...scrollableProps} className={mergedScrollableClassName}>
+        {gridContent}
+      </Scrollable>
+    );
   }
 
   return gridContent;
 };
+
+Grid.displayName = 'Grid';
 
 export default Grid;
