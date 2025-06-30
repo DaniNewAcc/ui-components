@@ -13,6 +13,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(
   ({ bgColor, padding, gap, height, className, testId = 'header', children, ...props }, ref) => (
     <header
       ref={ref}
+      data-testid={testId}
       className={cn(HeaderVariants({ bgColor, padding, gap, height }), className)}
       {...props}
     >
