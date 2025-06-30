@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 
 describe('Flex', () => {
   it('should render', () => {
-    render(<Flex testId="flex"></Flex>);
+    render(<Flex></Flex>);
     const flex = screen.getByTestId('flex');
     expect(flex).toBeInTheDocument();
   });
@@ -15,11 +15,11 @@ describe('Flex', () => {
     expect(wrapper?.className).toMatch('ui:max-h-[300px]');
   });
 
-  it('should wrap content in Scrollable with custom class when scrollable is object', () => {
+  it('should wrap content in Scrollable with custom props when ScrollableProps are provided', () => {
     render(
       <Flex
-        testId="flex"
-        scrollable={{ className: 'custom-scroll', 'data-testid': 'scrollable-wrap' }}
+        scrollable
+        scrollableProps={{ className: 'custom-scroll', 'data-testid': 'scrollable-wrap' }}
       />
     );
     const scrollable = screen.getByTestId('scrollable-wrap');
@@ -28,7 +28,7 @@ describe('Flex', () => {
   });
 
   it('should render without Scrollable wrapper when scrollable is false', () => {
-    render(<Flex testId="flex" scrollable={false} />);
+    render(<Flex scrollable={false} />);
     const flex = screen.getByTestId('flex');
     const wrapper = flex.parentElement;
     expect(wrapper?.className).not.toMatch('ui:max-h-[300px]|custom-scroll');
