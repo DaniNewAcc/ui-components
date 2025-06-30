@@ -1,14 +1,14 @@
-import { Footer } from "@/components";
-import { render, screen } from "@testing-library/react";
+import { Footer } from '@/components';
+import { render, screen } from '@testing-library/react';
 
-describe("Footer", () => {
-  it("should render", () => {
+describe('Footer', () => {
+  it('should render', () => {
     render(
       <Footer>
         <div></div>
-      </Footer>,
+      </Footer>
     );
-    const footer = screen.getByRole("contentinfo");
+    const footer = screen.getByTestId('footer');
     expect(footer).toBeInTheDocument();
   });
 });
