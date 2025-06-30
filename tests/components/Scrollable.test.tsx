@@ -3,17 +3,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 const setup = (props = {}) => {
   render(
-    <Scrollable testId="scroll" {...props}>
+    <Scrollable {...props}>
       <div style={{ height: 1000 }}>Content</div>
     </Scrollable>
   );
-  return screen.getByTestId('scroll');
+  return screen.getByTestId('scrollable');
 };
 
 describe('Scrollable', () => {
   it('should render correctly', () => {
-    setup();
-    expect(screen.getByTestId('scroll')).toBeInTheDocument();
+    const scrollable = setup();
+    expect(scrollable).toBeInTheDocument();
   });
 
   it('should call onScroll when scrolling', () => {
