@@ -10,7 +10,6 @@ type CardProps = ComponentPropsWithRef<'article'> &
     role?: string;
     tabIndex?: number;
     children: ReactNode;
-    onClick?: React.MouseEventHandler;
   };
 
 const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
@@ -24,10 +23,9 @@ const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
       focusable,
       role,
       tabIndex,
-      testId,
+      testId = 'card',
       className,
       children,
-      onClick,
       ...props
     },
     ref
@@ -44,7 +42,6 @@ const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
             'ui:focus:outline-none ui:focus-visible:ring-2 ui:focus-visible:ring-primary-500',
           className
         )}
-        onClick={onClick}
         {...props}
       >
         {children}
@@ -52,5 +49,7 @@ const Card = forwardRef<React.ElementRef<'article'>, CardProps>(
     );
   }
 );
+
+Card.displayName = 'Card';
 
 export default Card;
