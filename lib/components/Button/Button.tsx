@@ -9,6 +9,8 @@ type ButtonProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     loading?: boolean;
     showLoader?: boolean;
+    leadingIcon?: ReactNode;
+    trailingIcon?: ReactNode;
     testId?: string;
     children: ReactNode;
   };
@@ -25,6 +27,8 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
       size,
       fullWidth,
       rounded,
+      leadingIcon,
+      trailingIcon,
       className,
       children,
       testId = 'button',
@@ -58,7 +62,11 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
         {loading && showLoader ? (
           <Loader size={'md'} loaderType={'spinner'} />
         ) : (
-          <Text>{children}</Text>
+          <span className="ui:inline-flex ui:items-center ui:gap-2">
+            {leadingIcon && <span className="ui:flex-shrink-0">{leadingIcon}</span>}
+            <Text>{children}</Text>
+            {trailingIcon && <span className="ui:flex-shrink-0">{trailingIcon}</span>}
+          </span>
         )}
       </button>
     );
