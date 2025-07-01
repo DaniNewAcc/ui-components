@@ -9,12 +9,15 @@ type ButtonProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     loading?: boolean;
     showLoader?: boolean;
+    testId?: string;
     children: ReactNode;
   };
 
 const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
   (
     {
+      disabled,
+      type = 'button',
       intent,
       loading,
       showLoader,
@@ -24,13 +27,20 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
       rounded,
       className,
       children,
+      testId = 'button',
       ...props
     },
     ref
   ) => {
+    const isDisabled = loading || disabled;
     return (
       <button
+        data-testid={testId}
+        type={type}
         ref={ref}
+        aria-busy={loading}
+        aria-disabled={isDisabled}
+        aria-live="polite"
         className={cn(
           ButtonVariants({
             intent,
@@ -39,8 +49,10 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
             fullWidth,
             rounded,
           }),
+          { 'ui:pointer-events-none ui:opacity-50': loading && !showLoader },
           className
         )}
+        disabled={isDisabled}
         {...props}
       >
         {loading && showLoader ? (
@@ -52,5 +64,7 @@ const Button = forwardRef<React.ElementRef<'button'>, ButtonProps>(
     );
   }
 );
+
+Button.displayName = 'Button';
 
 export default Button;
