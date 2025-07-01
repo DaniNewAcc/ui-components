@@ -22,6 +22,7 @@ import { AnimateProps } from '../Animate/Animate';
 
 type Option = {
   [key: string]: any;
+  disabled?: boolean;
 };
 
 type ActiveOption = string | number | null;
@@ -165,25 +166,38 @@ const Select = ({
   );
 
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-
-    if (isDropdownOpen && registeredCount === options.length) {
-      timeout = setTimeout(() => {
-        if (activeOption !== null) {
-          setFocusedIndex(activeOption);
-        } else {
-          moveToStart();
-        }
-      }, 10);
-    } else if (!isDropdownOpen) {
+    if (!isDropdownOpen) {
       clearFocusRefs();
       setFocusedIndex(null);
+      return;
     }
 
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [isDropdownOpen, registeredCount, activeOption, options.length]);
+    if (registeredCount !== options.length) return;
+
+    const timeout = setTimeout(() => {
+      const activeOptionObj = options.find(opt => opt[valueKey] === activeOption);
+      const isActiveValid = activeOption !== null && activeOptionObj && !activeOptionObj.disabled;
+
+      if (isActiveValid) {
+        setFocusedIndex(activeOption);
+      } else {
+        const firstEnabledValue = options.find(opt => !opt.disabled)?.[valueKey];
+        if (firstEnabledValue !== undefined) {
+          setFocusedIndex(firstEnabledValue);
+        }
+      }
+    }, 10);
+
+    return () => clearTimeout(timeout);
+  }, [
+    isDropdownOpen,
+    registeredCount,
+    activeOption,
+    options,
+    valueKey,
+    setFocusedIndex,
+    clearFocusRefs,
+  ]);
 
   const ref = useClickOutside<HTMLDivElement>(() => setIsDropdownOpen(false), isDropdownOpen);
   return (
@@ -414,8 +428,8 @@ const SelectDropdown = ({
 
       const search = typedKeysRef.current;
 
-      const matchIndex = options.findIndex(option =>
-        option[labelKey]?.toString().toLowerCase().startsWith(search)
+      const matchIndex = options.findIndex(
+        option => !option.disabled && option[labelKey]?.toString().toLowerCase().startsWith(search)
       );
 
       if (matchIndex !== -1) {
