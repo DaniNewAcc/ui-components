@@ -394,6 +394,8 @@ const SelectDropdown = ({
   const duration = animateProps?.duration ?? 300;
   const typedKeysRef = useRef<string>('');
   const typingTimeoutRef = useRef<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
   const isActiveOptionValid =
     activeOption !== null && options.some(opt => opt[valueKey] === activeOption && !opt.disabled);
 
@@ -487,13 +489,17 @@ const SelectDropdown = ({
     [moveFocus, moveToStart, moveToEnd, handleOptions, handleTypeahead, focusedIndex]
   );
 
+  const handleAnimationChange = useCallback((animating: boolean) => {
+    setIsAnimating(animating);
+  }, []);
+
   const { ref, shouldRender, maxHeight } = useSyncAnimation<HTMLUListElement>({
     isOpen: isDropdownOpen,
     duration,
   });
 
   return (
-    <Animate isVisible={isDropdownOpen} preset="dropdown">
+    <Animate isVisible={isDropdownOpen} preset="dropdown" onAnimationChange={handleAnimationChange}>
       {shouldRender && (
         <ul
           ref={ref}
@@ -501,7 +507,7 @@ const SelectDropdown = ({
           id={idMap.list}
           className={cn(
             'ui:mt-[-2px] ui:flex ui:flex-col ui:rounded-md ui:border-2 ui:shadow-md',
-            { 'ui:rounded-t-none ui:border-primary-500': isDropdownOpen },
+            { 'ui:rounded-t-none ui:border-primary-500': isDropdownOpen || isAnimating },
             className
           )}
           style={{
