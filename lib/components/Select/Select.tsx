@@ -24,7 +24,7 @@ type Option = {
   [key: string]: any;
 };
 
-type ActiveOption = string | number | null | undefined;
+type ActiveOption = string | number | null;
 
 type SelectProps = ComponentProps<'div'> & {
   options: Option[];
@@ -54,8 +54,8 @@ type SelectContextProps = {
   setFocusRef: (SetFocusRefProps: { index: number | string; element: HTMLElement | null }) => void;
   setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveOption: React.Dispatch<React.SetStateAction<ActiveOption>>;
+  resetSelection: () => void;
   handleDropdown: () => void;
-  handleReset: (e: React.MouseEvent<HTMLButtonElement>) => void;
   handleOptions: (value: string | number) => void;
 };
 
@@ -83,9 +83,15 @@ const Select = ({
     setFocusRef,
     clearFocusRefs,
   } = useRovingFocus(null, loop);
-  const [activeOption, setActiveOption] = useState<ActiveOption>(defaultValue);
+  const [activeOption, setActiveOption] = useState<ActiveOption>(defaultValue ?? null);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isDropdownOpen && activeOption !== null) {
+      setFocusedIndex(activeOption);
+    }
+  }, [activeOption, isDropdownOpen, setFocusedIndex]);
 
   const idKeys = useMemo(
     () => ['trigger', 'list', ...options.map(opt => `option-${opt[valueKey]}`)],
@@ -98,23 +104,19 @@ const Select = ({
     setIsDropdownOpen(prev => !prev);
   }, []);
 
-  const handleReset = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const resetSelection = useCallback(() => {
     setActiveOption(null);
     setIsDropdownOpen(false);
-  }, []);
+    triggerRef.current?.focus();
+  }, [setActiveOption, setIsDropdownOpen, triggerRef]);
 
   const handleOptions = useCallback(
     (value: string | number) => {
       if (activeOption !== value) {
         setActiveOption(value);
-        setIsDropdownOpen(false);
-      } else {
-        setIsDropdownOpen(false);
       }
-      if (triggerRef?.current) {
-        triggerRef.current.focus();
-      }
+      setIsDropdownOpen(false);
+      triggerRef?.current?.focus();
     },
     [activeOption]
   );
@@ -137,9 +139,9 @@ const Select = ({
       setFocusRef,
       setIsDropdownOpen,
       setActiveOption,
+      resetSelection,
       handleDropdown,
       handleOptions,
-      handleReset,
     }),
     [
       options,
@@ -156,9 +158,9 @@ const Select = ({
       setFocusRef,
       setIsDropdownOpen,
       setActiveOption,
+      resetSelection,
       handleDropdown,
       handleOptions,
-      handleReset,
     ]
   );
 
@@ -167,8 +169,12 @@ const Select = ({
 
     if (isDropdownOpen && registeredCount === options.length) {
       timeout = setTimeout(() => {
-        moveToStart();
-      }, 0);
+        if (activeOption !== null) {
+          setFocusedIndex(activeOption);
+        } else {
+          moveToStart();
+        }
+      }, 10);
     } else if (!isDropdownOpen) {
       clearFocusRefs();
       setFocusedIndex(null);
@@ -177,7 +183,7 @@ const Select = ({
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [isDropdownOpen, registeredCount, options.length]);
+  }, [isDropdownOpen, registeredCount, activeOption, options.length]);
 
   const ref = useClickOutside<HTMLDivElement>(() => setIsDropdownOpen(false), isDropdownOpen);
   return (
@@ -223,8 +229,6 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
       activeOption,
       options,
       focusedIndex,
-      handleReset,
-      handleDropdown,
       idMap,
       triggerRef,
       valueKey,
@@ -232,6 +236,8 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
       clearable,
       isDropdownOpen,
       setIsDropdownOpen,
+      resetSelection,
+      handleDropdown,
       moveToStart,
     } = useSelectContext();
 
@@ -258,6 +264,24 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
         }
       },
       [moveToStart]
+    );
+
+    const handleClearClick = useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        resetSelection();
+      },
+      [resetSelection]
+    );
+
+    const handleClearKeyDown = useCallback(
+      (e: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          resetSelection();
+        }
+      },
+      [resetSelection]
     );
 
     const selectedOption = options.find(opt => opt[valueKey] === activeOption);
@@ -308,8 +332,9 @@ const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
             type="button"
             data-testid="clear-btn"
             aria-label="Clear"
-            onClick={handleReset}
-            className="ui:absolute ui:end-6 ui:flex ui:h-6 ui:w-6 ui:items-center ui:justify-center ui:rounded-full ui:outline-none ui:focus-visible:ring-2 ui:focus-visible:ring-primary-600"
+            onClick={handleClearClick}
+            onKeyDown={handleClearKeyDown}
+            className="ui:absolute ui:end-6 ui:flex ui:h-6 ui:w-6 ui:cursor-pointer ui:items-center ui:justify-center ui:rounded-full ui:outline-none ui:focus-visible:ring-2 ui:focus-visible:ring-primary-600"
           >
             <XMarkIcon className="ui:pointer-events-none ui:h-5 ui:w-5" />
           </button>
@@ -340,16 +365,84 @@ const SelectDropdown = ({
     isDropdownOpen,
     triggerRef,
     focusedIndex,
+    options,
     idMap,
+    valueKey,
+    labelKey,
+    activeOption,
+    setFocusedIndex,
     setIsDropdownOpen,
     handleOptions,
     moveFocus,
+    moveToStart,
+    moveToEnd,
   } = useSelectContext();
   const duration = animateProps?.duration ?? 300;
+  const typedKeysRef = useRef<string>('');
+  const typingTimeoutRef = useRef<number | null>(null);
+  const isActiveOptionValid =
+    activeOption !== null && options.some(opt => opt[valueKey] === activeOption && !opt.disabled);
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      ref.current?.focus();
+
+      if (isActiveOptionValid) {
+        setFocusedIndex(activeOption);
+      } else {
+        const firstFocusableOption = options.find(opt => !opt.disabled)?.[valueKey];
+        if (firstFocusableOption !== undefined) {
+          setFocusedIndex(firstFocusableOption);
+        }
+      }
+    } else {
+      setFocusedIndex(null);
+    }
+  }, [isDropdownOpen, activeOption, options, setFocusedIndex, valueKey]);
+
+  const handleTypeahead = useCallback(
+    (key: string) => {
+      typedKeysRef.current += key.toLowerCase();
+
+      if (typingTimeoutRef.current !== null) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = window.setTimeout(() => {
+        typedKeysRef.current = '';
+      }, 500);
+
+      const search = typedKeysRef.current;
+
+      const matchIndex = options.findIndex(option =>
+        option[labelKey]?.toString().toLowerCase().startsWith(search)
+      );
+
+      if (matchIndex !== -1) {
+        const matchedValue = options[matchIndex][valueKey];
+        setFocusedIndex(matchedValue);
+      }
+    },
+    [options, labelKey, valueKey, setFocusedIndex]
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      switch (e.key) {
+      const key = e.key;
+
+      if (key === 'Enter' || key === ' ') {
+        e.preventDefault();
+        if (focusedIndex !== null) {
+          handleOptions(focusedIndex);
+        }
+        return;
+      }
+
+      if (key.length === 1 && /^[a-z0-9 ]$/i.test(key)) {
+        handleTypeahead(key);
+        return;
+      }
+      switch (key) {
         case 'Tab':
           e.preventDefault();
           break;
@@ -361,12 +454,13 @@ const SelectDropdown = ({
           e.preventDefault();
           moveFocus('previous');
           break;
-        case 'Enter':
-        case ' ':
+        case 'Home':
           e.preventDefault();
-          if (focusedIndex !== null) {
-            handleOptions(focusedIndex);
-          }
+          moveToStart();
+          break;
+        case 'End':
+          e.preventDefault();
+          moveToEnd();
           break;
         case 'Escape':
           setIsDropdownOpen(false);
@@ -376,7 +470,7 @@ const SelectDropdown = ({
           break;
       }
     },
-    [moveFocus, handleOptions, focusedIndex]
+    [moveFocus, moveToStart, moveToEnd, handleOptions, handleTypeahead, focusedIndex]
   );
 
   const { ref, shouldRender, maxHeight } = useSyncAnimation<HTMLUListElement>({
@@ -421,6 +515,7 @@ SelectDropdown.displayName = 'SelectDropdown';
 type SelectOptionProps = ComponentProps<'li'> & {
   testId?: string;
   value: string | number;
+  disabled?: boolean;
   children: ReactNode;
 };
 
@@ -428,6 +523,7 @@ const SelectOption = ({
   value,
   className,
   children,
+  disabled,
   testId = 'select-option',
   ...props
 }: SelectOptionProps) => {
@@ -440,10 +536,16 @@ const SelectOption = ({
     setFocusRef({ index: value, element: optionRef.current });
   }, [setFocusRef, value]);
 
+  const handleClick = useCallback(() => {
+    if (disabled) return;
+    handleOptions(value);
+  }, [disabled, value, handleOptions]);
+
   return (
     <li
       ref={optionRef}
       data-testid={testId}
+      aria-disabled={disabled ? 'true' : undefined}
       aria-selected={isSelected ? 'true' : 'false'}
       id={idMap[`option-${value}`]}
       className={cn(
@@ -453,8 +555,8 @@ const SelectOption = ({
         className
       )}
       role="option"
-      tabIndex={isFocused ? 0 : -1}
-      onClick={() => handleOptions(value)}
+      tabIndex={disabled ? -1 : isFocused ? 0 : -1}
+      onClick={handleClick}
       {...props}
     >
       <span className="ui:flex-1 ui:truncate">{children}</span>
