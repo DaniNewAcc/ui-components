@@ -297,7 +297,9 @@ describe('Tabs', () => {
 
   describe('Focus management based on tabbing direction', () => {
     it('should move focus to the tab panel when Tab key is pressed on the active tab trigger', async () => {
+      vi.useFakeTimers();
       renderTabs();
+
       const tabsTrigger = screen.getByRole('tab', { name: 'Trigger 1' });
       const panel = screen.getByRole('tabpanel');
 
@@ -305,7 +307,7 @@ describe('Tabs', () => {
         tabsTrigger.focus();
       });
 
-      fireEvent.keyDown(tabsTrigger, { key: 'Tab' });
+      userEvent.tab();
 
       await act(async () => {
         vi.advanceTimersByTime(0);
@@ -314,13 +316,15 @@ describe('Tabs', () => {
       expect(panel).toHaveFocus();
     });
 
-    it('should move focus to the previous focusable element when Shift+Tab is pressed on TabsList', () => {
+    it('should move focus to the previous focusable element when Shift+Tab is pressed on TabsList', async () => {
       renderTabs();
 
       const tabsList = screen.getByTestId('tabslist');
       tabsList.focus();
 
       fireEvent.keyDown(tabsList, { key: 'Tab', shiftKey: true });
+
+      expect(tabsList).not.toHaveFocus();
     });
   });
 });
