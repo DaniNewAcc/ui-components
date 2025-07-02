@@ -209,8 +209,10 @@ const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
     const mergedRefs = useMergedRefs(animationRef, containerRef, ref);
     useAutoFocus(isOpen && shouldRender, containerRef);
 
-    const handleKeyDown = useCallback(
-      (e: KeyboardEvent) => {
+    useEffect(() => {
+      if (!isOpen) return;
+
+      const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           e.stopPropagation();
           onClose();
@@ -219,18 +221,14 @@ const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
           e.preventDefault();
           moveFocus(e.shiftKey ? 'previous' : 'next');
         }
-      },
-      [moveFocus, onClose]
-    );
+      };
 
-    useEffect(() => {
-      if (isOpen) {
-        document.addEventListener('keydown', handleKeyDown);
-        return () => {
-          document.removeEventListener('keydown', handleKeyDown);
-        };
-      }
-    }, [isOpen, handleKeyDown]);
+      document.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [isOpen, onClose, moveFocus]);
 
     return (
       <Animate
