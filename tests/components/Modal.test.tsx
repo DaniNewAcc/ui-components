@@ -214,7 +214,7 @@ describe('Modal', () => {
   });
 
   describe('Keyboard Navigation', () => {
-    it('calls onClose when Escape key is pressed', async () => {
+    it('should call onClose when Escape key is pressed', async () => {
       const onClose = vi.fn();
       renderModal({ isOpen: true, onClose: onClose });
 
@@ -226,9 +226,9 @@ describe('Modal', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('moves focus between focusable elements when Tab and Shift+Tab are pressed', async () => {
+    it('should move focus between focusable elements when Tab and Shift+Tab are pressed', async () => {
       render(
-        <Modal onClose={() => {}}>
+        <Modal>
           <Modal.Trigger testId="trigger">
             <button>Open</button>
           </Modal.Trigger>
@@ -256,7 +256,6 @@ describe('Modal', () => {
         expect(document.activeElement).toBe(btn2);
       });
 
-      // Fire Shift+Tab keydown to move focus backward
       fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab' });
       await waitFor(() => {
         expect(document.activeElement).toBe(btn1);
