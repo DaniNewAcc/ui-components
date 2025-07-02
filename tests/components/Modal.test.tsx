@@ -261,5 +261,50 @@ describe('Modal', () => {
         expect(document.activeElement).toBe(btn1);
       });
     });
+
+    it('should loop focus backwards with Shift+Tab', async () => {
+      render(
+        <Modal>
+          <Modal.Trigger testId="trigger">
+            <button>Open</button>
+          </Modal.Trigger>
+          <Modal.Portal>
+            <Modal.Content testId="content">
+              <button data-testid="btn1">Button 1</button>
+              <button data-testid="btn2">Button 2</button>
+              <Modal.Close data-testid="close" />
+            </Modal.Content>
+          </Modal.Portal>
+        </Modal>
+      );
+
+      fireEvent.click(screen.getByTestId('trigger'));
+
+      const btn1 = screen.getByTestId('btn1');
+      const btn2 = screen.getByTestId('btn2');
+      const closeBtn = screen.getByTestId('close');
+
+      // Start with last focusable
+      closeBtn.focus();
+      expect(document.activeElement).toBe(closeBtn);
+
+      // Shift+Tab → should move focus to btn2
+      fireEvent.keyDown(closeBtn, { key: 'Tab', code: 'Tab', shiftKey: true });
+      await waitFor(() => {
+        expect(document.activeElement).toBe(btn2);
+      });
+
+      // Shift+Tab → should move focus to btn1
+      fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab', shiftKey: true });
+      await waitFor(() => {
+        expect(document.activeElement).toBe(btn1);
+      });
+
+      // Shift+Tab → loop back to close button
+      fireEvent.keyDown(btn1, { key: 'Tab', code: 'Tab', shiftKey: true });
+      await waitFor(() => {
+        expect(document.activeElement).toBe(closeBtn);
+      });
+    });
   });
 });
