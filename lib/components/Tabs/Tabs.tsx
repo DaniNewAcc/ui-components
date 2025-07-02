@@ -1,3 +1,4 @@
+import useFocusVisible from '@/hooks/useFocusVisible';
 import useKeyboardNavigation from '@/hooks/useKeyboardNavigation';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { cn } from '@/utils/cn';
@@ -70,6 +71,12 @@ const Tabs = ({
   const [activeTab, setActiveTab] = useState<number | string>(defaultValue);
   const [tabbingDirection, setTabbingDirection] = useState<TabbingDirection>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    if (focusedIndex !== null) {
+      setActiveTab(focusedIndex);
+    }
+  }, [focusedIndex]);
 
   useEffect(() => {
     if (tabbingDirection !== null) {
@@ -258,23 +265,13 @@ const TabsTrigger = ({
     setTabbingDirection,
     setFocusRef,
   } = useTabsContext();
-  const [isFocusVisible, setIsFocusVisible] = useState<boolean>(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const isClickingRef = useRef<boolean>(false);
-
   const triggerId = `trigger-${value}`;
   const contentId = `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
   const isFirst = isActive && focusedIndex === null;
-
-  const handleMouseDown = useCallback(() => {
-    isClickingRef.current = true;
-    setIsFocusVisible(false);
-    setTimeout(() => {
-      isClickingRef.current = false;
-    }, 0);
-  }, []);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const { isFocusVisible, handleBlur, handleFocus, handleMouseDown } = useFocusVisible(inputMode);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -282,20 +279,6 @@ const TabsTrigger = ({
     setFocusedIndex(value);
     setTabbingDirection(null);
   }, [disabled, setActiveTab, setFocusedIndex, setTabbingDirection, value]);
-
-  const handleFocus = useCallback(() => {
-    if (!disabled) {
-      if (focusedIndex === null) {
-        setFocusedIndex(value);
-      }
-      setActiveTab(value);
-    }
-    setIsFocusVisible(!isClickingRef.current && inputMode === 'keyboard');
-  }, [disabled, inputMode, value]);
-
-  const handleBlur = useCallback(() => {
-    setIsFocusVisible(false);
-  }, []);
 
   useEffect(() => {
     if (triggerRef.current) {
@@ -321,7 +304,7 @@ const TabsTrigger = ({
         {
           'ui:bg-primary-50 ui:text-primary-600':
             (isFocused && inputMode === 'keyboard') || isActive,
-          'ui:border-primary-600': isFocusVisible,
+          'ui:focus-visible:border-primary-600': isFocusVisible,
           'ui:focus-visible:ring-0': !isFocusVisible,
           'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
           [`ui:last:${orientation === 'vertical' ? 'rounded-bl-md' : 'rounded-tr-sm'}`]: true,
@@ -351,27 +334,12 @@ type TabsContentProps = ComponentProps<'div'> & {
 };
 
 const TabsContent = ({ value, className, children, ...props }: TabsContentProps) => {
-  const { panelRefs, activeTab, tabbingDirection, focusedIndex, orientation, setTabbingDirection } =
-    useTabsContext();
+  const { activeTab, focusedIndex, orientation } = useTabsContext();
   const triggerId = `trigger-${value}`;
   const contentId = `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
-
   const panelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    panelRefs.current[Number(activeTab)] = panelRef.current;
-    if (isActive && isFocused && tabbingDirection === 'forward' && panelRef.current) {
-      setTimeout(() => {
-        panelRef.current?.focus();
-      }, 0);
-    }
-  }, [activeTab, isFocused, isActive, tabbingDirection]);
-
-  const handleFocus = useCallback(() => {
-    setTabbingDirection(null);
-  }, [setTabbingDirection]);
 
   return (
     <>
@@ -393,7 +361,6 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
             'ui:flex-1 ui:overflow-y-auto',
             className
           )}
-          onFocus={handleFocus}
           {...props}
         >
           {children}
