@@ -1,3 +1,4 @@
+import useComponentIds from '@/hooks/useComponentIds';
 import useFocusVisible from '@/hooks/useFocusVisible';
 import useKeyboardNavigation from '@/hooks/useKeyboardNavigation';
 import useRovingFocus from '@/hooks/useRovingFocus';
@@ -5,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { ButtonVariants, TabsListVariants, TabsVariants } from '@/utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import React, {
+  Children,
   ComponentProps,
   ComponentPropsWithoutRef,
   createContext,
@@ -12,6 +14,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -41,6 +44,7 @@ type TabsContextProps = {
   tabbingDirection: TabbingDirection;
   inputMode: string;
   panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  idMap: Record<string, string>;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -72,6 +76,18 @@ const Tabs = ({
   const [tabbingDirection, setTabbingDirection] = useState<TabbingDirection>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const idKeys = useMemo(() => {
+    const values = Children.toArray(children)
+      .filter(React.isValidElement)
+      .filter(child => child.type === Tabs.Trigger || child.type === Tabs.Content)
+      .map(child => (child.props as any).value)
+      .filter((v): v is number | string => v !== undefined && v !== null);
+
+    return ['list', ...values.map(v => `trigger-${v}`), ...values.map(v => `content-${v}`)];
+  }, [children]);
+
+  const idMap = useComponentIds('tabs', idKeys);
+
   useEffect(() => {
     if (focusedIndex !== null) {
       setActiveTab(focusedIndex);
@@ -93,6 +109,7 @@ const Tabs = ({
     orientation,
     tabbingDirection,
     inputMode,
+    idMap,
     setTabbingDirection,
     setActiveTab,
     setFocusRef,
@@ -146,6 +163,7 @@ const TabsList = ({ variant, className, children, testId, ...props }: TabsListPr
     hasPadding,
     panelRefs,
     orientation,
+    idMap,
     moveFocus,
     moveToStart,
     moveToEnd,
@@ -213,10 +231,11 @@ const TabsList = ({ variant, className, children, testId, ...props }: TabsListPr
   return (
     <div
       data-testid={testId}
-      role="tablist"
-      aria-activedescendant={`trigger-${activeTab}`}
-      aria-orientation={orientation}
+      id={idMap['list']}
+      aria-activedescendant={idMap[`trigger-${activeTab}`]}
       aria-label="Tabs"
+      aria-orientation={orientation}
+      role="tablist"
       className={cn(
         TabsListVariants({ variant }),
         `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
@@ -260,13 +279,14 @@ const TabsTrigger = ({
     hasPadding,
     orientation,
     inputMode,
+    idMap,
     setActiveTab,
     setFocusedIndex,
     setTabbingDirection,
     setFocusRef,
   } = useTabsContext();
-  const triggerId = `trigger-${value}`;
-  const contentId = `content-${value}`;
+  const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
+  const contentId = idMap[`content-${value}`] ?? `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
   const isFirst = isActive && focusedIndex === null;
@@ -334,9 +354,9 @@ type TabsContentProps = ComponentProps<'div'> & {
 };
 
 const TabsContent = ({ value, className, children, ...props }: TabsContentProps) => {
-  const { activeTab, focusedIndex, orientation } = useTabsContext();
-  const triggerId = `trigger-${value}`;
-  const contentId = `content-${value}`;
+  const { activeTab, focusedIndex, orientation, idMap } = useTabsContext();
+  const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
+  const contentId = idMap[`content-${value}`] ?? `content-${value}`;
   const isActive = activeTab === value;
   const isFocused = focusedIndex === value;
   const panelRef = useRef<HTMLDivElement | null>(null);
