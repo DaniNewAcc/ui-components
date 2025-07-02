@@ -13,6 +13,7 @@ import React, {
   cloneElement,
   ComponentPropsWithoutRef,
   createContext,
+  forwardRef,
   isValidElement,
   ReactNode,
   useCallback,
@@ -197,80 +198,70 @@ type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
-const ModalContent = ({
-  AnimateProps,
-  className,
-  testId,
-  children,
-  ...props
-}: ModalContentProps) => {
-  const { isOpen, onClose } = useModalContext();
-  const duration = AnimateProps?.duration ?? 300;
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const { moveFocus } = useTrapFocus({ containerRef, loop: true });
-  const {
-    ref: animationRef,
-    shouldRender,
-    maxHeight,
-  } = useSyncAnimation({
-    isOpen: isOpen,
-    duration,
-  });
-  const mergedRefs = useMergedRefs(animationRef, containerRef);
-  useAutoFocus(isOpen && shouldRender, containerRef);
+const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
+  ({ AnimateProps, className, testId, children, ...props }, ref) => {
+    const { isOpen, onClose } = useModalContext();
+    const duration = AnimateProps?.duration ?? 300;
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const { moveFocus } = useTrapFocus({ containerRef, loop: true });
+    const { ref: animationRef, shouldRender, maxHeight } = useSyncAnimation({ isOpen, duration });
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose();
+    const mergedRefs = useMergedRefs(animationRef, containerRef, ref);
+    useAutoFocus(isOpen && shouldRender, containerRef);
+
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          onClose();
+        }
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          moveFocus(e.shiftKey ? 'previous' : 'next');
+        }
+      },
+      [moveFocus, onClose]
+    );
+
+    useEffect(() => {
+      if (isOpen) {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+          document.removeEventListener('keydown', handleKeyDown);
+        };
       }
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        moveFocus(e.shiftKey ? 'previous' : 'next');
-      }
-    },
-    [moveFocus, onClose]
-  );
+    }, [isOpen, handleKeyDown]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [isOpen, handleKeyDown]);
-
-  return (
-    <Animate
-      isVisible={isOpen}
-      preset="modal"
-      className={cn(
-        'ui:relative ui:z-50 ui:w-full ui:max-w-lg ui:rounded ui:bg-white ui:p-6 ui:shadow-lg',
-        className
-      )}
-    >
-      {shouldRender && (
-        <div
-          ref={mergedRefs}
-          data-testid={testId}
-          role="document"
-          style={{
-            maxHeight: `${maxHeight}px`,
-            transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
-            opacity: isOpen ? 1 : 0,
-            visibility: isOpen ? 'visible' : 'hidden',
-          }}
-          tabIndex={-1}
-          {...props}
-        >
-          {children}
-        </div>
-      )}
-    </Animate>
-  );
-};
+    return (
+      <Animate
+        isVisible={isOpen}
+        preset="modal"
+        className={cn(
+          'ui:relative ui:z-50 ui:w-full ui:max-w-lg ui:rounded ui:bg-white ui:p-6 ui:shadow-lg',
+          className
+        )}
+      >
+        {shouldRender && (
+          <div
+            ref={mergedRefs}
+            data-testid={testId}
+            role="document"
+            style={{
+              maxHeight: `${maxHeight}px`,
+              transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+              opacity: isOpen ? 1 : 0,
+              visibility: isOpen ? 'visible' : 'hidden',
+            }}
+            tabIndex={-1}
+            {...props}
+          >
+            {children}
+          </div>
+        )}
+      </Animate>
+    );
+  }
+);
 
 ModalContent.displayName = 'ModalContent';
 Modal.Content = ModalContent;
@@ -340,54 +331,50 @@ type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
     asChild?: boolean;
   };
 
-const ModalClose = ({
-  variant,
-  size,
-  intent,
-  rounded,
-  testId,
-  className,
-  asChild = false,
-  children,
-  ...props
-}: ModalCloseProps) => {
-  const { onClose } = useModalContext();
+const ModalClose = forwardRef<HTMLButtonElement, ModalCloseProps>(
+  (
+    { variant, size, intent, rounded, testId, className, asChild = false, children, ...props },
+    ref
+  ) => {
+    const { onClose } = useModalContext();
 
-  const handleClick = (e: React.MouseEvent) => {
-    onClose();
-    if (isValidElement(children) && typeof children.props?.onClick === 'function') {
-      children.props.onClick(e);
+    const handleClick = (e: React.MouseEvent) => {
+      onClose();
+      if (isValidElement(children) && typeof children.props?.onClick === 'function') {
+        children.props.onClick(e);
+      }
+    };
+
+    if (asChild && isValidElement(children)) {
+      return cloneElement(children, {
+        onClick: handleClick,
+        ...props,
+      });
     }
-  };
 
-  if (asChild && isValidElement(children)) {
-    return cloneElement(children, {
-      onClick: handleClick,
-      ...props,
-    });
+    return (
+      <Button
+        type="button"
+        ref={ref}
+        intent={'icon'}
+        rounded={'full'}
+        size={'sm'}
+        variant={'unstyled'}
+        aria-label="Close modal"
+        onClick={onClose}
+        data-testid={testId}
+        className={cn(
+          ButtonVariants({ variant, size, intent, rounded }),
+          'ui:absolute ui:top-4 ui:right-4 ui:z-60 ui:text-gray-500 ui:hover:bg-gray-100',
+          className
+        )}
+        {...props}
+      >
+        <XMarkIcon className="ui:h-5 ui:w-5" aria-hidden="true" />
+      </Button>
+    );
   }
-
-  return (
-    <Button
-      type="button"
-      intent={'icon'}
-      rounded={'full'}
-      size={'sm'}
-      variant={'unstyled'}
-      aria-label="Close modal"
-      onClick={onClose}
-      data-testid={testId}
-      className={cn(
-        ButtonVariants({ variant, size, intent, rounded }),
-        'ui:absolute ui:top-4 ui:right-4 ui:z-60 ui:text-gray-500 ui:hover:bg-gray-100',
-        className
-      )}
-      {...props}
-    >
-      <XMarkIcon className="ui:h-5 ui:w-5" aria-hidden="true" />
-    </Button>
-  );
-};
+);
 
 ModalClose.displayName = 'ModalClose';
 Modal.Close = ModalClose;
