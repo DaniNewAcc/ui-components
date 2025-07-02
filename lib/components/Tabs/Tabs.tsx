@@ -311,6 +311,7 @@ const TabsTrigger = ({
       size={'sm'}
       aria-controls={contentId}
       aria-disabled={disabled}
+      aria-expanded={isActive}
       aria-selected={isActive}
       id={triggerId}
       role="tab"
@@ -377,7 +378,9 @@ const TabsContent = ({ value, className, children, ...props }: TabsContentProps)
       {isActive ? (
         <div
           ref={panelRef}
+          aria-hidden={!isActive}
           aria-labelledby={triggerId}
+          aria-live="polite"
           hidden={!isActive}
           role="tabpanel"
           id={contentId}
