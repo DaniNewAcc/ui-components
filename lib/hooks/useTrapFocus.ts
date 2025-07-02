@@ -32,7 +32,10 @@ const useTrapFocus = ({ containerRef, loop = true }: TrapFocusProps) => {
       if (focusables.length === 0) return;
 
       const activeElement = document.activeElement;
-      const currentIndex = focusables.indexOf(activeElement as HTMLElement);
+      let currentIndex = focusables.indexOf(activeElement as HTMLElement);
+      if (currentIndex === -1) {
+        currentIndex = direction === 'next' ? -1 : 0;
+      }
 
       let nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
 
