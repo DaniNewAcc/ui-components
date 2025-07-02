@@ -6,6 +6,10 @@ vi.mock('@/components/Animate', () => {
   };
 });
 
+vi.mock('@/hooks/useComponentIds', () => ({
+  default: () => ({}),
+}));
+
 import { Tabs } from '@/components';
 import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
@@ -325,6 +329,28 @@ describe('Tabs', () => {
       fireEvent.keyDown(tabsList, { key: 'Tab', shiftKey: true });
 
       expect(tabsList).not.toHaveFocus();
+    });
+  });
+
+  describe('idMap Behavior', () => {
+    it('should fallback to default IDs when hook returns no IDs', () => {
+      render(
+        <Tabs defaultValue={1}>
+          <Tabs.List>
+            <Tabs.Trigger value={1}>Trigger 1</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value={1}>Content 1</Tabs.Content>
+        </Tabs>
+      );
+
+      const trigger = screen.getByRole('tab');
+      const content = screen.getByRole('tabpanel');
+
+      expect(trigger).toHaveAttribute('id', 'trigger-1');
+      expect(content).toHaveAttribute('id', 'content-1');
+
+      expect(trigger).toHaveAttribute('aria-controls', 'content-1');
+      expect(content).toHaveAttribute('aria-labelledby', 'trigger-1');
     });
   });
 });
