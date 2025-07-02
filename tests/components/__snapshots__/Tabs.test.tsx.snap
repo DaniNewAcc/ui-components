@@ -7,7 +7,6 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
     data-testid="tabsgroup"
   >
     <div
-      aria-activedescendant="trigger-1"
       aria-label="Tabs"
       aria-orientation="horizontal"
       class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent ui:flex-row"
@@ -16,39 +15,55 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
     >
       <button
         aria-controls="content-1"
+        aria-expanded="true"
+        aria-live="polite"
         aria-selected="true"
         class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:bg-primary-50 ui:text-primary-600 ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        data-testid="button"
         id="trigger-1"
         role="tab"
         tabindex="0"
         type="button"
       >
         <span
-          class=""
+          class="ui:inline-flex ui:items-center ui:gap-2"
         >
-          Trigger 
-          1
+          <span
+            class=""
+          >
+            Trigger 
+            1
+          </span>
         </span>
       </button>
       <button
         aria-controls="content-2"
+        aria-expanded="false"
+        aria-live="polite"
         aria-selected="false"
         class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        data-testid="button"
         id="trigger-2"
         role="tab"
         tabindex="-1"
         type="button"
       >
         <span
-          class=""
+          class="ui:inline-flex ui:items-center ui:gap-2"
         >
-          Trigger 
-          2
+          <span
+            class=""
+          >
+            Trigger 
+            2
+          </span>
         </span>
       </button>
     </div>
     <div
+      aria-hidden="false"
       aria-labelledby="trigger-1"
+      aria-live="polite"
       class="ui:flex-1 ui:overflow-y-auto"
       id="content-1"
       role="tabpanel"
