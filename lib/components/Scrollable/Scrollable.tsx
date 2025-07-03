@@ -63,7 +63,8 @@ const Scrollable = <C extends React.ElementType = 'div'>({
       const clientHeight = target.clientHeight;
 
       const isAtTop = scrollTop <= scrollThreshold;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - scrollThreshold;
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+      const isAtBottom = Math.abs(distanceFromBottom) <= scrollThreshold;
 
       const scrollDirection: ScrollDirection =
         scrollTop > previousScrollTop.current ? 'down' : 'up';
