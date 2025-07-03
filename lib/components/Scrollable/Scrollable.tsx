@@ -12,6 +12,8 @@ type ScrollableProps<C extends React.ElementType> = VariantProps<typeof Scrollab
       as?: C;
       testId?: string;
       scrollThreshold?: number;
+      scrollThrottleDelay?: number;
+      disableScrollThrottle?: boolean;
       onScroll?: (e: UIEvent<HTMLElement>) => void;
       onReachTop?: () => void;
       onReachBottom?: () => void;
@@ -24,6 +26,8 @@ const Scrollable = <C extends React.ElementType = 'div'>({
   scrollBar,
   smooth = false,
   scrollThreshold = 10,
+  scrollThrottleDelay = 100,
+  disableScrollThrottle = false,
   onScroll,
   onReachTop,
   onReachBottom,
@@ -53,7 +57,9 @@ const Scrollable = <C extends React.ElementType = 'div'>({
     [scrollThreshold, onScroll, onReachTop, onReachBottom]
   );
 
-  const handleScroll = useThrottle(internalScrollHandler, 100);
+  const handleScroll = disableScrollThrottle
+    ? internalScrollHandler
+    : useThrottle(internalScrollHandler, scrollThrottleDelay);
 
   return (
     <Tag
