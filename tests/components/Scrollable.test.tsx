@@ -40,6 +40,30 @@ describe('Scrollable', () => {
     expect(onScroll).toHaveBeenCalled();
   });
 
+  it('should call onScrollStateChange with correct scroll state', () => {
+    const onScrollStateChange = vi.fn();
+    const scrollable = setup({ onScrollStateChange, scrollThreshold: 50 });
+
+    Object.defineProperty(scrollable, 'scrollTop', { value: 100, writable: true });
+    Object.defineProperty(scrollable, 'scrollHeight', { value: 1000 });
+    Object.defineProperty(scrollable, 'clientHeight', { value: 200 });
+
+    fireEvent.scroll(scrollable);
+
+    expect(onScrollStateChange).toHaveBeenCalledTimes(1);
+
+    const callArg = onScrollStateChange.mock.calls[0][0];
+
+    expect(callArg).toMatchObject({
+      scrollTop: 100,
+      scrollHeight: 1000,
+      clientHeight: 200,
+      isAtTop: false,
+      isAtBottom: false,
+      scrollDirection: 'down',
+    });
+  });
+
   it('should call onReachTop when scrolled to top', () => {
     const onReachTop = vi.fn();
     const scrollable = setup({ onReachTop, scrollThreshold: 50 });
