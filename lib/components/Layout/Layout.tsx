@@ -1,25 +1,33 @@
 import { cn } from '@/utils/cn';
-import { PolymorphicComponent } from '@utils/types';
+import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
+import { ElementType } from 'react';
 
-type LayoutProps<C extends React.ElementType> = PolymorphicComponent<
-  C,
-  { as?: C; testId?: string; isCentered?: boolean; overflowHidden?: boolean }
->;
+type LayoutOwnProps = {
+  testId?: string;
+  isCentered?: boolean;
+  overflowHidden?: boolean;
+};
 
-const Layout = <C extends React.ElementType = 'div'>({
-  as,
-  testId = 'layout',
-  className,
-  isCentered = true,
-  overflowHidden = false,
-  children,
-  ...props
-}: LayoutProps<C>) => {
-  const Tag = as || 'div';
+type LayoutProps<C extends ElementType> = PolymorphicProps<C, LayoutOwnProps>;
+
+function LayoutRender<C extends ElementType = 'div'>(
+  {
+    as,
+    testId = 'layout',
+    className,
+    isCentered = true,
+    overflowHidden = false,
+    children,
+    ...props
+  }: LayoutProps<C>,
+  ref: PolymorphicRef<C>
+) {
+  const Tag = as ?? 'div';
 
   return (
     <Tag
       data-testid={testId}
+      ref={ref}
       className={cn(
         'ui:flex ui:min-h-screen ui:w-full ui:grow-0 ui:flex-col',
         isCentered ? 'ui:items-center ui:justify-center' : 'ui:items-start ui:justify-start',
@@ -31,8 +39,8 @@ const Layout = <C extends React.ElementType = 'div'>({
       {children}
     </Tag>
   );
-};
+}
 
-Layout.displayName = 'Layout';
+const Layout = forwardRefWithAs(LayoutRender, 'Layout');
 
 export default Layout;
