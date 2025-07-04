@@ -14,30 +14,28 @@ type TextProps<C extends ElementType> = PolymorphicProps<
   TextOwnProps & VariantProps<typeof TextVariants>
 >;
 
-const Text = forwardRefWithAs(
-  <C extends React.ElementType = 'span'>(
-    { as, variant, level, className, children, testId, ...props }: TextProps<C>,
-    ref: PolymorphicRef<C>
-  ) => {
-    let Tag: React.ElementType = as || 'span';
+function TextRender<C extends React.ElementType = 'span'>(
+  { as, variant, level, className, children, testId, ...props }: TextProps<C>,
+  ref: PolymorphicRef<C>
+) {
+  let Tag: React.ElementType = as || 'span';
 
-    if (!as && variant === 'heading') {
-      Tag = level ? `h${level}` : 'h1';
-    }
-
-    return (
-      <Tag
-        data-testid={testId}
-        ref={ref}
-        className={cn(TextVariants({ variant }), className)}
-        {...props}
-      >
-        {children}
-      </Tag>
-    );
+  if (!as && variant === 'heading') {
+    Tag = level ? `h${level}` : 'h1';
   }
-);
 
-Text.displayName = 'Text';
+  return (
+    <Tag
+      data-testid={testId}
+      ref={ref}
+      className={cn(TextVariants({ variant }), className)}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+const Text = forwardRefWithAs(TextRender, 'Text');
 
 export default Text;
