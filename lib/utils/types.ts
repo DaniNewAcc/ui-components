@@ -1,10 +1,4 @@
-import React, {
-  ComponentPropsWithoutRef,
-  ElementType,
-  ForwardRefExoticComponent,
-  ReactElement,
-  RefAttributes,
-} from 'react';
+import React, { ComponentPropsWithoutRef, ElementType, forwardRef, ReactElement } from 'react';
 
 // allow to dynamically define the native html element for the component
 type AsProp<C extends React.ElementType> = {
@@ -38,19 +32,18 @@ export type PolymorphicProps<C extends ElementType, Props = {}> = Props & {
 } & Omit<ComponentPropsWithoutRef<C>, keyof Props | 'as'>;
 
 // Helper function to allow correct ref forwarding in polymorphic component
-export function forwardRefWithAs<C extends ElementType, Props = {}>(
-  render: (props: PolymorphicProps<C, Props>, ref: PolymorphicRef<C>) => ReactElement | null
-) {
-  type Comp<AsC extends ElementType = C> = PolymorphicProps<AsC, Props> & {
-    ref?: PolymorphicRef<AsC>;
-  };
+export function forwardRefWithAs<
+  RenderFn extends <C extends ElementType = 'div'>(
+    props: PolymorphicProps<C, any>,
+    ref: PolymorphicRef<C>
+  ) => ReactElement | null,
+>(render: RenderFn, displayName?: string) {
+  type Props = Parameters<RenderFn>[0];
+  type RefType = Parameters<RenderFn>[1];
 
-  type CompType = <AsC extends ElementType = C>(props: Comp<AsC>) => ReactElement | null;
+  const component = forwardRef((props: Props, ref: RefType) => render(props, ref));
 
-  const Forwarded = React.forwardRef(render as any) as ForwardRefExoticComponent<
-    PolymorphicProps<C, Props> & RefAttributes<PolymorphicRef<C>>
-  > &
-    CompType;
+  (component as any).displayName = displayName || render.name || 'Component';
 
-  return Forwarded;
+  return component as unknown as RenderFn;
 }
