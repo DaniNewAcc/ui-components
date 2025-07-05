@@ -1,18 +1,21 @@
 import { SeparatorVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
-import { PolymorphicComponent } from '@utils/types';
+import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { VariantProps } from 'class-variance-authority';
 
-type SeparatorProps<C extends React.ElementType> = VariantProps<typeof SeparatorVariants> &
-  PolymorphicComponent<C, { as?: C; testId?: string }>;
+type SeparatorOwnProps = {
+  testId?: string;
+};
 
-const Separator = <C extends React.ElementType = 'hr'>({
-  testId,
-  as,
-  orientation,
-  className,
-  ...props
-}: SeparatorProps<C>) => {
+type SeparatorProps<C extends React.ElementType> = PolymorphicProps<
+  C,
+  SeparatorOwnProps & VariantProps<typeof SeparatorVariants>
+>;
+
+function SeparatorRender<C extends React.ElementType = 'hr'>(
+  { testId, as, orientation, className, ...props }: SeparatorProps<C>,
+  ref: PolymorphicRef<C>
+) {
   let Tag = as ?? (orientation === 'horizontal' ? 'hr' : 'div');
 
   const isSemantic = 'aria-label' in props || 'aria-labelledby' in props;
@@ -20,14 +23,15 @@ const Separator = <C extends React.ElementType = 'hr'>({
   return (
     <Tag
       data-testid={testId}
+      ref={ref}
       role="separator"
       aria-hidden={isDecorative ? true : undefined}
       className={cn(SeparatorVariants({ orientation }), className)}
       {...props}
     />
   );
-};
+}
 
-Separator.displayName = 'Separator';
+const Separator = forwardRefWithAs(SeparatorRender, 'Separator');
 
 export default Separator;
