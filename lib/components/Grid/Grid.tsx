@@ -1,36 +1,39 @@
 import { GridVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
-import { PolymorphicComponent } from '@utils/types';
+import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { VariantProps } from 'class-variance-authority';
 import { ElementType } from 'react';
 import Scrollable from '../Scrollable/Scrollable';
 
-type GridProps<C extends React.ElementType> = VariantProps<typeof GridVariants> &
-  PolymorphicComponent<
-    C,
-    {
-      as?: C;
-      testId?: string;
-      scrollable?: boolean;
-      scrollableProps?: React.ComponentProps<typeof Scrollable>;
-    }
-  >;
+type GridOwnProps = {
+  testId?: string;
+  scrollable?: boolean;
+  scrollableProps?: React.ComponentProps<typeof Scrollable>;
+};
 
-const Grid = <C extends ElementType = 'div'>({
-  as,
-  scrollable = false,
-  scrollableProps,
-  display,
-  gap,
-  colGap,
-  rowGap,
-  gridCol,
-  gridRow,
-  testId = 'grid',
-  className,
-  children,
-  ...props
-}: GridProps<C>) => {
+type GridProps<C extends React.ElementType> = PolymorphicProps<
+  C,
+  GridOwnProps & VariantProps<typeof GridVariants>
+>;
+
+function GridRender<C extends ElementType = 'div'>(
+  {
+    as,
+    scrollable = false,
+    scrollableProps,
+    display,
+    gap,
+    colGap,
+    rowGap,
+    gridCol,
+    gridRow,
+    testId = 'grid',
+    className,
+    children,
+    ...props
+  }: GridProps<C>,
+  ref: PolymorphicRef<C>
+) {
   const Tag = as || 'div';
 
   const gridClasses = cn(
@@ -39,7 +42,7 @@ const Grid = <C extends ElementType = 'div'>({
   );
 
   const gridContent = (
-    <Tag data-testid={testId} className={gridClasses} {...props}>
+    <Tag data-testid={testId} ref={ref} className={gridClasses} {...props}>
       {children}
     </Tag>
   );
@@ -56,8 +59,8 @@ const Grid = <C extends ElementType = 'div'>({
   }
 
   return gridContent;
-};
+}
 
-Grid.displayName = 'Grid';
+const Grid = forwardRefWithAs(GridRender, 'Grid');
 
 export default Grid;
