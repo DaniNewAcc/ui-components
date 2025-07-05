@@ -1,40 +1,43 @@
 import { FlexVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
-import { PolymorphicComponent } from '@utils/types';
+import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { VariantProps } from 'class-variance-authority';
 import Scrollable from '../Scrollable/Scrollable';
 
-type FlexProps<C extends React.ElementType> = VariantProps<typeof FlexVariants> &
-  PolymorphicComponent<
-    C,
-    {
-      as?: C;
-      testId?: string;
-      scrollable?: boolean;
-      scrollableProps?: React.ComponentProps<typeof Scrollable>;
-    }
-  >;
+type FlexOwnProps = {
+  testId?: string;
+  scrollable?: boolean;
+  scrollableProps?: React.ComponentProps<typeof Scrollable>;
+};
 
-const Flex = <C extends React.ElementType = 'div'>({
-  as,
-  scrollable = false,
-  scrollableProps,
-  align,
-  direction,
-  flexWrap,
-  gap,
-  justify,
-  testId = 'flex',
-  className,
-  children,
-  ...props
-}: FlexProps<C>) => {
+type FlexProps<C extends React.ElementType> = PolymorphicProps<
+  C,
+  FlexOwnProps & VariantProps<typeof FlexVariants>
+>;
+
+function FlexRender<C extends React.ElementType = 'div'>(
+  {
+    as,
+    scrollable = false,
+    scrollableProps,
+    align,
+    direction,
+    flexWrap,
+    gap,
+    justify,
+    testId = 'flex',
+    className,
+    children,
+    ...props
+  }: FlexProps<C>,
+  ref: PolymorphicRef<C>
+) {
   const Tag = as || 'div';
 
   const flexClasses = cn(FlexVariants({ align, direction, flexWrap, gap, justify }), className);
 
   const flexContent = (
-    <Tag data-testid={testId} className={flexClasses} {...props}>
+    <Tag data-testid={testId} ref={ref} className={flexClasses} {...props}>
       {children}
     </Tag>
   );
@@ -51,8 +54,8 @@ const Flex = <C extends React.ElementType = 'div'>({
   }
 
   return flexContent;
-};
+}
 
-Flex.displayName = 'Flex';
+const Flex = forwardRefWithAs(FlexRender, 'Flex');
 
 export default Flex;
