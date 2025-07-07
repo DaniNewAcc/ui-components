@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithoutRef, ElementType, forwardRef, ReactElement } from 'react';
+import React from 'react';
 
 // allow to dynamically define the native html element for the component
 type AsProp<C extends React.ElementType> = {
@@ -27,23 +27,28 @@ export type PolymorphicComponentWithRef<
 > = PolymorphicComponent<C, Props> & { ref?: PolymorphicRef<C> };
 
 // Helper type to merge your custom props with the props of the `as` element, omitting conflicts
-export type PolymorphicProps<C extends ElementType, Props = {}> = Props & {
+export type PolymorphicProps<C extends React.ElementType, Props = {}> = Props & {
   as?: C;
-} & Omit<ComponentPropsWithoutRef<C>, keyof Props | 'as'>;
+} & Omit<React.ComponentPropsWithoutRef<C>, keyof Props | 'as'>;
 
 // Helper function to allow correct ref forwarding in polymorphic component
-export function forwardRefWithAs<
-  RenderFn extends <C extends ElementType = 'div'>(
-    props: PolymorphicProps<C, any>,
+export function forwardRefWithAs<DefaultTag extends React.ElementType, Props = {}>(
+  render: <C extends React.ElementType = DefaultTag>(
+    props: PolymorphicProps<C, Props>,
     ref: PolymorphicRef<C>
-  ) => ReactElement | null,
->(render: RenderFn, displayName?: string) {
-  type Props = Parameters<RenderFn>[0];
-  type RefType = Parameters<RenderFn>[1];
+  ) => React.ReactElement | null,
+  displayName?: string
+) {
+  const component = React.forwardRef((props: any, ref: React.Ref<any>) => render(props, ref)) as <
+    C extends React.ElementType = DefaultTag,
+  >(
+    props: PolymorphicProps<C, Props> & {
+      ref?: PolymorphicRef<C>;
+    }
+  ) => React.ReactElement | null;
 
-  const component = forwardRef((props: Props, ref: RefType) => render(props, ref));
+  (component as typeof component & { displayName?: string }).displayName =
+    displayName ?? render.name ?? 'Component';
 
-  (component as any).displayName = displayName || render.name || 'Component';
-
-  return component as unknown as RenderFn;
+  return component;
 }
