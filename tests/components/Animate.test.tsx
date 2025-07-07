@@ -18,7 +18,7 @@ describe('Animate', () => {
   describe('Rendering', () => {
     it('should render correctly when isVisible is true', () => {
       render(
-        <Animate isVisible={true} testId="animate">
+        <Animate isVisible={true}>
           <div>Content</div>
         </Animate>
       );
@@ -30,7 +30,7 @@ describe('Animate', () => {
 
     it('should not render the content when isVisible is false', () => {
       render(
-        <Animate isVisible={false} testId="animate">
+        <Animate isVisible={false}>
           <div>Content</div>
         </Animate>
       );
@@ -47,7 +47,7 @@ describe('Animate', () => {
 
     it('should apply values from a valid preset', () => {
       render(
-        <Animate preset="toast" isVisible={true} testId="animate">
+        <Animate preset="toast" isVisible={true}>
           <div>Toast content</div>
         </Animate>
       );
@@ -59,7 +59,7 @@ describe('Animate', () => {
 
     it('should fallback when unknown preset key is used', () => {
       render(
-        <Animate preset={'nonexistent' as any} isVisible={true} testId="animate">
+        <Animate preset={'nonexistent' as any} isVisible={true}>
           <div>Invalid preset content</div>
         </Animate>
       );
@@ -70,7 +70,7 @@ describe('Animate', () => {
 
     it('should allow overriding preset props with direct props', () => {
       render(
-        <Animate preset="toast" type="zoomIn" duration={1000} isVisible={true} testId="animate">
+        <Animate preset="toast" type="zoomIn" duration={1000} isVisible={true}>
           <div>Overridden</div>
         </Animate>
       );
@@ -80,7 +80,7 @@ describe('Animate', () => {
     });
   });
 
-  describe('Animate useHeightAnimation behavior', () => {
+  describe('Animate animateHeight behavior', () => {
     beforeEach(() => {
       vi.mocked(useReduceMotion).mockReturnValue(false);
       vi.useFakeTimers();
@@ -90,17 +90,17 @@ describe('Animate', () => {
       vi.useRealTimers();
     });
 
-    it('should call startOpenAnimation and onStart when isVisible is true with useHeightAnimation', () => {
+    it('should call startOpenAnimation and onStart when isVisible is true with animateHeight', () => {
       const onStart = vi.fn();
 
       const { rerender } = render(
-        <Animate isVisible={false} useHeightAnimation onStart={onStart} testId="animate">
+        <Animate isVisible={false} animateHeight onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
 
       rerender(
-        <Animate isVisible={true} useHeightAnimation onStart={onStart} testId="animate">
+        <Animate isVisible={true} animateHeight onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
@@ -112,17 +112,17 @@ describe('Animate', () => {
       expect(onStart).toHaveBeenCalled();
     });
 
-    it('should call startCloseAnimation and onStart when isVisible is false with useHeightAnimation', () => {
+    it('should call startCloseAnimation and onStart when isVisible is false with animateHeight', () => {
       const onStart = vi.fn();
 
       const { rerender } = render(
-        <Animate isVisible={true} useHeightAnimation onStart={onStart} testId="animate">
+        <Animate isVisible={true} animateHeight onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
 
       rerender(
-        <Animate isVisible={false} useHeightAnimation onStart={onStart} testId="animate">
+        <Animate isVisible={false} animateHeight onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
@@ -140,7 +140,7 @@ describe('Animate', () => {
       vi.mocked(useReduceMotion).mockReturnValue(true);
 
       render(
-        <Animate isVisible={true} testId="animate">
+        <Animate isVisible={true}>
           <div>Content</div>
         </Animate>
       );
@@ -153,7 +153,7 @@ describe('Animate', () => {
       vi.mocked(useReduceMotion).mockReturnValue(false);
 
       render(
-        <Animate isVisible={true} testId="animate" type={'slideDown'}>
+        <Animate isVisible={true} type={'slideDown'}>
           <div>Content</div>
         </Animate>
       );
@@ -174,7 +174,7 @@ describe('Animate', () => {
 
         return (
           <div>
-            <Animate ref={ref} isVisible={true} useHeightAnimation testId="animate">
+            <Animate ref={ref} isVisible={true} animateHeight>
               <div style={{ height: 100 }}>Content</div>
             </Animate>
             <button onClick={() => ref.current?.startOpenAnimation()}>Open</button>
@@ -200,7 +200,7 @@ describe('Animate', () => {
 
         return (
           <div>
-            <Animate ref={ref} isVisible={true} useHeightAnimation testId="animate">
+            <Animate ref={ref} isVisible={true} animateHeight>
               <div style={{ height: 100 }}>Content</div>
             </Animate>
             <button onClick={() => ref.current?.startCloseAnimation()}>Close</button>
@@ -234,13 +234,13 @@ describe('Animate', () => {
       vi.useFakeTimers();
 
       const { rerender } = render(
-        <Animate isVisible={true} duration={300} delay={0} testId="animate">
+        <Animate isVisible={true} duration={300} delay={0}>
           <div>Content</div>
         </Animate>
       );
 
       rerender(
-        <Animate isVisible={false} duration={300} delay={0} testId="animate">
+        <Animate isVisible={false} duration={300} delay={0}>
           <div>Content</div>
         </Animate>
       );
@@ -257,7 +257,7 @@ describe('Animate', () => {
 
     it('should not apply animation class when disabled is true', () => {
       render(
-        <Animate isVisible={true} disabled={true} type="slideDown" testId="animate">
+        <Animate isVisible={true} disabled={true} type="slideDown">
           <div>Content</div>
         </Animate>
       );
@@ -266,9 +266,9 @@ describe('Animate', () => {
       expect(animate.className).not.toMatch(/ui-animate/);
     });
 
-    it('should not apply maxHeight or transition styles when useHeightAnimation is false', () => {
+    it('should not apply maxHeight or transition styles when animateHeight is false', () => {
       render(
-        <Animate isVisible={true} testId="animate" duration={300}>
+        <Animate isVisible={true} duration={300}>
           <div>Content</div>
         </Animate>
       );
@@ -284,14 +284,7 @@ describe('Animate', () => {
       const onEnd = vi.fn();
 
       render(
-        <Animate
-          isVisible={true}
-          duration={500}
-          delay={200}
-          onStart={onStart}
-          onEnd={onEnd}
-          testId="animate-test"
-        >
+        <Animate isVisible={true} duration={500} delay={200} onStart={onStart} onEnd={onEnd}>
           <div>Content</div>
         </Animate>
       );
@@ -320,7 +313,7 @@ describe('Animate', () => {
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
       const { unmount } = render(
-        <Animate isVisible={true} duration={500} delay={300} testId="animate-test">
+        <Animate isVisible={true} duration={500} delay={300}>
           <div>Content</div>
         </Animate>
       );
@@ -332,7 +325,7 @@ describe('Animate', () => {
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
       const { unmount } = render(
-        <Animate isVisible={true} duration={500} delay={100} testId="animate-test">
+        <Animate isVisible={true} duration={500} delay={100}>
           <div>Content</div>
         </Animate>
       );
