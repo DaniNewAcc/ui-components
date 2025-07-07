@@ -41,6 +41,6 @@ function LayoutRender<C extends ElementType = 'div'>(
   );
 }
 
-const Layout = forwardRefWithAs(LayoutRender, 'Layout');
+const Layout = forwardRefWithAs<'div', LayoutOwnProps>(LayoutRender, 'Layout');
 
 export default Layout;
