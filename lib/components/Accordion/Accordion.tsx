@@ -1,14 +1,18 @@
+import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   ComponentProps,
+  ComponentPropsWithoutRef,
   createContext,
+  forwardRef,
   ReactNode,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -51,7 +55,7 @@ const Accordion = ({
   defaultValue,
   multiple = false,
   loop = true,
-  testId,
+  testId = 'accordion',
   className,
   valueKey,
   labelKey,
@@ -86,22 +90,36 @@ const Accordion = ({
     setActiveItems(prev => toggleItem(prev, index));
   }
 
-  const contextValue = {
-    activeItems,
-    focusedIndex,
-    valueKey,
-    labelKey,
-    isMultiple: multiple,
-    isFocused,
-    setIsFocused,
-    setFocusRef,
-    setFocusedIndex,
-    setActiveItems,
-    handleAccordion,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-  };
+  const contextValue = useMemo(
+    () => ({
+      activeItems,
+      focusedIndex,
+      valueKey,
+      labelKey,
+      isMultiple: multiple,
+      isFocused,
+      setIsFocused,
+      setFocusRef,
+      setFocusedIndex,
+      setActiveItems,
+      handleAccordion,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+    }),
+    [
+      activeItems,
+      focusedIndex,
+      valueKey,
+      labelKey,
+      multiple,
+      isFocused,
+      handleAccordion,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+    ]
+  );
 
   return (
     <AccordionContext.Provider value={contextValue}>
@@ -138,96 +156,103 @@ type AccordionItemContextProps = {
 
 const AccordionItemContext = createContext<AccordionItemContextProps | null>(null);
 
-type AccordionItemProps = ComponentProps<'div'> & {
+type AccordionItemProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   value: string | number;
+  headingLevel?: number;
   children: ReactNode;
 };
 
-const AccordionItem = ({ testId, value, className, children, ...props }: AccordionItemProps) => {
-  const {
-    focusedIndex,
-    setIsFocused,
-    setFocusedIndex,
-    setFocusRef,
-    handleAccordion,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-  } = useAccordionContext();
+const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
+  ({ headingLevel = 3, testId = 'accordion-item', value, className, children, ...props }, ref) => {
+    const {
+      focusedIndex,
+      setIsFocused,
+      setFocusedIndex,
+      setFocusRef,
+      handleAccordion,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+    } = useAccordionContext();
 
-  const itemRef = useRef<HTMLDivElement | null>(null);
+    const itemRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (itemRef.current) {
-      setFocusRef({ index: value, element: itemRef.current });
-    }
-  }, [value, focusedIndex, setFocusRef]);
+    const mergedRefs = useMergedRefs(itemRef, ref);
 
-  const handleFocus = useCallback(() => {
-    setFocusedIndex(value);
-    setIsFocused(true);
-  }, [value, setFocusedIndex]);
-
-  const handleBlur = useCallback(() => {
-    setIsFocused(false);
-  }, []);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          moveFocus('next');
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          moveFocus('previous');
-          break;
-        case 'Home':
-          e.preventDefault();
-          moveToStart();
-          break;
-        case 'End':
-          e.preventDefault();
-          moveToEnd();
-          break;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          handleAccordion(value);
-          break;
-        default:
-          break;
+    useEffect(() => {
+      if (itemRef.current) {
+        setFocusRef({ index: value, element: itemRef.current });
       }
-    },
-    [value, handleAccordion, moveFocus, moveToStart, moveToEnd]
-  );
+    }, [value, focusedIndex, setFocusRef]);
 
-  const contextValue = {
-    value,
-  };
+    const handleFocus = useCallback(() => {
+      setFocusedIndex(value);
+      setIsFocused(true);
+    }, [value, setFocusedIndex]);
 
-  return (
-    <AccordionItemContext.Provider value={contextValue}>
-      <div
-        data-testid={testId}
-        ref={itemRef}
-        tabIndex={0}
-        className={cn(
-          'ui:relative ui:border-b ui:border-gray-300 ui:first:rounded-t-md ui:last:rounded-b-md ui:focus-within:ring-2 ui:focus-within:ring-primary-500 ui:focus-within:outline-none',
-          className
-        )}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
-        {...props}
-      >
-        {children}
-      </div>
-    </AccordionItemContext.Provider>
-  );
-};
+    const handleBlur = useCallback(() => {
+      setIsFocused(false);
+    }, []);
+
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            moveFocus('next');
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            moveFocus('previous');
+            break;
+          case 'Home':
+            e.preventDefault();
+            moveToStart();
+            break;
+          case 'End':
+            e.preventDefault();
+            moveToEnd();
+            break;
+          case 'Enter':
+          case ' ':
+            e.preventDefault();
+            handleAccordion(value);
+            break;
+          default:
+            break;
+        }
+      },
+      [value, handleAccordion, moveFocus, moveToStart, moveToEnd]
+    );
+
+    const contextValue = {
+      value,
+    };
+
+    return (
+      <AccordionItemContext.Provider value={contextValue}>
+        <div
+          data-testid={testId}
+          ref={mergedRefs}
+          role="heading"
+          aria-level={headingLevel}
+          tabIndex={0}
+          className={cn(
+            'ui:relative ui:border-b ui:border-gray-300 ui:first:rounded-t-md ui:last:rounded-b-md ui:focus-within:ring-2 ui:focus-within:ring-primary-500 ui:focus-within:outline-none',
+            className
+          )}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
+          {...props}
+        >
+          {children}
+        </div>
+      </AccordionItemContext.Provider>
+    );
+  }
+);
 
 Accordion.Item = AccordionItem;
 AccordionItem.displayName = 'AccordionItem';
@@ -246,104 +271,105 @@ function useAccordionItemContext() {
 
 // ------------ Trigger component
 
-type AccordionTriggerProps = ComponentProps<'div'> & {
+type AccordionTriggerProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   iconProps?: React.ComponentProps<typeof ChevronDownIcon>;
   children: ReactNode;
 };
 
-const AccordionTrigger = ({
-  iconProps,
-  testId,
-  className,
-  children,
-  ...props
-}: AccordionTriggerProps) => {
-  const { activeItems, handleAccordion } = useAccordionContext();
-  const { value } = useAccordionItemContext();
+const AccordionTrigger = forwardRef<React.ElementRef<'div'>, AccordionTriggerProps>(
+  ({ iconProps, testId = 'accordion-trigger', className, children, ...props }, ref) => {
+    const { activeItems, handleAccordion } = useAccordionContext();
+    const { value } = useAccordionItemContext();
 
-  const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
-  const contentId = `content-${value}`;
+    const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
+    const triggerId = `trigger-${value}`;
+    const contentId = `content-${value}`;
 
-  return (
-    <Flex
-      data-testid={testId}
-      aria-controls={contentId}
-      aria-expanded={isOpen ? 'true' : 'false'}
-      align={'center'}
-      justify={'between'}
-      role="button"
-      {...props}
-      className={cn('ui:h-10 ui:border-gray-300 ui:px-4 ui:py-2 ui:not-last:border-b', className)}
-      onClick={() => handleAccordion(value)}
-    >
-      {children}
-      <ChevronDownIcon
-        className={cn(
-          'ui:h-5 ui:w-5 ui:transform ui:transition-transform ui:duration-300',
-          { 'ui:rotate-180': isOpen },
-          iconProps?.className
-        )}
-        {...iconProps}
-      />
-    </Flex>
-  );
-};
+    return (
+      <Flex
+        data-testid={testId}
+        ref={ref}
+        aria-controls={contentId}
+        aria-expanded={isOpen ? 'true' : 'false'}
+        id={triggerId}
+        align={'center'}
+        justify={'between'}
+        role="button"
+        {...props}
+        className={cn('ui:h-10 ui:border-gray-300 ui:px-4 ui:py-2 ui:not-last:border-b', className)}
+        onClick={() => handleAccordion(value)}
+      >
+        {children}
+        <ChevronDownIcon
+          className={cn(
+            'ui:h-5 ui:w-5 ui:transform ui:transition-transform ui:duration-300',
+            { 'ui:rotate-180': isOpen },
+            iconProps?.className
+          )}
+          {...iconProps}
+        />
+      </Flex>
+    );
+  }
+);
 
 Accordion.Trigger = AccordionTrigger;
 AccordionTrigger.displayName = 'AccordionTrigger';
 
 // ------------ Content component
 
-type AccordionContentProps = ComponentProps<'div'> & {
+type AccordionContentProps = ComponentPropsWithoutRef<'div'> & {
   animateProps?: Partial<AnimateProps>;
   testId?: string;
   children: ReactNode;
 };
 
-const AccordionContent = ({
-  animateProps,
-  testId,
-  className,
-  children,
-  ...props
-}: AccordionContentProps) => {
-  const { activeItems } = useAccordionContext();
-  const { value } = useAccordionItemContext();
+const AccordionContent = forwardRef<React.ElementRef<'div'>, AccordionContentProps>(
+  ({ animateProps, testId = 'accordion-content', className, children, ...props }, ref) => {
+    const { activeItems } = useAccordionContext();
+    const { value } = useAccordionItemContext();
 
-  const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
-  const triggerId = `trigger-${value}`;
-  const duration = animateProps?.duration ?? 300;
+    const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
+    const triggerId = `trigger-${value}`;
+    const duration = animateProps?.duration ?? 300;
 
-  const { ref, shouldRender, maxHeight } = useSyncAnimation({
-    isOpen,
-    duration,
-  });
+    const {
+      ref: animationRef,
+      shouldRender,
+      maxHeight,
+    } = useSyncAnimation({
+      isOpen,
+      duration,
+    });
 
-  return (
-    <Animate isVisible={isOpen} type={'slideDown'} exitType={'fadeOut'} {...animateProps}>
-      {shouldRender && (
-        <div
-          ref={ref}
-          data-testid={testId}
-          aria-hidden={!isOpen ? 'true' : 'false'}
-          aria-labelledby={triggerId}
-          role="region"
-          className={cn('ui:relative ui:overflow-hidden', className)}
-          style={{
-            maxHeight: `${maxHeight}px`,
-            transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
-            opacity: isOpen ? 1 : 0,
-            visibility: isOpen ? 'visible' : 'hidden',
-          }}
-          {...props}
-        >
-          <div className="ui:px-4 ui:py-2">{children}</div>
-        </div>
-      )}
-    </Animate>
-  );
-};
+    const mergedRefs = useMergedRefs(animationRef, ref);
+
+    return (
+      <Animate isVisible={isOpen} type={'slideDown'} exitType={'fadeOut'} {...animateProps}>
+        {shouldRender && (
+          <div
+            data-testid={testId}
+            ref={mergedRefs}
+            aria-hidden={!isOpen ? 'true' : 'false'}
+            aria-labelledby={triggerId}
+            role="region"
+            className={cn('ui:relative ui:overflow-hidden', className)}
+            style={{
+              maxHeight: `${maxHeight}px`,
+              transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+              opacity: isOpen ? 1 : 0,
+              visibility: isOpen ? 'visible' : 'hidden',
+            }}
+            {...props}
+          >
+            <div className="ui:px-4 ui:py-2">{children}</div>
+          </div>
+        )}
+      </Animate>
+    );
+  }
+);
 
 Accordion.Content = AccordionContent;
 AccordionContent.displayName = 'AccordionContent';
