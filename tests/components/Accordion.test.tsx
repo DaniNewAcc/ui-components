@@ -21,18 +21,11 @@ const renderAccordion = (
 ) => {
   const { animateProps } = options;
   return render(
-    <Accordion
-      items={count}
-      defaultValue={defaultValue ?? undefined}
-      multiple={multiple}
-      testId="accordiongroup"
-    >
+    <Accordion items={count} defaultValue={defaultValue ?? undefined} multiple={multiple}>
       {Array.from({ length: count }, (_, i) => (
-        <Accordion.Item key={i} value={i + 1} testId="accordionItem">
-          <Accordion.Trigger testId="trigger">Trigger {i + 1}</Accordion.Trigger>
-          <Accordion.Content testId="content" animateProps={animateProps}>
-            Content {i + 1}
-          </Accordion.Content>
+        <Accordion.Item key={i} value={i + 1}>
+          <Accordion.Trigger>Trigger {i + 1}</Accordion.Trigger>
+          <Accordion.Content animateProps={animateProps}>Content {i + 1}</Accordion.Content>
         </Accordion.Item>
       ))}
     </Accordion>
@@ -101,10 +94,10 @@ describe('Accordion', () => {
     it('should render correctly', () => {
       renderAccordion(1);
 
-      expect(screen.getByTestId('accordiongroup')).toBeInTheDocument();
+      expect(screen.getByTestId('accordion')).toBeInTheDocument();
 
-      const trigger = screen.getAllByTestId('trigger');
-      const content = screen.getAllByTestId('content');
+      const trigger = screen.getAllByTestId('accordion-trigger');
+      const content = screen.getAllByTestId('accordion-content');
 
       expect(trigger[0]).toBeInTheDocument();
       expect(content[0]).toBeInTheDocument();
@@ -116,14 +109,12 @@ describe('Accordion', () => {
         <Accordion items={1} defaultValue={1}>
           <Accordion.Item value={1}>
             <Accordion.Trigger>Trigger</Accordion.Trigger>
-            <Accordion.Content testId="content" animateProps={{ duration: 500 }}>
-              Content
-            </Accordion.Content>
+            <Accordion.Content animateProps={{ duration: 500 }}>Content</Accordion.Content>
           </Accordion.Item>
         </Accordion>
       );
 
-      const content = screen.getByTestId('content');
+      const content = screen.getByTestId('accordion-content');
       expect(content).toHaveStyle(
         'transition: max-height 500ms ease, opacity 500ms ease, visibility 500ms ease'
       );
@@ -136,7 +127,7 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, null, true);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
       expect(screen.queryByText('Content 1')).toBeNull();
 
@@ -158,7 +149,7 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, null, false);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
       expect(screen.queryByText('Content 1')).toBeNull();
 
@@ -180,7 +171,7 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, false);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
       expect(screen.getByText('Content 1')).toBeVisible();
       expect(screen.queryByText('Content 2')).toBeNull();
@@ -205,16 +196,16 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, true);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
-      let content = screen.queryAllByTestId('content');
+      let content = screen.queryAllByTestId('accordion-content');
       expect(content[0]).toHaveTextContent('Content 1');
 
       await act(async () => {
         await user.click(trigger[1]);
       });
 
-      content = screen.queryAllByTestId('content');
+      content = screen.queryAllByTestId('accordion-content');
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
@@ -222,7 +213,7 @@ describe('Accordion', () => {
         await user.click(trigger[2]);
       });
 
-      content = screen.queryAllByTestId('content');
+      content = screen.queryAllByTestId('accordion-content');
       expect(content[2]).toHaveTextContent('Content 3');
     });
 
@@ -231,16 +222,16 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, true);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
-      let content = screen.queryAllByTestId('content');
+      let content = screen.queryAllByTestId('accordion-content');
       expect(content[0]).toHaveTextContent('Content 1');
 
       await act(async () => {
         await user.click(trigger[1]);
       });
 
-      content = screen.queryAllByTestId('content');
+      content = screen.queryAllByTestId('accordion-content');
       expect(content[0]).toHaveTextContent('Content 1');
       expect(content[1]).toHaveTextContent('Content 2');
 
@@ -248,7 +239,7 @@ describe('Accordion', () => {
         await user.click(trigger[1]);
       });
 
-      content = screen.queryAllByTestId('content');
+      content = screen.queryAllByTestId('accordion-content');
       expect(content[0]).toHaveTextContent('Content 1');
     });
 
@@ -257,7 +248,7 @@ describe('Accordion', () => {
       const user = userEvent.setup({ delay: null });
       renderAccordion(3, 1, false);
 
-      const trigger = screen.getAllByTestId('trigger');
+      const trigger = screen.getAllByTestId('accordion-trigger');
 
       expect(screen.getByText('Content 1')).toBeVisible();
 
@@ -279,7 +270,7 @@ describe('Accordion', () => {
     it('should moves focus to the first item when Home key is pressed', async () => {
       vi.useRealTimers();
       const user = userEvent.setup({ delay: null });
-      const item = screen.getAllByTestId('accordionItem');
+      const item = screen.getAllByTestId('accordion-item');
 
       item[0].focus();
 
@@ -293,7 +284,7 @@ describe('Accordion', () => {
     it('should move focus to the last item when End key is pressed', async () => {
       vi.useRealTimers();
       const user = userEvent.setup({ delay: null });
-      const item = screen.getAllByTestId('accordionItem');
+      const item = screen.getAllByTestId('accordion-item');
 
       item[0].focus();
 
@@ -311,7 +302,7 @@ describe('Accordion', () => {
       });
 
       const user = userEvent.setup({ delay: null });
-      const items = screen.getAllByTestId('accordionItem');
+      const items = screen.getAllByTestId('accordion-item');
 
       await act(async () => {
         items[0].focus();
@@ -351,7 +342,7 @@ describe('Accordion', () => {
       });
 
       const user = userEvent.setup({ delay: null });
-      const item = screen.getAllByTestId('accordionItem');
+      const item = screen.getAllByTestId('accordion-item');
 
       await act(async () => {
         item[0].focus();
@@ -386,7 +377,7 @@ describe('Accordion', () => {
       vi.useRealTimers();
       renderAccordion();
       const user = userEvent.setup({ delay: null });
-      const item = screen.getAllByTestId('accordionItem');
+      const item = screen.getAllByTestId('accordion-item');
       await act(async () => {
         item[1].focus();
       });
@@ -395,14 +386,14 @@ describe('Accordion', () => {
         await user.keyboard('{Enter}');
       });
 
-      expect(screen.getAllByTestId('content')[1]).toBeVisible();
+      expect(screen.getAllByTestId('accordion-content')[1]).toBeVisible();
     });
 
     it('should open accordion with Space key', async () => {
       vi.useRealTimers();
       renderAccordion();
       const user = userEvent.setup({ delay: null });
-      const item = screen.getAllByTestId('accordionItem');
+      const item = screen.getAllByTestId('accordion-item');
       await act(async () => {
         item[1].focus();
       });
@@ -411,7 +402,7 @@ describe('Accordion', () => {
         await user.keyboard(' ');
       });
 
-      expect(screen.getAllByTestId('content')[1]).toBeVisible();
+      expect(screen.getAllByTestId('accordion-content')[1]).toBeVisible();
     });
   });
 });
