@@ -8,12 +8,9 @@ type FlexOwnProps = {
   testId?: string;
   scrollable?: boolean;
   scrollableProps?: React.ComponentProps<typeof Scrollable>;
-};
+} & VariantProps<typeof FlexVariants>;
 
-type FlexProps<C extends React.ElementType> = PolymorphicProps<
-  C,
-  FlexOwnProps & VariantProps<typeof FlexVariants>
->;
+type FlexProps<C extends React.ElementType> = PolymorphicProps<C, FlexOwnProps>;
 
 function FlexRender<C extends React.ElementType = 'div'>(
   {
@@ -56,6 +53,6 @@ function FlexRender<C extends React.ElementType = 'div'>(
   return flexContent;
 }
 
-const Flex = forwardRefWithAs(FlexRender, 'Flex');
+const Flex = forwardRefWithAs<'div', FlexOwnProps>(FlexRender, 'Flex');
 
 export default Flex;
