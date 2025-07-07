@@ -2,17 +2,13 @@ import { TextVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
 import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { VariantProps } from 'class-variance-authority';
-import { ElementType } from 'react';
 
 type TextOwnProps = {
   testId?: string;
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-};
+} & VariantProps<typeof TextVariants>;
 
-type TextProps<C extends ElementType> = PolymorphicProps<
-  C,
-  TextOwnProps & VariantProps<typeof TextVariants>
->;
+type TextProps<C extends React.ElementType> = PolymorphicProps<C, TextOwnProps>;
 
 function TextRender<C extends React.ElementType = 'span'>(
   { as, variant, level, className, children, testId, ...props }: TextProps<C>,
@@ -36,6 +32,6 @@ function TextRender<C extends React.ElementType = 'span'>(
   );
 }
 
-const Text = forwardRefWithAs(TextRender, 'Text');
+const Text = forwardRefWithAs<'span', TextOwnProps>(TextRender, 'Text');
 
 export default Text;
