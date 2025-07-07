@@ -25,34 +25,31 @@ type ScrollableOwnProps = {
   onReachTop?: () => void;
   onReachBottom?: () => void;
   onScrollStateChange?: (state: ScrollState) => void;
-};
+} & VariantProps<typeof ScrollableVariants>;
 
-type ScrollableProps<C extends ElementType> = PolymorphicProps<
-  C,
-  ScrollableOwnProps & VariantProps<typeof ScrollableVariants>
->;
+type ScrollableProps<C extends ElementType> = PolymorphicProps<C, ScrollableOwnProps>;
 
-const Scrollable = forwardRefWithAs(
-  <C extends React.ElementType = 'div'>(
-    {
-      as,
-      direction,
-      scrollBar,
-      smooth = false,
-      scrollThreshold = 10,
-      scrollThrottleDelay = 100,
-      disableScrollThrottle = false,
-      className,
-      children,
-      testId = 'scrollable',
-      onScroll,
-      onReachTop,
-      onReachBottom,
-      onScrollStateChange,
-      ...props
-    }: ScrollableProps<C>,
-    ref: PolymorphicRef<C>
-  ) => {
+function ScrollableRender<C extends React.ElementType = 'div'>(
+  {
+    as,
+    direction,
+    scrollBar,
+    smooth = false,
+    scrollThreshold = 10,
+    scrollThrottleDelay = 100,
+    disableScrollThrottle = false,
+    className,
+    children,
+    testId = 'scrollable',
+    onScroll,
+    onReachTop,
+    onReachBottom,
+    onScrollStateChange,
+    ...props
+  }: ScrollableProps<C>,
+  ref: PolymorphicRef<C>
+) {
+  {
     const Tag = as || 'div';
     const previousScrollTop = useRef<number>(0);
 
@@ -110,8 +107,8 @@ const Scrollable = forwardRefWithAs(
       </Tag>
     );
   }
-);
+}
 
-Scrollable.displayName = 'Scrollable';
+const Scrollable = forwardRefWithAs<'div', ScrollableOwnProps>(ScrollableRender, 'Scrollable');
 
 export default Scrollable;
