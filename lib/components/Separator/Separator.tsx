@@ -5,12 +5,9 @@ import { VariantProps } from 'class-variance-authority';
 
 type SeparatorOwnProps = {
   testId?: string;
-};
+} & VariantProps<typeof SeparatorVariants>;
 
-type SeparatorProps<C extends React.ElementType> = PolymorphicProps<
-  C,
-  SeparatorOwnProps & VariantProps<typeof SeparatorVariants>
->;
+type SeparatorProps<C extends React.ElementType> = PolymorphicProps<C, SeparatorOwnProps>;
 
 function SeparatorRender<C extends React.ElementType = 'hr'>(
   { testId, as, orientation, className, ...props }: SeparatorProps<C>,
@@ -32,6 +29,6 @@ function SeparatorRender<C extends React.ElementType = 'hr'>(
   );
 }
 
-const Separator = forwardRefWithAs(SeparatorRender, 'Separator');
+const Separator = forwardRefWithAs<'hr', SeparatorOwnProps>(SeparatorRender, 'Separator');
 
 export default Separator;
