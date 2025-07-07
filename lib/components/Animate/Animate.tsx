@@ -18,12 +18,13 @@ export type AnimateProps = ComponentPropsWithoutRef<'div'> &
     children?: ReactNode;
     className?: string;
     disabled?: boolean;
-    onStart?: () => void;
-    onEnd?: () => void;
     isVisible: boolean;
     testId?: string;
-    useHeightAnimation?: boolean;
+    animateHeight?: boolean;
     style?: React.CSSProperties;
+    onStart?: () => void;
+    onEnd?: () => void;
+    onAnimationChange?: (isAnimating: boolean) => void;
   };
 
 const Animate = forwardRef<AnimateMethods, AnimateProps>(
@@ -40,19 +41,22 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       exitEasing: userExitEasing,
       className,
       disabled,
-      onStart,
-      onEnd,
       children,
       isVisible,
-      testId,
-      useHeightAnimation = false,
+      testId = 'animate',
+      animateHeight = false,
       style,
+      onStart,
+      onEnd,
+      onAnimationChange,
       ...props
     }: AnimateProps,
     forwardedRef
   ) => {
     // check if a preset is entered by the user
-    const presetValues = preset ? (animationPresets[preset] ?? {}) : {};
+    const presetValues: Partial<VariantProps<typeof AnimationVariants>> = preset
+      ? (animationPresets[preset] ?? {})
+      : {};
 
     // make styles inside the preset overridable by the user
     const type = userType ?? presetValues.type;
@@ -105,31 +109,40 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
 
     // delay enter and exit animation for preventing flickers and layout shifts
     useLayoutEffect(() => {
+      let timeout: ReturnType<typeof setTimeout>;
       let animationTimeout: ReturnType<typeof setTimeout>;
 
-      const timeoutRef = setTimeout(() => {
-        if (isVisible) {
-          setIsAnimating(true);
-          onStart?.();
-          if (useHeightAnimation) startOpenAnimation();
-        } else {
-          setIsAnimating(true);
-          onStart?.();
-          if (useHeightAnimation) startCloseAnimation();
+      timeout = setTimeout(() => {
+        setIsAnimating(prev => {
+          if (!prev) {
+            onStart?.();
+            onAnimationChange?.(true);
+            return true;
+          }
+          return prev;
+        });
+
+        if (animateHeight) {
+          if (isVisible) {
+            startOpenAnimation();
+          } else {
+            startCloseAnimation();
+          }
         }
 
         animationTimeout = setTimeout(() => {
           resetAnimation();
           setShouldRender(isVisible);
           onEnd?.();
+          onAnimationChange?.(false);
         }, duration);
       }, delay);
 
       return () => {
-        clearTimeout(timeoutRef);
-        clearTimeout(animationTimeout); // <- this will now always run
+        clearTimeout(timeout);
+        clearTimeout(animationTimeout);
       };
-    }, [isVisible, duration, onStart, onEnd, delay, useHeightAnimation]);
+    }, [isVisible, animateHeight, duration, delay, onStart, onEnd, onAnimationChange]);
 
     if (!shouldRender) return null;
 
@@ -154,10 +167,10 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
           'is-animating-exit': isAnimating && !isVisible,
         })}
         style={{
-          overflow: useHeightAnimation ? 'hidden' : undefined,
-          maxHeight: useHeightAnimation ? maxHeight : undefined,
-          transition: useHeightAnimation ? `max-height ${duration}ms ease` : undefined,
-          willChange: useHeightAnimation ? 'max-height' : undefined,
+          overflow: animateHeight ? 'hidden' : undefined,
+          maxHeight: animateHeight ? maxHeight : undefined,
+          transition: animateHeight ? `max-height ${duration}ms ease` : undefined,
+          willChange: animateHeight ? 'max-height' : undefined,
           ...style,
         }}
         {...props}
