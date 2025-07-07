@@ -1,15 +1,15 @@
 import { FooterVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
 import { VariantProps } from 'class-variance-authority';
-import { ComponentProps, forwardRef, ReactNode } from 'react';
+import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type FooterProps = ComponentProps<'footer'> &
+type FooterProps = ComponentPropsWithoutRef<'footer'> &
   VariantProps<typeof FooterVariants> & {
     testId?: string;
     children: ReactNode;
   };
 
-const Footer = forwardRef<HTMLElement, FooterProps>(
+const Footer = forwardRef<React.ElementRef<'footer'>, FooterProps>(
   ({ bgColor, padding, gap, height, className, testId = 'footer', children, ...props }, ref) => {
     return (
       <footer
