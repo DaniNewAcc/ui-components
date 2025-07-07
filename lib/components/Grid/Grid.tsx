@@ -9,12 +9,9 @@ type GridOwnProps = {
   testId?: string;
   scrollable?: boolean;
   scrollableProps?: React.ComponentProps<typeof Scrollable>;
-};
+} & VariantProps<typeof GridVariants>;
 
-type GridProps<C extends React.ElementType> = PolymorphicProps<
-  C,
-  GridOwnProps & VariantProps<typeof GridVariants>
->;
+type GridProps<C extends React.ElementType> = PolymorphicProps<C, GridOwnProps>;
 
 function GridRender<C extends ElementType = 'div'>(
   {
@@ -61,6 +58,6 @@ function GridRender<C extends ElementType = 'div'>(
   return gridContent;
 }
 
-const Grid = forwardRefWithAs(GridRender, 'Grid');
+const Grid = forwardRefWithAs<'div', GridOwnProps>(GridRender, 'Grid');
 
 export default Grid;
