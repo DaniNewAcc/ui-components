@@ -256,7 +256,7 @@ describe('Modal', () => {
         expect(document.activeElement).toBe(btn2);
       });
 
-      fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab' });
+      fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab', shiftKey: true });
       await waitFor(() => {
         expect(document.activeElement).toBe(btn1);
       });
@@ -284,23 +284,19 @@ describe('Modal', () => {
       const btn2 = screen.getByTestId('btn2');
       const closeBtn = screen.getByTestId('close');
 
-      // Start with last focusable
       closeBtn.focus();
       expect(document.activeElement).toBe(closeBtn);
 
-      // Shift+Tab → should move focus to btn2
       fireEvent.keyDown(closeBtn, { key: 'Tab', code: 'Tab', shiftKey: true });
       await waitFor(() => {
         expect(document.activeElement).toBe(btn2);
       });
 
-      // Shift+Tab → should move focus to btn1
       fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab', shiftKey: true });
       await waitFor(() => {
         expect(document.activeElement).toBe(btn1);
       });
 
-      // Shift+Tab → loop back to close button
       fireEvent.keyDown(btn1, { key: 'Tab', code: 'Tab', shiftKey: true });
       await waitFor(() => {
         expect(document.activeElement).toBe(closeBtn);
