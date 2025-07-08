@@ -1,3 +1,4 @@
+import useComponentIds from '@/hooks/useComponentIds';
 import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
@@ -12,6 +13,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -38,6 +40,7 @@ type AccordionContextProps = {
   isMultiple: boolean;
   isFocused: boolean;
   focusedIndex: string | number | null;
+  baseId: string;
   setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
   setFocusedIndex: React.Dispatch<React.SetStateAction<string | number | null>>;
   setActiveItems: React.Dispatch<React.SetStateAction<ActiveItems>>;
@@ -62,6 +65,7 @@ const Accordion = ({
   children,
   ...props
 }: AccordionProps) => {
+  const baseId = useId();
   const [activeItems, setActiveItems] = useState<ActiveItems>(
     defaultValue ?? (multiple ? [] : null)
   );
@@ -98,6 +102,7 @@ const Accordion = ({
       labelKey,
       isMultiple: multiple,
       isFocused,
+      baseId,
       setIsFocused,
       setFocusRef,
       setFocusedIndex,
@@ -114,6 +119,7 @@ const Accordion = ({
       labelKey,
       multiple,
       isFocused,
+      baseId,
       handleAccordion,
       moveFocus,
       moveToStart,
@@ -152,6 +158,7 @@ function useAccordionContext() {
 
 type AccordionItemContextProps = {
   value: string | number;
+  idMap: Record<string, string>;
 };
 
 const AccordionItemContext = createContext<AccordionItemContextProps | null>(null);
@@ -167,6 +174,7 @@ const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
   ({ headingLevel = 3, testId = 'accordion-item', value, className, children, ...props }, ref) => {
     const {
       focusedIndex,
+      baseId,
       setIsFocused,
       setFocusedIndex,
       setFocusRef,
@@ -179,6 +187,8 @@ const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
     const itemRef = useRef<HTMLDivElement | null>(null);
 
     const mergedRefs = useMergedRefs(itemRef, ref);
+
+    const idMap = useComponentIds(baseId, [`trigger-${value}`, `content-${value}`]);
 
     useEffect(() => {
       if (itemRef.current) {
@@ -228,6 +238,7 @@ const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
 
     const contextValue = {
       value,
+      idMap,
     };
 
     return (
@@ -280,11 +291,11 @@ type AccordionTriggerProps = ComponentPropsWithoutRef<'div'> & {
 const AccordionTrigger = forwardRef<React.ElementRef<'div'>, AccordionTriggerProps>(
   ({ iconProps, testId = 'accordion-trigger', className, children, ...props }, ref) => {
     const { activeItems, handleAccordion } = useAccordionContext();
-    const { value } = useAccordionItemContext();
+    const { value, idMap } = useAccordionItemContext();
 
     const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
-    const triggerId = `trigger-${value}`;
-    const contentId = `content-${value}`;
+    const triggerId = idMap[`trigger-${value}`];
+    const contentId = idMap[`content-${value}`];
 
     return (
       <Flex
@@ -328,10 +339,10 @@ type AccordionContentProps = ComponentPropsWithoutRef<'div'> & {
 const AccordionContent = forwardRef<React.ElementRef<'div'>, AccordionContentProps>(
   ({ animateProps, testId = 'accordion-content', className, children, ...props }, ref) => {
     const { activeItems } = useAccordionContext();
-    const { value } = useAccordionItemContext();
+    const { value, idMap } = useAccordionItemContext();
 
     const isOpen = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
-    const triggerId = `trigger-${value}`;
+    const triggerId = idMap[`trigger-${value}`];
     const duration = animateProps?.duration ?? 300;
 
     const {
