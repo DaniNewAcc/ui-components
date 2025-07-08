@@ -1,6 +1,7 @@
 import useComponentIds from '@/hooks/useComponentIds';
 import useFocusVisible from '@/hooks/useFocusVisible';
 import useKeyboardNavigation from '@/hooks/useKeyboardNavigation';
+import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { cn } from '@/utils/cn';
 import { ButtonVariants, TabsListVariants, TabsVariants } from '@/utils/variants';
@@ -10,6 +11,7 @@ import React, {
   ComponentProps,
   ComponentPropsWithoutRef,
   createContext,
+  forwardRef,
   ReactNode,
   useCallback,
   useContext,
@@ -151,104 +153,107 @@ function useTabsContext() {
 
 // ------------ List component
 
-type TabsListProps = ComponentProps<'div'> &
+type TabsListProps = ComponentPropsWithoutRef<'div'> &
   VariantProps<typeof TabsListVariants> & {
     children: ReactNode;
     testId?: string;
   };
 
-const TabsList = ({ variant, className, children, testId, ...props }: TabsListProps) => {
-  const {
-    activeTab,
-    hasPadding,
-    panelRefs,
-    orientation,
-    idMap,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-    setTabbingDirection,
-  } = useTabsContext();
+const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
+  ({ variant, className, children, testId, ...props }, ref) => {
+    const {
+      activeTab,
+      hasPadding,
+      panelRefs,
+      orientation,
+      idMap,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+      setTabbingDirection,
+    } = useTabsContext();
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case 'Home': {
-          e.preventDefault();
-          setTabbingDirection(null);
-          moveToStart();
-          break;
-        }
-        case 'End': {
-          e.preventDefault();
-          setTabbingDirection(null);
-          moveToEnd();
-          break;
-        }
-        case 'Tab': {
-          setTabbingDirection(e.shiftKey ? 'backward' : 'forward');
-          break;
-        }
-      }
-      switch (orientation) {
-        case 'horizontal': {
-          switch (e.key) {
-            case 'ArrowRight': {
-              e.preventDefault();
-              setTabbingDirection(null);
-              moveFocus('next');
-              break;
-            }
-            case 'ArrowLeft': {
-              e.preventDefault();
-              setTabbingDirection(null);
-              moveFocus('previous');
-              break;
-            }
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        switch (e.key) {
+          case 'Home': {
+            e.preventDefault();
+            setTabbingDirection(null);
+            moveToStart();
+            break;
           }
-          break;
-        }
-        case 'vertical': {
-          switch (e.key) {
-            case 'ArrowDown':
-              e.preventDefault();
-              setTabbingDirection(null);
-              moveFocus('next');
-              break;
-            case 'ArrowUp':
-              e.preventDefault();
-              setTabbingDirection(null);
-              moveFocus('previous');
-              break;
+          case 'End': {
+            e.preventDefault();
+            setTabbingDirection(null);
+            moveToEnd();
+            break;
           }
-          break;
+          case 'Tab': {
+            setTabbingDirection(e.shiftKey ? 'backward' : 'forward');
+            break;
+          }
         }
-      }
-    },
-    [panelRefs, activeTab, setTabbingDirection, moveFocus, moveToStart, moveToEnd]
-  );
+        switch (orientation) {
+          case 'horizontal': {
+            switch (e.key) {
+              case 'ArrowRight': {
+                e.preventDefault();
+                setTabbingDirection(null);
+                moveFocus('next');
+                break;
+              }
+              case 'ArrowLeft': {
+                e.preventDefault();
+                setTabbingDirection(null);
+                moveFocus('previous');
+                break;
+              }
+            }
+            break;
+          }
+          case 'vertical': {
+            switch (e.key) {
+              case 'ArrowDown':
+                e.preventDefault();
+                setTabbingDirection(null);
+                moveFocus('next');
+                break;
+              case 'ArrowUp':
+                e.preventDefault();
+                setTabbingDirection(null);
+                moveFocus('previous');
+                break;
+            }
+            break;
+          }
+        }
+      },
+      [panelRefs, activeTab, setTabbingDirection, moveFocus, moveToStart, moveToEnd]
+    );
 
-  return (
-    <div
-      data-testid={testId}
-      id={idMap['list']}
-      aria-activedescendant={idMap[`trigger-${activeTab}`]}
-      aria-label="Tabs"
-      aria-orientation={orientation}
-      role="tablist"
-      className={cn(
-        TabsListVariants({ variant }),
-        `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
-        `${orientation === 'vertical' ? 'ui:flex-col' : 'ui:flex-row'}`,
-        className
-      )}
-      onKeyDown={handleKeyDown}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-};
+    return (
+      <div
+        data-testid={testId}
+        ref={ref}
+        id={idMap['list']}
+        aria-activedescendant={idMap[`trigger-${activeTab}`]}
+        aria-label="Tabs"
+        aria-orientation={orientation}
+        role="tablist"
+        className={cn(
+          TabsListVariants({ variant }),
+          `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
+          `${orientation === 'vertical' ? 'ui:flex-col' : 'ui:flex-row'}`,
+          className
+        )}
+        onKeyDown={handleKeyDown}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 Tabs.List = TabsList;
 TabsList.displayName = 'TabsList';
@@ -262,133 +267,129 @@ type TabsTriggerProps = ComponentPropsWithoutRef<'button'> &
     children: ReactNode;
   };
 
-const TabsTrigger = ({
-  disabled,
-  variant,
-  size,
-  intent,
-  rounded,
-  value,
-  className,
-  children,
-  ...props
-}: TabsTriggerProps) => {
-  const {
-    activeTab,
-    focusedIndex,
-    hasPadding,
-    orientation,
-    inputMode,
-    idMap,
-    setActiveTab,
-    setFocusedIndex,
-    setTabbingDirection,
-    setFocusRef,
-  } = useTabsContext();
-  const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
-  const contentId = idMap[`content-${value}`] ?? `content-${value}`;
-  const isActive = activeTab === value;
-  const isFocused = focusedIndex === value;
-  const isFirst = isActive && focusedIndex === null;
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const { isFocusVisible, handleBlur, handleFocus, handleMouseDown } = useFocusVisible(inputMode);
+const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
+  ({ disabled, variant, size, intent, rounded, value, className, children, ...props }, ref) => {
+    const {
+      activeTab,
+      focusedIndex,
+      hasPadding,
+      orientation,
+      inputMode,
+      idMap,
+      setActiveTab,
+      setFocusedIndex,
+      setTabbingDirection,
+      setFocusRef,
+    } = useTabsContext();
+    const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
+    const contentId = idMap[`content-${value}`] ?? `content-${value}`;
+    const isActive = activeTab === value;
+    const isFocused = focusedIndex === value;
+    const isFirst = isActive && focusedIndex === null;
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const mergedRefs = useMergedRefs(triggerRef, ref);
+    const { isFocusVisible, handleBlur, handleFocus, handleMouseDown } = useFocusVisible(inputMode);
 
-  const handleClick = useCallback(() => {
-    if (disabled) return;
-    setActiveTab(value);
-    setFocusedIndex(value);
-    setTabbingDirection(null);
-  }, [disabled, setActiveTab, setFocusedIndex, setTabbingDirection, value]);
+    const handleClick = useCallback(() => {
+      if (disabled) return;
+      setActiveTab(value);
+      setFocusedIndex(value);
+      setTabbingDirection(null);
+    }, [disabled, setActiveTab, setFocusedIndex, setTabbingDirection, value]);
 
-  useEffect(() => {
-    if (triggerRef.current) {
-      setFocusRef({ index: value, element: triggerRef.current });
-    }
-  }, [setFocusRef, value]);
+    useEffect(() => {
+      if (triggerRef.current) {
+        setFocusRef({ index: value, element: triggerRef.current });
+      }
+    }, [setFocusRef, value]);
 
-  return (
-    <Button
-      ref={triggerRef}
-      type="button"
-      variant={'unstyled'}
-      size={'sm'}
-      aria-controls={contentId}
-      aria-disabled={disabled}
-      aria-expanded={isActive}
-      aria-selected={isActive}
-      id={triggerId}
-      role="tab"
-      tabIndex={disabled ? -1 : isFocused || isFirst ? 0 : -1}
-      className={cn(
-        ButtonVariants({ variant, size, intent, rounded }),
-        {
-          'ui:bg-primary-50 ui:text-primary-600':
-            (isFocused && inputMode === 'keyboard') || isActive,
-          'ui:focus-visible:border-primary-600': isFocusVisible,
-          'ui:focus-visible:ring-0': !isFocusVisible,
-          'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
-          [`ui:last:${orientation === 'vertical' ? 'rounded-bl-md' : 'rounded-tr-sm'}`]: true,
-        },
-        'ui:flex-1 ui:first:rounded-tl-sm',
-        className
-      )}
-      onBlur={handleBlur}
-      onClick={handleClick}
-      onFocus={handleFocus}
-      onMouseDown={handleMouseDown}
-      {...props}
-    >
-      {children}
-    </Button>
-  );
-};
+    return (
+      <Button
+        ref={mergedRefs}
+        type="button"
+        variant={'unstyled'}
+        size={'sm'}
+        aria-controls={contentId}
+        aria-disabled={disabled}
+        aria-expanded={isActive}
+        aria-selected={isActive}
+        id={triggerId}
+        role="tab"
+        tabIndex={disabled ? -1 : isFocused || isFirst ? 0 : -1}
+        className={cn(
+          ButtonVariants({ variant, size, intent, rounded }),
+          {
+            'ui:bg-primary-50 ui:text-primary-600':
+              (isFocused && inputMode === 'keyboard') || isActive,
+            'ui:focus-visible:border-primary-600': isFocusVisible,
+            'ui:focus-visible:ring-0': !isFocusVisible,
+            'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
+            [`ui:last:${orientation === 'vertical' ? 'rounded-bl-md' : 'rounded-tr-sm'}`]: true,
+          },
+          'ui:flex-1 ui:first:rounded-tl-sm',
+          className
+        )}
+        onBlur={handleBlur}
+        onClick={handleClick}
+        onFocus={handleFocus}
+        onMouseDown={handleMouseDown}
+        {...props}
+      >
+        {children}
+      </Button>
+    );
+  }
+);
 
 Tabs.Trigger = TabsTrigger;
 TabsTrigger.displayName = 'TabsTrigger';
 
 // ------------ Content component
 
-type TabsContentProps = ComponentProps<'div'> & {
+type TabsContentProps = ComponentPropsWithoutRef<'div'> & {
   value: number | string;
   children: ReactNode;
 };
 
-const TabsContent = ({ value, className, children, ...props }: TabsContentProps) => {
-  const { activeTab, focusedIndex, orientation, idMap } = useTabsContext();
-  const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
-  const contentId = idMap[`content-${value}`] ?? `content-${value}`;
-  const isActive = activeTab === value;
-  const isFocused = focusedIndex === value;
-  const panelRef = useRef<HTMLDivElement | null>(null);
+const TabsContent = forwardRef<React.ElementRef<'div'>, TabsContentProps>(
+  ({ value, className, children, ...props }, ref) => {
+    const { activeTab, focusedIndex, orientation, idMap } = useTabsContext();
+    const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
+    const contentId = idMap[`content-${value}`] ?? `content-${value}`;
+    const isActive = activeTab === value;
+    const isFocused = focusedIndex === value;
+    const panelRef = useRef<HTMLDivElement | null>(null);
+    const mergedRefs = useMergedRefs(panelRef, ref);
 
-  return (
-    <>
-      {isActive ? (
-        <div
-          ref={panelRef}
-          aria-hidden={!isActive}
-          aria-labelledby={triggerId}
-          aria-live="polite"
-          hidden={!isActive}
-          role="tabpanel"
-          id={contentId}
-          tabIndex={0}
-          className={cn(
-            {
-              'ui:w-[250px] ui:px-4': orientation === 'vertical',
-              'ui:z-10': isActive && isFocused,
-            },
-            'ui:flex-1 ui:overflow-y-auto',
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      ) : null}
-    </>
-  );
-};
+    return (
+      <>
+        {isActive ? (
+          <div
+            ref={mergedRefs}
+            aria-hidden={!isActive}
+            aria-labelledby={triggerId}
+            aria-live="polite"
+            hidden={!isActive}
+            role="tabpanel"
+            id={contentId}
+            tabIndex={0}
+            className={cn(
+              {
+                'ui:w-[250px] ui:px-4': orientation === 'vertical',
+                'ui:z-10': isActive && isFocused,
+              },
+              'ui:flex-1 ui:overflow-y-auto',
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </div>
+        ) : null}
+      </>
+    );
+  }
+);
 
 Tabs.Content = TabsContent;
 TabsContent.displayName = 'TabsContent';
