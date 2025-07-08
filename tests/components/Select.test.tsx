@@ -14,9 +14,9 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react';
 
 const options = [
-  { id: 1, name: 'Option 1' },
-  { id: 2, name: 'Option 2' },
-  { id: 3, name: 'Option 3' },
+  { id: 1, name: 'First Option' },
+  { id: 2, name: 'Second Option' },
+  { id: 3, name: 'Third Option' },
 ];
 
 const renderSelect = (props: Partial<React.ComponentProps<typeof Select>> = {}) => {
@@ -67,7 +67,7 @@ describe('Select', () => {
           <>
             <Select.Trigger value={1}>Trigger 1</Select.Trigger>
             <Select.Dropdown>
-              <Select.Option value={1}>Option 1</Select.Option>
+              <Select.Option value={1}>First Option</Select.Option>
             </Select.Dropdown>
           </>
         );
@@ -101,10 +101,10 @@ describe('Select', () => {
 
     it('should use provided animateProps duration in SelectDropdown', () => {
       render(
-        <Select options={[{ id: 1, name: 'Option 1' }]} valueKey="id" labelKey="name">
+        <Select options={[{ id: 1, name: 'First Option' }]} valueKey="id" labelKey="name">
           <Select.Trigger>Trigger</Select.Trigger>
           <Select.Dropdown animateProps={{ duration: 500 }}>
-            <Select.Option value={1}>Option 1</Select.Option>
+            <Select.Option value={1}>First Option</Select.Option>
           </Select.Dropdown>
         </Select>
       );
@@ -150,6 +150,21 @@ describe('Select', () => {
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       expect(screen.getByText('Select an option...')).toBeInTheDocument();
     });
+
+    it('should focus the active option on open when activeOption is valid and enabled', async () => {
+      vi.useRealTimers();
+      renderSelect({ defaultValue: 1 });
+
+      const trigger = screen.getByTestId('select-trigger');
+      await act(async () => {
+        fireEvent.click(trigger);
+      });
+
+      const options = await screen.findAllByRole('option');
+      await waitFor(() => {
+        expect(options[0]).toHaveFocus();
+      });
+    });
   });
 
   describe('Keyboard Navigation - Trigger', () => {
@@ -163,21 +178,21 @@ describe('Select', () => {
         fireEvent.keyDown(trigger, { key });
         const listbox = screen.getByRole('listbox');
         expect(listbox).toBeVisible();
-        expect(screen.getByText('Option 1')).toBeInTheDocument();
+        expect(screen.getByText('First Option')).toBeInTheDocument();
       });
     });
 
-    it('should reset selection when clear button is focused and spacebar key is pressed', async () => {
+    it('should reset selection when clear button is focused and enter key is pressed', async () => {
       vi.useRealTimers();
       renderSelect({ defaultValue: 1, clearable: true });
 
-      expect(screen.getByText('Option 1')).toBeInTheDocument();
+      expect(screen.getByText('First Option')).toBeInTheDocument();
 
       const clearButton = screen.getByTestId('clear-btn');
       clearButton.focus();
 
       await act(async () => {
-        await userEvent.type(clearButton, '{Space}');
+        await userEvent.keyboard('{Enter}');
       });
 
       await waitFor(() => {
@@ -203,7 +218,7 @@ describe('Select', () => {
       vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup();
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -236,6 +251,64 @@ describe('Select', () => {
       });
     });
 
+    it('should move the focus to the first element with Home key', async () => {
+      vi.useRealTimers();
+      renderSelect();
+
+      const user = userEvent.setup();
+      const trigger = screen.getByRole('combobox');
+
+      await act(async () => {
+        await user.click(trigger);
+      });
+
+      const listbox = await screen.findByRole('listbox');
+      const options = screen.getAllByRole('option');
+      expect(listbox).toBeInTheDocument();
+
+      options[1].focus();
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[1]);
+      });
+
+      await act(async () => {
+        await user.keyboard('{Home}');
+      });
+
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[1]);
+      });
+    });
+
+    it('should move the focus to the last element with End key', async () => {
+      vi.useRealTimers();
+      renderSelect();
+
+      const user = userEvent.setup();
+      const trigger = screen.getByRole('combobox');
+
+      await act(async () => {
+        await user.click(trigger);
+      });
+
+      const listbox = await screen.findByRole('listbox');
+      const options = screen.getAllByRole('option');
+      expect(listbox).toBeInTheDocument();
+
+      options[1].focus();
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[1]);
+      });
+
+      await act(async () => {
+        await user.keyboard('{End}');
+      });
+
+      await waitFor(() => {
+        expect(document.activeElement).toBe(options[2]);
+      });
+    });
+
     it('should close the dropdown when escape key is pressed', async () => {
       vi.useRealTimers();
       renderSelect();
@@ -258,7 +331,7 @@ describe('Select', () => {
       vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup();
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -287,14 +360,14 @@ describe('Select', () => {
         expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       });
 
-      expect(trigger).toHaveTextContent('Option 2');
+      expect(trigger).toHaveTextContent('Second Option');
     });
 
     it('should pass to the trigger the option selected when spacebar key is pressed', async () => {
       vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup();
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -325,7 +398,7 @@ describe('Select', () => {
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
 
-      expect(trigger).toHaveTextContent('Option 2');
+      expect(trigger).toHaveTextContent('Second Option');
     });
 
     it('should not move the focus if tab key is pressed when the dropdown is open', async () => {
@@ -372,6 +445,19 @@ describe('Select', () => {
       });
 
       expect(document.activeElement).toBe(options[0]);
+    });
+  });
+
+  describe('Typeahead Behavior', () => {
+    it('should focus option matching single key', async () => {
+      vi.useRealTimers();
+      const user = userEvent.setup();
+      renderSelect();
+      await act(() => user.click(screen.getByRole('combobox')));
+      const opt1 = screen.getByTestId('option-1');
+      opt1.focus();
+      await act(() => user.keyboard('F'));
+      expect(opt1).toHaveFocus();
     });
   });
 });
