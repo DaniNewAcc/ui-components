@@ -150,17 +150,18 @@ type ModalTriggerProps = {
   children: React.ReactElement;
 };
 
-const ModalTrigger = ({ children, testId }: ModalTriggerProps) => {
+const ModalTrigger = forwardRef<HTMLElement, ModalTriggerProps>(({ children, testId }, ref) => {
   const { open } = useModalContext();
 
   return React.cloneElement(children, {
+    ref,
     onClick: (e: React.MouseEvent) => {
       children.props.onClick?.(e);
       open();
     },
     ...(testId && { 'data-testid': testId }),
   });
-};
+});
 
 ModalTrigger.displayName = 'ModalTrigger';
 Modal.Trigger = ModalTrigger;
@@ -198,7 +199,7 @@ type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
-const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
+const ModalContent = forwardRef<React.ElementRef<'div'>, ModalContentProps>(
   ({ AnimateProps, className, testId, children, ...props }, ref) => {
     const { isOpen, onClose } = useModalContext();
     const duration = AnimateProps?.duration ?? 300;
@@ -270,14 +271,23 @@ type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
   testId?: string;
 };
 
-const ModalTitle = ({ className, testId, children, ...props }: ModalTitleProps) => {
-  const { ids } = useModalContext();
-  return (
-    <Text as="h2" id={ids.title} testId={testId} className={cn('', className)} {...props}>
-      {children}
-    </Text>
-  );
-};
+const ModalTitle = forwardRef<React.ElementRef<'h2'>, ModalTitleProps>(
+  ({ className, testId, children, ...props }, ref) => {
+    const { ids } = useModalContext();
+    return (
+      <Text
+        as="h2"
+        ref={ref}
+        id={ids.title}
+        testId={testId}
+        className={cn('', className)}
+        {...props}
+      >
+        {children}
+      </Text>
+    );
+  }
+);
 
 ModalTitle.displayName = 'ModalTitle';
 Modal.Title = ModalTitle;
@@ -288,14 +298,23 @@ type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
   testId?: string;
 };
 
-const ModalDescription = ({ className, testId, children, ...props }: ModalDescriptionProps) => {
-  const { ids } = useModalContext();
-  return (
-    <Text as="p" id={ids.description} testId={testId} className={cn('', className)} {...props}>
-      {children}
-    </Text>
-  );
-};
+const ModalDescription = forwardRef<React.ElementRef<'p'>, ModalDescriptionProps>(
+  ({ className, testId, children, ...props }, ref) => {
+    const { ids } = useModalContext();
+    return (
+      <Text
+        as="p"
+        ref={ref}
+        id={ids.description}
+        testId={testId}
+        className={cn('', className)}
+        {...props}
+      >
+        {children}
+      </Text>
+    );
+  }
+);
 
 ModalDescription.displayName = 'ModalDescription';
 Modal.Description = ModalDescription;
@@ -306,17 +325,20 @@ type ModalFooterProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
-const ModalFooter = ({ className, children, testId, ...props }: ModalFooterProps) => {
-  return (
-    <div
-      data-testid={testId}
-      className={cn('ui:flex ui:justify-end ui:gap-4', className)}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-};
+const ModalFooter = forwardRef<React.ElementRef<'div'>, ModalFooterProps>(
+  ({ className, children, testId, ...props }, ref) => {
+    return (
+      <div
+        data-testid={testId}
+        ref={ref}
+        className={cn('ui:flex ui:justify-end ui:gap-4', className)}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 ModalFooter.displayName = 'ModalFooter';
 Modal.Footer = ModalFooter;
@@ -329,7 +351,7 @@ type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
     asChild?: boolean;
   };
 
-const ModalClose = forwardRef<HTMLButtonElement, ModalCloseProps>(
+const ModalClose = forwardRef<React.ElementRef<'button'>, ModalCloseProps>(
   (
     { variant, size, intent, rounded, testId, className, asChild = false, children, ...props },
     ref
