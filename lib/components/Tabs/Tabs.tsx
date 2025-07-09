@@ -47,13 +47,13 @@ type TabsContextProps = {
   inputMode: string;
   panelRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
   idMap: Record<string, string>;
-  moveFocus: (direction: 'next' | 'previous') => void;
-  moveToStart: () => void;
-  moveToEnd: () => void;
   setActiveTab: React.Dispatch<React.SetStateAction<number | string>>;
   setTabbingDirection: React.Dispatch<React.SetStateAction<TabbingDirection>>;
   setFocusedIndex: React.Dispatch<React.SetStateAction<number | string | null>>;
   setFocusRef: (SetFocusRefProps: { index: number | string; element: HTMLElement | null }) => void;
+  moveFocus: (direction: 'next' | 'previous') => void;
+  moveToStart: () => void;
+  moveToEnd: () => void;
 };
 
 const TabsContext = createContext<TabsContextProps | null>(null);
@@ -91,10 +91,10 @@ const Tabs = ({
   const idMap = useComponentIds('tabs', idKeys);
 
   useEffect(() => {
-    if (focusedIndex !== null) {
+    if (focusedIndex !== null && focusedIndex !== activeTab) {
       setActiveTab(focusedIndex);
     }
-  }, [focusedIndex]);
+  }, [focusedIndex, activeTab]);
 
   useEffect(() => {
     if (tabbingDirection !== null) {
@@ -103,23 +103,42 @@ const Tabs = ({
     }
   }, [tabbingDirection]);
 
-  const contextValue = {
-    activeTab: activeTab,
-    focusedIndex,
-    hasPadding,
-    panelRefs,
-    orientation,
-    tabbingDirection,
-    inputMode,
-    idMap,
-    setTabbingDirection,
-    setActiveTab,
-    setFocusRef,
-    setFocusedIndex,
-    moveFocus,
-    moveToStart,
-    moveToEnd,
-  };
+  const contextValue = useMemo(
+    () => ({
+      hasPadding,
+      orientation,
+      activeTab,
+      focusedIndex,
+      tabbingDirection,
+      panelRefs,
+      inputMode,
+      idMap,
+      setTabbingDirection,
+      setActiveTab,
+      setFocusRef,
+      setFocusedIndex,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+    }),
+    [
+      hasPadding,
+      orientation,
+      activeTab,
+      focusedIndex,
+      tabbingDirection,
+      panelRefs,
+      inputMode,
+      idMap,
+      setTabbingDirection,
+      setActiveTab,
+      setFocusRef,
+      setFocusedIndex,
+      moveFocus,
+      moveToStart,
+      moveToEnd,
+    ]
+  );
   return (
     <TabsContext.Provider value={contextValue}>
       <div
@@ -164,7 +183,6 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
     const {
       activeTab,
       hasPadding,
-      panelRefs,
       orientation,
       idMap,
       moveFocus,
@@ -173,62 +191,57 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
       setTabbingDirection,
     } = useTabsContext();
 
+    const handleHorizontalKeyDown = (key: string, e: React.KeyboardEvent) => {
+      if (key === 'ArrowRight') {
+        e.preventDefault();
+        setTabbingDirection(null);
+        moveFocus('next');
+      } else if (key === 'ArrowLeft') {
+        e.preventDefault();
+        setTabbingDirection(null);
+        moveFocus('previous');
+      }
+    };
+
+    const handleVerticalKeyDown = (key: string, e: React.KeyboardEvent) => {
+      if (key === 'ArrowDown') {
+        e.preventDefault();
+        setTabbingDirection(null);
+        moveFocus('next');
+      } else if (key === 'ArrowUp') {
+        e.preventDefault();
+        setTabbingDirection(null);
+        moveFocus('previous');
+      }
+    };
+
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
-        switch (e.key) {
-          case 'Home': {
+        const key = e.key;
+
+        switch (key) {
+          case 'Home':
             e.preventDefault();
             setTabbingDirection(null);
             moveToStart();
-            break;
-          }
-          case 'End': {
+            return;
+          case 'End':
             e.preventDefault();
             setTabbingDirection(null);
             moveToEnd();
-            break;
-          }
-          case 'Tab': {
+            return;
+          case 'Tab':
             setTabbingDirection(e.shiftKey ? 'backward' : 'forward');
-            break;
-          }
+            return;
         }
-        switch (orientation) {
-          case 'horizontal': {
-            switch (e.key) {
-              case 'ArrowRight': {
-                e.preventDefault();
-                setTabbingDirection(null);
-                moveFocus('next');
-                break;
-              }
-              case 'ArrowLeft': {
-                e.preventDefault();
-                setTabbingDirection(null);
-                moveFocus('previous');
-                break;
-              }
-            }
-            break;
-          }
-          case 'vertical': {
-            switch (e.key) {
-              case 'ArrowDown':
-                e.preventDefault();
-                setTabbingDirection(null);
-                moveFocus('next');
-                break;
-              case 'ArrowUp':
-                e.preventDefault();
-                setTabbingDirection(null);
-                moveFocus('previous');
-                break;
-            }
-            break;
-          }
+
+        if (orientation === 'horizontal') {
+          handleHorizontalKeyDown(key, e);
+        } else if (orientation === 'vertical') {
+          handleVerticalKeyDown(key, e);
         }
       },
-      [panelRefs, activeTab, setTabbingDirection, moveFocus, moveToStart, moveToEnd]
+      [orientation, setTabbingDirection, moveFocus, moveToStart, moveToEnd]
     );
 
     return (
@@ -324,7 +337,8 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
             'ui:focus-visible:border-primary-600': isFocusVisible,
             'ui:focus-visible:ring-0': !isFocusVisible,
             'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
-            [`ui:last:${orientation === 'vertical' ? 'rounded-bl-md' : 'rounded-tr-sm'}`]: true,
+            [`${orientation === 'vertical' ? 'ui:last:rounded-bl-md' : 'ui:last:rounded-tr-sm'}`]:
+              true,
           },
           'ui:flex-1 ui:first:rounded-tl-sm',
           className
