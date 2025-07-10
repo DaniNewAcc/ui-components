@@ -30,3 +30,16 @@ export const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
   const elements = Array.from(container.querySelectorAll<HTMLElement>(selectors));
   return elements.filter(isElementFocusable);
 };
+
+export const applyInitialFocus = <T>(
+  isValid: boolean,
+  activeValue: T | null,
+  fallbackValue: T | undefined,
+  setFocus: (val: T) => void
+) => {
+  if (isValid && activeValue !== null) {
+    setFocus(activeValue);
+  } else if (fallbackValue !== undefined) {
+    setFocus(fallbackValue);
+  }
+};
