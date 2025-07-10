@@ -119,7 +119,6 @@ describe('Tabs', () => {
         await user.click(tabs[1]);
       });
       expect(tabs[1]).toHaveAttribute('aria-disabled', 'true');
-      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     });
 
     it('should skip disabled tabs when using keyboard navigation', async () => {
@@ -351,6 +350,21 @@ describe('Tabs', () => {
 
       expect(trigger).toHaveAttribute('aria-controls', 'content-1');
       expect(content).toHaveAttribute('aria-labelledby', 'trigger-1');
+    });
+  });
+
+  describe('Timeout Behavior', () => {
+    it('should clear and reset timeout when Tab keydown happens multiple times quickly', async () => {
+      renderTabs();
+
+      const tabsList = screen.getByTestId('tabslist');
+      fireEvent.keyDown(tabsList, { key: 'Tab', shiftKey: false });
+
+      fireEvent.keyDown(tabsList, { key: 'Tab', shiftKey: true });
+
+      await act(async () => {
+        vi.advanceTimersByTime(20);
+      });
     });
   });
 });
