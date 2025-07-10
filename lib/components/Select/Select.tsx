@@ -3,7 +3,9 @@ import useComponentIds from '@/hooks/useComponentIds';
 import { useMergedRefs } from '@/hooks/useMergedRefs';
 import useRovingFocus from '@/hooks/useRovingFocus';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
+import useTypeahead from '@/hooks/useTypehead';
 import { cn } from '@/utils/cn';
+import { applyInitialFocus } from '@/utils/helpers';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import React, {
   ComponentProps,
@@ -49,6 +51,8 @@ type SelectContextProps = {
   focusedIndex: number | string | null;
   triggerRef: React.RefObject<HTMLButtonElement>;
   idMap: Record<string, string>;
+  isActiveOptionValid: boolean;
+  firstFocusableOption: () => string | number;
   moveFocus: (direction: 'next' | 'previous') => void;
   moveToStart: () => void;
   moveToEnd: () => void;
@@ -75,25 +79,29 @@ const Select = ({
   children,
   ...props
 }: SelectProps) => {
+  const [activeOption, setActiveOption] = useState<ActiveOption>(defaultValue ?? null);
   const {
     focusedIndex,
     registeredCount,
+    clearFocusRefs,
     setFocusedIndex,
     moveFocus,
     moveToStart,
     moveToEnd,
     setFocusRef,
-    clearFocusRefs,
-  } = useRovingFocus(null, loop);
-  const [activeOption, setActiveOption] = useState<ActiveOption>(defaultValue ?? null);
+  } = useRovingFocus(activeOption, loop);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    if (!isDropdownOpen && activeOption !== null) {
-      setFocusedIndex(activeOption);
-    }
-  }, [activeOption, isDropdownOpen, setFocusedIndex]);
+  const isActiveOptionValid = useMemo(() => {
+    return (
+      activeOption !== null && options.some(opt => opt[valueKey] === activeOption && !opt.disabled)
+    );
+  }, [activeOption, options, valueKey]);
+
+  const firstFocusableOption = useMemo(() => {
+    return options.find(opt => !opt.disabled)?.[valueKey];
+  }, [options, valueKey]);
 
   const idKeys = useMemo(
     () => ['trigger', 'list', ...options.map(opt => `option-${opt[valueKey]}`)],
@@ -110,18 +118,37 @@ const Select = ({
     setActiveOption(null);
     setIsDropdownOpen(false);
     triggerRef.current?.focus();
-  }, [setActiveOption, setIsDropdownOpen, triggerRef]);
+  }, []);
 
-  const handleOptions = useCallback(
-    (value: string | number) => {
-      if (activeOption !== value) {
-        setActiveOption(value);
-      }
-      setIsDropdownOpen(false);
-      triggerRef?.current?.focus();
-    },
-    [activeOption]
-  );
+  const handleOptions = useCallback((value: string | number) => {
+    setActiveOption(value);
+    setIsDropdownOpen(false);
+    triggerRef?.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) {
+      clearFocusRefs();
+      setFocusedIndex(null);
+      return;
+    }
+
+    if (registeredCount !== options.length) return;
+
+    const timeout = setTimeout(() => {
+      applyInitialFocus(isActiveOptionValid, activeOption, firstFocusableOption, setFocusedIndex);
+    }, 10);
+
+    return () => clearTimeout(timeout);
+  }, [
+    isDropdownOpen,
+    registeredCount,
+    isActiveOptionValid,
+    activeOption,
+    firstFocusableOption,
+    options,
+    clearFocusRefs,
+  ]);
 
   const contextValue = useMemo(
     () => ({
@@ -134,6 +161,8 @@ const Select = ({
       triggerRef,
       clearable,
       idMap,
+      isActiveOptionValid,
+      firstFocusableOption,
       setFocusedIndex,
       moveFocus,
       moveToStart,
@@ -153,6 +182,8 @@ const Select = ({
       labelKey,
       idMap,
       focusedIndex,
+      isActiveOptionValid,
+      firstFocusableOption,
       setFocusedIndex,
       moveFocus,
       moveToStart,
@@ -165,40 +196,6 @@ const Select = ({
       handleOptions,
     ]
   );
-
-  useEffect(() => {
-    if (!isDropdownOpen) {
-      clearFocusRefs();
-      setFocusedIndex(null);
-      return;
-    }
-
-    if (registeredCount !== options.length) return;
-
-    const timeout = setTimeout(() => {
-      const activeOptionObj = options.find(opt => opt[valueKey] === activeOption);
-      const isActiveValid = activeOption !== null && activeOptionObj && !activeOptionObj.disabled;
-
-      if (isActiveValid) {
-        setFocusedIndex(activeOption);
-      } else {
-        const firstEnabledValue = options.find(opt => !opt.disabled)?.[valueKey];
-        if (firstEnabledValue !== undefined) {
-          setFocusedIndex(firstEnabledValue);
-        }
-      }
-    }, 10);
-
-    return () => clearTimeout(timeout);
-  }, [
-    isDropdownOpen,
-    registeredCount,
-    activeOption,
-    options,
-    valueKey,
-    setFocusedIndex,
-    clearFocusRefs,
-  ]);
 
   const ref = useClickOutside<HTMLDivElement>(() => setIsDropdownOpen(false), isDropdownOpen);
   return (
@@ -278,7 +275,7 @@ const SelectTrigger = forwardRef<React.ElementRef<'button'>, SelectTriggerProps>
             break;
         }
       },
-      [moveToStart]
+      [isDropdownOpen, moveToStart]
     );
 
     const handleClearClick = useCallback(
@@ -299,7 +296,9 @@ const SelectTrigger = forwardRef<React.ElementRef<'button'>, SelectTriggerProps>
       [resetSelection]
     );
 
-    const selectedOption = options.find(opt => opt[valueKey] === activeOption);
+    const selectedOption = useMemo(() => {
+      return options.find(opt => opt[valueKey] === activeOption);
+    }, [activeOption, options, valueKey]);
     return (
       <div
         className={cn(
@@ -380,6 +379,8 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
       valueKey,
       labelKey,
       activeOption,
+      isActiveOptionValid,
+      firstFocusableOption,
       setFocusedIndex,
       setIsDropdownOpen,
       handleOptions,
@@ -388,8 +389,6 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
       moveToEnd,
     } = useSelectContext();
     const duration = animateProps?.duration ?? 300;
-    const typedKeysRef = useRef<string>('');
-    const typingTimeoutRef = useRef<number | null>(null);
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const {
       ref: animationRef,
@@ -400,54 +399,24 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
       duration,
     });
 
-    const mergedRefs = useMergedRefs(animationRef, ref);
+    const { handleTypeahead } = useTypeahead({
+      options,
+      getLabel: item => String(item[labelKey]),
+      getValue: item => item[valueKey],
+      onMatch: setFocusedIndex,
+    });
 
-    const isActiveOptionValid =
-      activeOption !== null && options.some(opt => opt[valueKey] === activeOption && !opt.disabled);
+    const mergedRefs = useMergedRefs(animationRef, ref);
 
     useEffect(() => {
       if (isDropdownOpen) {
         animationRef.current?.focus();
 
-        if (isActiveOptionValid) {
-          setFocusedIndex(activeOption);
-        } else {
-          const firstFocusableOption = options.find(opt => !opt.disabled)?.[valueKey];
-          if (firstFocusableOption !== undefined) {
-            setFocusedIndex(firstFocusableOption);
-          }
-        }
+        applyInitialFocus(isActiveOptionValid, activeOption, firstFocusableOption, setFocusedIndex);
       } else {
         setFocusedIndex(null);
       }
-    }, [isDropdownOpen, activeOption, options, setFocusedIndex, valueKey]);
-
-    const handleTypeahead = useCallback(
-      (key: string) => {
-        typedKeysRef.current += key.toLowerCase();
-
-        if (typingTimeoutRef.current !== null) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = window.setTimeout(() => {
-          typedKeysRef.current = '';
-        }, 500);
-
-        const search = typedKeysRef.current;
-
-        const matchIndex = options.findIndex(
-          option =>
-            !option.disabled && option[labelKey]?.toString().toLowerCase().startsWith(search)
-        );
-
-        if (matchIndex !== -1) {
-          const matchedValue = options[matchIndex][valueKey];
-          setFocusedIndex(matchedValue);
-        }
-      },
-      [options, labelKey, valueKey, setFocusedIndex]
-    );
+    }, [isDropdownOpen, activeOption, isActiveOptionValid, firstFocusableOption]);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
@@ -486,10 +455,11 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
             moveToEnd();
             break;
           case 'Escape':
+            e.preventDefault();
             setIsDropdownOpen(false);
-            if (triggerRef?.current) {
-              triggerRef.current.focus();
-            }
+            setTimeout(() => {
+              triggerRef.current?.focus();
+            }, 0);
             break;
         }
       },
@@ -549,20 +519,22 @@ type SelectOptionProps = ComponentPropsWithoutRef<'li'> & {
 const SelectOption = forwardRef<React.ElementRef<'li'>, SelectOptionProps>(
   ({ value, className, children, disabled, testId = 'select-option', ...props }, ref) => {
     const { focusedIndex, activeOption, idMap, handleOptions, setFocusRef } = useSelectContext();
-    const optionRef = useRef<HTMLLIElement | null>(null);
-    const mergedRefs = useMergedRefs(optionRef, ref);
     const isSelected = activeOption === value;
     const isFocused = focusedIndex === value;
 
-    useEffect(() => {
-      setFocusRef({ index: value, element: optionRef.current });
-    }, [setFocusRef, value]);
+    const optionRefCallback = useCallback(
+      (node: HTMLLIElement | null) => {
+        setFocusRef({ index: value, element: node });
+      },
+      [setFocusRef, value]
+    );
 
     const handleClick = useCallback(() => {
       if (disabled) return;
       handleOptions(value);
     }, [disabled, value, handleOptions]);
 
+    const mergedRefs = useMergedRefs(optionRefCallback, ref);
     return (
       <li
         data-testid={testId}
