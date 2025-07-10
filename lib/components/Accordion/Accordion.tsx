@@ -12,10 +12,8 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useId,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import Animate from '../Animate';
@@ -75,24 +73,23 @@ const Accordion = ({
 
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  function handleAccordion(index: string | number) {
-    const toggleItem = (prev: ActiveItems, index: string | number) => {
-      // toggle items inside of activeItems array
-      if (multiple) {
-        const prevItems = Array.isArray(prev) ? [...prev] : prev === null ? [] : [prev];
-        if (prevItems.includes(index)) {
-          return prevItems.filter(item => item !== index);
-        } else {
-          return [...prevItems, index];
+  const handleAccordion = useCallback(
+    (index: string | number) => {
+      setActiveItems(prev => {
+        // Normalize prev to an array for consistent toggling logic
+        const currentItems = Array.isArray(prev) ? prev : prev !== null ? [prev] : [];
+        // toggle selected item for multiple mode
+        if (multiple) {
+          return currentItems.includes(index)
+            ? currentItems.filter(item => item !== index)
+            : [...currentItems, index];
         }
-      }
-      // toggle item for single mode
-      return prev === index ? null : index;
-    };
-
-    // update activeItems state
-    setActiveItems(prev => toggleItem(prev, index));
-  }
+        // toggle selected item for single mode
+        return prev === index ? null : index;
+      });
+    },
+    [multiple]
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -173,7 +170,6 @@ type AccordionItemProps = ComponentPropsWithoutRef<'div'> & {
 const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
   ({ headingLevel = 3, testId = 'accordion-item', value, className, children, ...props }, ref) => {
     const {
-      focusedIndex,
       baseId,
       setIsFocused,
       setFocusedIndex,
@@ -184,22 +180,21 @@ const AccordionItem = forwardRef<React.ElementRef<'div'>, AccordionItemProps>(
       moveToEnd,
     } = useAccordionContext();
 
-    const itemRef = useRef<HTMLDivElement | null>(null);
-
-    const mergedRefs = useMergedRefs(itemRef, ref);
-
     const idMap = useComponentIds(baseId, [`trigger-${value}`, `content-${value}`]);
 
-    useEffect(() => {
-      if (itemRef.current) {
-        setFocusRef({ index: value, element: itemRef.current });
-      }
-    }, [value, focusedIndex, setFocusRef]);
+    const itemRefCallback = useCallback(
+      (node: HTMLDivElement | null) => {
+        setFocusRef({ index: value, element: node });
+      },
+      [setFocusRef, value]
+    );
+
+    const mergedRefs = useMergedRefs(itemRefCallback, ref);
 
     const handleFocus = useCallback(() => {
       setFocusedIndex(value);
       setIsFocused(true);
-    }, [value, setFocusedIndex]);
+    }, [value]);
 
     const handleBlur = useCallback(() => {
       setIsFocused(false);
