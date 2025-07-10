@@ -24,7 +24,9 @@ const renderAccordion = (
     <Accordion items={count} defaultValue={defaultValue ?? undefined} multiple={multiple}>
       {Array.from({ length: count }, (_, i) => (
         <Accordion.Item key={i} value={i + 1}>
-          <Accordion.Trigger>Trigger {i + 1}</Accordion.Trigger>
+          <Accordion.Trigger iconProps={{ className: 'ui:w-4 ui:w-4' }}>
+            Trigger {i + 1}
+          </Accordion.Trigger>
           <Accordion.Content animateProps={animateProps}>Content {i + 1}</Accordion.Content>
         </Accordion.Item>
       ))}
