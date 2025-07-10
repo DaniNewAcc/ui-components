@@ -90,19 +90,6 @@ const Tabs = ({
 
   const idMap = useComponentIds('tabs', idKeys);
 
-  useEffect(() => {
-    if (focusedIndex !== null && focusedIndex !== activeTab) {
-      setActiveTab(focusedIndex);
-    }
-  }, [focusedIndex, activeTab]);
-
-  useEffect(() => {
-    if (tabbingDirection !== null) {
-      const timeout = setTimeout(() => setTabbingDirection(null), 10);
-      return () => clearTimeout(timeout);
-    }
-  }, [tabbingDirection]);
-
   const contextValue = useMemo(
     () => ({
       hasPadding,
@@ -127,7 +114,6 @@ const Tabs = ({
       activeTab,
       focusedIndex,
       tabbingDirection,
-      panelRefs,
       inputMode,
       idMap,
       setTabbingDirection,
@@ -190,30 +176,37 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
       moveToEnd,
       setTabbingDirection,
     } = useTabsContext();
+    const timeoutRef = useRef<number | null>(null);
 
-    const handleHorizontalKeyDown = (key: string, e: React.KeyboardEvent) => {
-      if (key === 'ArrowRight') {
-        e.preventDefault();
-        setTabbingDirection(null);
-        moveFocus('next');
-      } else if (key === 'ArrowLeft') {
-        e.preventDefault();
-        setTabbingDirection(null);
-        moveFocus('previous');
-      }
-    };
+    const handleHorizontalKeyDown = useCallback(
+      (key: string, e: React.KeyboardEvent) => {
+        if (key === 'ArrowRight') {
+          e.preventDefault();
+          setTabbingDirection(null);
+          moveFocus('next');
+        } else if (key === 'ArrowLeft') {
+          e.preventDefault();
+          setTabbingDirection(null);
+          moveFocus('previous');
+        }
+      },
+      [moveFocus]
+    );
 
-    const handleVerticalKeyDown = (key: string, e: React.KeyboardEvent) => {
-      if (key === 'ArrowDown') {
-        e.preventDefault();
-        setTabbingDirection(null);
-        moveFocus('next');
-      } else if (key === 'ArrowUp') {
-        e.preventDefault();
-        setTabbingDirection(null);
-        moveFocus('previous');
-      }
-    };
+    const handleVerticalKeyDown = useCallback(
+      (key: string, e: React.KeyboardEvent) => {
+        if (key === 'ArrowDown') {
+          e.preventDefault();
+          setTabbingDirection(null);
+          moveFocus('next');
+        } else if (key === 'ArrowUp') {
+          e.preventDefault();
+          setTabbingDirection(null);
+          moveFocus('previous');
+        }
+      },
+      [moveFocus]
+    );
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
@@ -232,6 +225,14 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
             return;
           case 'Tab':
             setTabbingDirection(e.shiftKey ? 'backward' : 'forward');
+            if (timeoutRef.current !== null) {
+              window.clearTimeout(timeoutRef.current);
+            }
+
+            timeoutRef.current = window.setTimeout(() => {
+              setTabbingDirection(null);
+              timeoutRef.current = null;
+            }, 10);
             return;
         }
 
@@ -241,8 +242,23 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
           handleVerticalKeyDown(key, e);
         }
       },
-      [orientation, setTabbingDirection, moveFocus, moveToStart, moveToEnd]
+      [
+        orientation,
+        handleHorizontalKeyDown,
+        handleVerticalKeyDown,
+        moveFocus,
+        moveToStart,
+        moveToEnd,
+      ]
     );
+
+    useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          window.clearTimeout(timeoutRef.current);
+        }
+      };
+    }, []);
 
     return (
       <div
@@ -299,8 +315,6 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
     const isActive = activeTab === value;
     const isFocused = focusedIndex === value;
     const isFirst = isActive && focusedIndex === null;
-    const triggerRef = useRef<HTMLButtonElement | null>(null);
-    const mergedRefs = useMergedRefs(triggerRef, ref);
     const { isFocusVisible, handleBlur, handleFocus, handleMouseDown } = useFocusVisible(inputMode);
 
     const handleClick = useCallback(() => {
@@ -308,13 +322,25 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
       setActiveTab(value);
       setFocusedIndex(value);
       setTabbingDirection(null);
-    }, [disabled, setActiveTab, setFocusedIndex, setTabbingDirection, value]);
+    }, [disabled, value]);
 
-    useEffect(() => {
-      if (triggerRef.current) {
-        setFocusRef({ index: value, element: triggerRef.current });
+    const handleInternalFocus = useCallback(() => {
+      handleFocus();
+
+      if (!isFocused || !isActive) {
+        setFocusedIndex(value);
+        setActiveTab(value);
       }
-    }, [setFocusRef, value]);
+    }, [handleFocus, isFocused, isActive, value]);
+
+    const triggerRefCallback = useCallback(
+      (node: HTMLButtonElement | null) => {
+        setFocusRef({ index: value, element: node });
+      },
+      [setFocusRef, value]
+    );
+
+    const mergedRefs = useMergedRefs(triggerRefCallback, ref);
 
     return (
       <Button
@@ -345,7 +371,7 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
         )}
         onBlur={handleBlur}
         onClick={handleClick}
-        onFocus={handleFocus}
+        onFocus={handleInternalFocus}
         onMouseDown={handleMouseDown}
         {...props}
       >
