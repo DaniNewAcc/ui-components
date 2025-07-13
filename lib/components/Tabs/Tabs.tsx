@@ -131,7 +131,11 @@ const Tabs = ({
         data-testid={testId}
         className={cn(
           TabsVariants({ hasPadding, selfAlign }),
-          `${orientation === 'vertical' ? 'ui:flex-row ui:gap-0' : 'ui:flex-col'}`,
+          {
+            'ui:flex-row': orientation === 'vertical',
+            'ui:rounded-md': hasPadding,
+            'ui:gap-4': hasPadding && orientation === 'horizontal',
+          },
           className
         )}
         {...props}
@@ -271,8 +275,10 @@ const TabsList = forwardRef<React.ElementRef<'div'>, TabsListProps>(
         role="tablist"
         className={cn(
           TabsListVariants({ variant }),
-          `${hasPadding ? 'ui:rounded-md ui:px-2 ui:py-2' : 'ui:rounded-t-md ui:bg-transparent'}`,
-          `${orientation === 'vertical' ? 'ui:flex-col' : 'ui:flex-row'}`,
+          {
+            'ui:rounded-sm': hasPadding && variant === 'spaced',
+            'ui:flex-col': orientation === 'vertical',
+          },
           className
         )}
         onKeyDown={handleKeyDown}
@@ -347,26 +353,26 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
         ref={mergedRefs}
         type="button"
         variant={'unstyled'}
-        size={'sm'}
+        size={'md'}
         aria-controls={contentId}
         aria-disabled={disabled}
         aria-expanded={isActive}
         aria-selected={isActive}
+        disabled={disabled}
         id={triggerId}
         role="tab"
         tabIndex={disabled ? -1 : isFocused || isFirst ? 0 : -1}
         className={cn(
-          ButtonVariants({ variant, size, intent, rounded }),
           {
             'ui:bg-primary-50 ui:text-primary-600':
               (isFocused && inputMode === 'keyboard') || isActive,
-            'ui:focus-visible:border-primary-600': isFocusVisible,
-            'ui:focus-visible:ring-0': !isFocusVisible,
-            'ui:first:rounded-l-sm ui:last:rounded-r-sm': hasPadding,
-            [`${orientation === 'vertical' ? 'ui:last:rounded-bl-md' : 'ui:last:rounded-tr-sm'}`]:
-              true,
+            'ui:first:rounded-l-md ui:last:rounded-r-md':
+              hasPadding && orientation === 'horizontal',
+            'ui:last:rounded-bl-md': orientation === 'vertical',
+            'ui:last:rounded-tr-md': orientation === 'horizontal',
+            'ui:shadow-[0_0_0_2px_currentColor]': isFocusVisible,
           },
-          'ui:flex-1 ui:first:rounded-tl-sm',
+          'ui:flex-1 ui:first:rounded-tl-md ui:focus-visible:ring-0',
           className
         )}
         onBlur={handleBlur}
@@ -393,7 +399,7 @@ type TabsContentProps = ComponentPropsWithoutRef<'div'> & {
 
 const TabsContent = forwardRef<React.ElementRef<'div'>, TabsContentProps>(
   ({ value, className, children, ...props }, ref) => {
-    const { activeTab, focusedIndex, orientation, idMap } = useTabsContext();
+    const { activeTab, focusedIndex, hasPadding, orientation, idMap } = useTabsContext();
     const triggerId = idMap[`trigger-${value}`] ?? `trigger-${value}`;
     const contentId = idMap[`content-${value}`] ?? `content-${value}`;
     const isActive = activeTab === value;
@@ -415,10 +421,12 @@ const TabsContent = forwardRef<React.ElementRef<'div'>, TabsContentProps>(
             tabIndex={0}
             className={cn(
               {
-                'ui:w-[250px] ui:px-4': orientation === 'vertical',
+                'ui:w-[250px] ui:rounded-r-md ui:px-4': orientation === 'vertical',
+                'ui:rounded-b-md': orientation === 'horizontal',
                 'ui:z-10': isActive && isFocused,
+                'ui:rounded-md': hasPadding && orientation === 'horizontal',
               },
-              'ui:flex-1 ui:overflow-y-auto',
+              'ui:flex-1 ui:grow ui:overflow-y-auto ui:p-2 ui:outline-hidden ui:focus-visible:shadow-[0_0_0_2px_currentColor] ui:focus-visible:ring-0',
               className
             )}
             {...props}
