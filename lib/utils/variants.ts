@@ -498,7 +498,7 @@ export const SeparatorVariants = cva('ui:bg-gray-400', {
 });
 
 export const TabsVariants = cva(
-  'ui:flex ui:w-fit ui:flex-col ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md',
+  'ui:flex ui:w-fit ui:flex-col ui:justify-between ui:bg-transparent ui:shadow-md',
   {
     variants: {
       hasPadding: {
