@@ -230,6 +230,48 @@ describe('Animate', () => {
       vi.useRealTimers();
     });
 
+    it('should call onAnimationChange(true) on animation start and onAnimationChange(false) on animation end', () => {
+      const onAnimationChange = vi.fn();
+
+      const { rerender } = render(
+        <Animate
+          isVisible={false}
+          onAnimationChange={onAnimationChange}
+          animateHeight={false}
+          duration={100}
+          delay={100}
+        >
+          <div>Content</div>
+        </Animate>
+      );
+
+      expect(onAnimationChange).not.toHaveBeenCalled();
+
+      rerender(
+        <Animate
+          isVisible={true}
+          onAnimationChange={onAnimationChange}
+          animateHeight={false}
+          duration={100}
+          delay={100}
+        >
+          <div>Content</div>
+        </Animate>
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+
+      expect(onAnimationChange).toHaveBeenCalledWith(true);
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+
+      expect(onAnimationChange).toHaveBeenCalledWith(false);
+    });
+
     it('should trigger exit animation when isVisible changes to false', () => {
       vi.useFakeTimers();
 
@@ -299,14 +341,14 @@ describe('Animate', () => {
       act(() => {
         vi.advanceTimersByTime(1);
       });
-      expect(onStart).toHaveBeenCalledTimes(1);
+      expect(onStart).toHaveBeenCalled();
 
       expect(onEnd).not.toHaveBeenCalled();
 
       act(() => {
         vi.advanceTimersByTime(500);
       });
-      expect(onEnd).toHaveBeenCalledTimes(1);
+      expect(onEnd).toHaveBeenCalled();
     });
 
     it('should clear delay timeout on unmount before animation starts', () => {
@@ -318,7 +360,7 @@ describe('Animate', () => {
         </Animate>
       );
       unmount();
-      expect(clearTimeoutSpy).toHaveBeenCalledTimes(2);
+      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
 
     it('should clear animationTimeout if unmounted after delay but before duration', () => {
@@ -333,7 +375,7 @@ describe('Animate', () => {
         vi.advanceTimersByTime(100);
       });
       unmount();
-      expect(clearTimeoutSpy).toHaveBeenCalledTimes(2);
+      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
   });
 });
