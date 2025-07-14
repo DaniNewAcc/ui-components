@@ -5,7 +5,7 @@ import { AnimationPresetKey, animationPresets } from '@/utils/preset';
 import { AnimationVariants } from '@/utils/variants';
 import type { VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-import { forwardRef, useImperativeHandle, useLayoutEffect, useState } from 'react';
+import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 
 type AnimateMethods = {
   startOpenAnimation: () => void;
@@ -106,21 +106,15 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       startOpenAnimation,
       startCloseAnimation,
     }));
+    const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+    const animationTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
     // delay enter and exit animation for preventing flickers and layout shifts
     useLayoutEffect(() => {
-      let timeout: ReturnType<typeof setTimeout>;
-      let animationTimeout: ReturnType<typeof setTimeout>;
-
-      timeout = setTimeout(() => {
-        setIsAnimating(prev => {
-          if (!prev) {
-            onStart?.();
-            onAnimationChange?.(true);
-            return true;
-          }
-          return prev;
-        });
+      timeoutRef.current = setTimeout(() => {
+        setIsAnimating(true);
+        onStart?.();
+        onAnimationChange?.(true);
 
         if (animateHeight) {
           if (isVisible) {
@@ -130,7 +124,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
           }
         }
 
-        animationTimeout = setTimeout(() => {
+        animationTimeoutRef.current = setTimeout(() => {
           resetAnimation();
           setShouldRender(isVisible);
           onEnd?.();
@@ -139,8 +133,8 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       }, delay);
 
       return () => {
-        clearTimeout(timeout);
-        clearTimeout(animationTimeout);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
       };
     }, [isVisible, animateHeight, duration, delay, onStart, onEnd, onAnimationChange]);
 
