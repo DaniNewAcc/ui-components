@@ -21,4 +21,18 @@ describe('Button', () => {
     expect(button.hasAttribute('submit'));
     expect(button.hasAttribute('loading'));
   });
+
+  it('should render leading icon correctly', () => {
+    render(<Button leadingIcon>Content</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+  });
+
+  it('should render trailing icon correctly', () => {
+    render(<Button trailingIcon>Content</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+  });
 });
