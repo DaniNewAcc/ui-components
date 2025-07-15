@@ -324,7 +324,6 @@ const TabsTrigger = forwardRef<React.ElementRef<'button'>, TabsTriggerProps>(
     const { isFocusVisible, handleBlur, handleFocus, handleMouseDown } = useFocusVisible(inputMode);
 
     const handleClick = useCallback(() => {
-      if (disabled) return;
       setActiveTab(value);
       setFocusedIndex(value);
       setTabbingDirection(null);
