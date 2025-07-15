@@ -3,13 +3,13 @@
 exports[`Tabs > Rendering > should match snapshot 1`] = `
 <div>
   <div
-    class="ui:flex ui:w-fit ui:justify-between ui:gap-4 ui:rounded-md ui:shadow-md ui:self-stretch ui:flex-col"
+    class="ui:flex ui:w-fit ui:flex-col ui:justify-between ui:bg-transparent ui:shadow-md ui:self-stretch"
     data-testid="tabsgroup"
   >
     <div
       aria-label="Tabs"
       aria-orientation="horizontal"
-      class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:rounded-t-md ui:bg-transparent ui:flex-row"
+      class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent"
       data-testid="tabslist"
       role="tablist"
     >
@@ -18,7 +18,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
         aria-expanded="true"
         aria-live="polite"
         aria-selected="true"
-        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:bg-primary-50 ui:text-primary-600 ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-4 ui:py-2 ui:text-base ui:bg-primary-50 ui:text-primary-600 ui:last:rounded-tr-md ui:flex-1 ui:first:rounded-tl-md ui:focus-visible:ring-0"
         data-testid="button"
         id="trigger-1"
         role="tab"
@@ -41,7 +41,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
         aria-expanded="false"
         aria-live="polite"
         aria-selected="false"
-        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-2 ui:py-1 ui:text-sm ui:focus-visible:ring-0 ui:last:rounded-tr-sm ui:flex-1 ui:first:rounded-tl-sm"
+        class="ui:inline-flex ui:gap-2 ui:items-center ui:justify-center ui:font-semibold ui:border ui:relative ui:shadow-sm ui:whitespace-nowrap ui:cursor-pointer ui:transition-colors ui:duration-200 ui:active:shadow-none ui:focus-visible:transition-none ui:focus-visible:duration-initial ui:focus-visible:outline-hidden ui:focus-visible:ring-primary-600 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:disabled:shadow-none ui:border-transparent ui:px-4 ui:py-2 ui:text-base ui:last:rounded-tr-md ui:flex-1 ui:first:rounded-tl-md ui:focus-visible:ring-0"
         data-testid="button"
         id="trigger-2"
         role="tab"
@@ -64,7 +64,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
       aria-hidden="false"
       aria-labelledby="trigger-1"
       aria-live="polite"
-      class="ui:flex-1 ui:overflow-y-auto"
+      class="ui:rounded-b-md ui:flex-1 ui:grow ui:overflow-y-auto ui:p-2 ui:outline-hidden ui:focus-visible:shadow-[0_0_0_2px_currentColor] ui:focus-visible:ring-0"
       id="content-1"
       role="tabpanel"
       tabindex="0"
