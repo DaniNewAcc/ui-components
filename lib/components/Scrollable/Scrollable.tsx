@@ -56,7 +56,6 @@ function ScrollableRender<C extends React.ElementType = 'div'>(
     const internalScrollHandler = useCallback(
       (e: UIEvent<HTMLElement>) => {
         const target = e.currentTarget;
-        if (!target) return;
         onScroll?.(e);
 
         const scrollTop = target.scrollTop;
