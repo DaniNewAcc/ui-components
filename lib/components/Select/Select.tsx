@@ -257,9 +257,6 @@ const SelectTrigger = forwardRef<React.ElementRef<'button'>, SelectTriggerProps>
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
-        const target = e.target as HTMLElement;
-
-        if (target.getAttribute('aria-label') === 'Clear') return;
         switch (e.key) {
           case 'ArrowDown':
           case 'ArrowUp':
@@ -410,8 +407,6 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
 
     useEffect(() => {
       if (isDropdownOpen) {
-        animationRef.current?.focus();
-
         applyInitialFocus(isActiveOptionValid, activeOption, firstFocusableOption, setFocusedIndex);
       } else {
         setFocusedIndex(null);
@@ -539,7 +534,7 @@ const SelectOption = forwardRef<React.ElementRef<'li'>, SelectOptionProps>(
       <li
         data-testid={testId}
         ref={mergedRefs}
-        aria-disabled={disabled ? 'true' : undefined}
+        aria-disabled={disabled ? true : undefined}
         aria-selected={isSelected ? 'true' : 'false'}
         id={idMap[`option-${value}`]}
         className={cn(
