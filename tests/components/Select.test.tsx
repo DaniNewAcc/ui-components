@@ -19,7 +19,10 @@ const options = [
   { id: 3, name: 'Third Option' },
 ];
 
-const renderSelect = (props: Partial<React.ComponentProps<typeof Select>> = {}) => {
+const renderSelect = (
+  props: Partial<React.ComponentProps<typeof Select>> = {},
+  disabledOptions: boolean[] = []
+) => {
   const { defaultValue = null, ...restProps } = props;
 
   return render(
@@ -32,8 +35,13 @@ const renderSelect = (props: Partial<React.ComponentProps<typeof Select>> = {}) 
     >
       <Select.Trigger placeholderText="Select an option...">Toggle</Select.Trigger>
       <Select.Dropdown>
-        {options.map(option => (
-          <Select.Option key={option.id} value={option.id} testId={`option-${option.id}`}>
+        {options.map((option, i) => (
+          <Select.Option
+            key={option.id}
+            value={option.id}
+            testId={`option-${option.id}`}
+            disabled={disabledOptions[i]}
+          >
             {option.name}
           </Select.Option>
         ))}
@@ -119,6 +127,45 @@ describe('Select', () => {
     });
   });
 
+  describe('Disabled options', () => {
+    it('should not call handleOptions when option is disabled', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderSelect({}, [true, false, false]);
+
+      fireEvent.click(screen.getByTestId('select-trigger'));
+
+      const options = screen.getAllByRole('option');
+
+      await act(async () => {
+        await user.click(options[0]);
+      });
+
+      expect(screen.getByTestId('select-trigger')).toHaveTextContent('Select an option...');
+    });
+
+    it('should skip disabled options when using keyboard navigation', async () => {
+      vi.useRealTimers();
+      renderSelect({}, [false, true, false]);
+
+      const user = userEvent.setup({ delay: null });
+
+      fireEvent.click(screen.getByTestId('select-trigger'));
+      const options = screen.getAllByRole('option');
+
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
+      });
+
+      expect(options[2]).toHaveFocus();
+
+      await act(async () => {
+        await user.keyboard('{ArrowUp}');
+      });
+
+      expect(options[0]).toHaveFocus();
+    });
+  });
+
   describe('Interaction', () => {
     it('should open dropdown when trigger is clicked', () => {
       renderSelect();
@@ -126,6 +173,17 @@ describe('Select', () => {
       fireEvent.click(screen.getByTestId('select-trigger'));
 
       expect(screen.getByTestId('select-dropdown')).toBeInTheDocument();
+    });
+
+    it('should close dropdown when clicking outside', () => {
+      renderSelect();
+
+      fireEvent.click(screen.getByTestId('select-trigger'));
+      expect(screen.getByTestId('select-dropdown')).toBeInTheDocument();
+
+      fireEvent.mouseDown(document.body);
+
+      expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
     });
 
     it('should close the dropdown when the same option is clicked again', () => {
@@ -179,6 +237,7 @@ describe('Select', () => {
         const listbox = screen.getByRole('listbox');
         expect(listbox).toBeVisible();
         expect(screen.getByText('First Option')).toBeInTheDocument();
+        expect(screen.getByTestId('option-1')).toHaveFocus();
       });
     });
 
@@ -197,6 +256,40 @@ describe('Select', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Select an option...')).toBeInTheDocument();
+      });
+    });
+
+    it('should reset selection when clear button is focused and Spacebar key is pressed', async () => {
+      vi.useRealTimers();
+      renderSelect({ defaultValue: 1, clearable: true });
+
+      expect(screen.getByText('First Option')).toBeInTheDocument();
+
+      const clearButton = screen.getByTestId('clear-btn');
+      clearButton.focus();
+
+      await act(async () => {
+        await userEvent.keyboard('{ }');
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Select an option...')).toBeInTheDocument();
+      });
+    });
+
+    it('should ignore keydown events on the clear button', () => {
+      renderSelect({ clearable: true, defaultValue: 1 });
+
+      const clearButton = screen.getByLabelText('Clear');
+      clearButton.focus();
+
+      expect(clearButton).toHaveFocus();
+
+      const keys = ['ArrowDown', 'ArrowUp', ' ', 'Enter'];
+
+      keys.forEach(key => {
+        fireEvent.keyDown(clearButton, { key });
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
       });
     });
 
@@ -324,7 +417,10 @@ describe('Select', () => {
 
       fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
 
-      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+        expect(trigger).toHaveFocus();
+      });
     });
 
     it('should pass to the trigger the option selected when enter key is pressed', async () => {
