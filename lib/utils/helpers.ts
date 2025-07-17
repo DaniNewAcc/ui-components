@@ -15,7 +15,7 @@ export const isElementFocusable = (el: HTMLElement | null | undefined): el is HT
   return !!el && !isElementDisabled(el) && isElementVisible(el);
 };
 
-export const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
+export const getFocusableElements = (container: HTMLElement | null | undefined): HTMLElement[] => {
   if (!container) return [];
   const selectors = [
     'a[href]',
