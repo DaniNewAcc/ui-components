@@ -48,7 +48,7 @@ export function forwardRefWithAs<DefaultTag extends React.ElementType, Props = {
   ) => React.ReactElement | null;
 
   (component as typeof component & { displayName?: string }).displayName =
-    displayName ?? render.name ?? 'Component';
+    displayName || render.name || 'Component';
 
   return component;
 }
