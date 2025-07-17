@@ -32,6 +32,10 @@ const useReduceMotion = () => {
       return;
     }
 
+    if (typeof window === 'undefined' || !('matchMedia' in window)) {
+      return;
+    }
+
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const handleChange = (e: MediaQueryListEvent) => {
       setReduceMotion(e.matches);
