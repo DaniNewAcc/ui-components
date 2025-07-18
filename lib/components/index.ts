@@ -1,5 +1,6 @@
 export { default as Accordion } from '@components/Accordion';
 export { default as Animate } from '@components/Animate';
+export { default as Breadcrumb } from '@components/Breadcrumb';
 export { default as Button } from '@components/Button';
 export { default as Card } from '@components/Card';
 export { default as Flex } from '@components/Flex';
