@@ -1,34 +1,45 @@
 import { cn } from '@/utils/cn';
-import { SeparatorVariants } from '@/utils/variants';
-import React, { ComponentProps, ComponentPropsWithoutRef, createContext, useContext } from 'react';
-import Separator from '../Separator';
+import React, {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  createContext,
+  ReactNode,
+  useContext,
+} from 'react';
 
-type BreadcrumbProps = ComponentProps<'nav'> & {};
+type Orientation = 'horizontal' | 'vertical';
 
-type BreadcrumbContextProps = {};
+type BreadcrumbProps = ComponentProps<'nav'> & {
+  orientation?: Orientation;
+};
+
+type BreadcrumbContextProps = {
+  orientation: Orientation;
+};
 
 const BreadcrumbContext = createContext<BreadcrumbContextProps | null>(null);
 
-const Breadcrumb = ({ className, children, ...props }: BreadcrumbProps) => {
-  const childrenArray = React.Children.toArray(children);
-
-  const totalItems = childrenArray.length;
-
-  const childrenWithProps = childrenArray.map((child, index) => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child as React.ReactElement<{ index: number; isLast: boolean }>, {
-        index,
-        isLast: index === totalItems - 1,
-      });
-    }
-    return child;
-  });
-
-  const contextValue = {};
+const Breadcrumb = ({
+  orientation = 'horizontal',
+  className,
+  children,
+  ...props
+}: BreadcrumbProps) => {
+  const contextValue = {
+    orientation,
+  };
   return (
     <BreadcrumbContext.Provider value={contextValue}>
       <nav aria-label="Breadcrumb" {...props}>
-        <ol className={cn('list-none p-0 m-0 flex', className)}>{childrenWithProps}</ol>
+        <ol
+          className={cn(
+            'ui:m-0 ui:flex ui:list-none ui:items-center ui:p-0',
+            { 'ui:flex-col': orientation === 'vertical' },
+            className
+          )}
+        >
+          {children}
+        </ol>
       </nav>
     </BreadcrumbContext.Provider>
   );
@@ -50,16 +61,12 @@ function useBreadcrumbContext() {
 
 // ------------ Item component
 
-type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'> & {
-  index?: number;
-  isLast?: boolean;
-};
+type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'>;
 
-const BreadcrumbItem = ({ className, children, index, isLast, ...props }: BreadcrumbItemProps) => {
+const BreadcrumbItem = ({ className, children, ...props }: BreadcrumbItemProps) => {
   return (
     <li className={cn('', className)} {...props}>
       {children}
-      {!isLast && <Breadcrumb.Separator />}
     </li>
   );
 };
@@ -78,7 +85,7 @@ const BreadcrumbLink = ({ isCurrent, className, children, ...props }: Breadcrumb
     return (
       <span
         aria-current="page"
-        className={cn('ui:font-semibold ui:text-blue-600', className)}
+        className={cn('ui:font-semibold ui:text-primary-600', className)}
         {...props}
       >
         {children}
@@ -86,7 +93,7 @@ const BreadcrumbLink = ({ isCurrent, className, children, ...props }: Breadcrumb
     );
   }
   return (
-    <a className={cn('ui:text-blue-600 ui:hover:underline', className)} {...props}>
+    <a className={cn('ui:text-gray-600 ui:hover:underline', className)} {...props}>
       {children}
     </a>
   );
@@ -97,19 +104,22 @@ BreadcrumbLink.displayName = 'BreadcrumbLink';
 
 // ------------ Separator component
 
-type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<typeof Separator>;
+type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<'span'> & {
+  children?: ReactNode;
+};
 
-const BreadcrumbSeparator = ({
-  orientation = 'vertical',
-  className,
-  ...props
-}: BreadcrumbSeparatorProps) => {
+const BreadcrumbSeparator = ({ children, className, ...props }: BreadcrumbSeparatorProps) => {
+  const { orientation } = useBreadcrumbContext();
+
+  const defaultContent = orientation === 'vertical' ? '↓' : '/';
   return (
-    <Separator
+    <span
       aria-hidden="true"
-      className={cn(SeparatorVariants({ orientation }), 'ui:mx-2 ui:inline-block', className)}
+      className={cn('ui:mx-2 ui:inline-block ui:select-none', className)}
       {...props}
-    />
+    >
+      {children ?? defaultContent}
+    </span>
   );
 };
 
