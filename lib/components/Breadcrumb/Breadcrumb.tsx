@@ -11,22 +11,27 @@ type Orientation = 'horizontal' | 'vertical';
 
 type BreadcrumbProps = ComponentProps<'nav'> & {
   orientation?: Orientation;
+  separator?: ReactNode;
 };
 
 type BreadcrumbContextProps = {
   orientation: Orientation;
+  separator: ReactNode;
 };
 
 const BreadcrumbContext = createContext<BreadcrumbContextProps | null>(null);
 
 const Breadcrumb = ({
   orientation = 'horizontal',
+  separator,
   className,
   children,
   ...props
 }: BreadcrumbProps) => {
+  const defaultSeparator = orientation === 'vertical' ? '↓' : '/';
   const contextValue = {
     orientation,
+    separator: separator ?? defaultSeparator,
   };
   return (
     <BreadcrumbContext.Provider value={contextValue}>
@@ -109,16 +114,14 @@ type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<'span'> & {
 };
 
 const BreadcrumbSeparator = ({ children, className, ...props }: BreadcrumbSeparatorProps) => {
-  const { orientation } = useBreadcrumbContext();
-
-  const defaultContent = orientation === 'vertical' ? '↓' : '/';
+  const { separator } = useBreadcrumbContext();
   return (
     <span
       aria-hidden="true"
       className={cn('ui:mx-2 ui:inline-block ui:select-none', className)}
       {...props}
     >
-      {children ?? defaultContent}
+      {children ?? separator}
     </span>
   );
 };
