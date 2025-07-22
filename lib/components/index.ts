@@ -20,6 +20,7 @@ export { default as Portal } from '@components/Portal';
 export { default as Scrollable } from '@components/Scrollable';
 export { default as Select } from '@components/Select';
 export { default as Separator } from '@components/Separator';
+export { default as Sidebar } from '@components/Sidebar';
 export { default as Tabs } from '@components/Tabs';
 export { default as Text } from '@components/Text';
 export { default as Trigger } from '@components/Trigger';
