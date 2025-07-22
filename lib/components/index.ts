@@ -13,6 +13,7 @@ export { default as Label } from '@components/Label';
 export { default as Layout } from '@components/Layout';
 export { default as Loader } from '@components/Loader';
 export { default as Modal } from '@components/Modal';
+export { default as Portal } from '@components/Portal';
 export { default as Scrollable } from '@components/Scrollable';
 export { default as Select } from '@components/Select';
 export { default as Separator } from '@components/Separator';
