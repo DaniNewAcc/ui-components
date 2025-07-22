@@ -10,6 +10,7 @@ import React, {
 type Orientation = 'horizontal' | 'vertical';
 
 type BreadcrumbProps = ComponentProps<'nav'> & {
+  testId?: string;
   orientation?: Orientation;
   separator?: ReactNode;
 };
@@ -26,6 +27,7 @@ const Breadcrumb = ({
   separator,
   className,
   children,
+  testId = 'breadcrumb',
   ...props
 }: BreadcrumbProps) => {
   const defaultSeparator = orientation === 'vertical' ? '↓' : '/';
@@ -35,7 +37,7 @@ const Breadcrumb = ({
   };
   return (
     <BreadcrumbContext.Provider value={contextValue}>
-      <nav aria-label="Breadcrumb" {...props}>
+      <nav data-testid={testId} aria-label="Breadcrumb" {...props}>
         <ol
           className={cn(
             'ui:m-0 ui:flex ui:list-none ui:items-center ui:p-0',
@@ -66,11 +68,13 @@ function useBreadcrumbContext() {
 
 // ------------ Item component
 
-type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'>;
+type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'> & {
+  testId?: string;
+};
 
-const BreadcrumbItem = ({ className, children, ...props }: BreadcrumbItemProps) => {
+const BreadcrumbItem = ({ className, children, testId, ...props }: BreadcrumbItemProps) => {
   return (
-    <li className={cn('', className)} {...props}>
+    <li data-testid={testId} className={cn('', className)} {...props}>
       {children}
     </li>
   );
@@ -83,12 +87,20 @@ BreadcrumbItem.displayName = 'BreadcrumbItem';
 
 type BreadcrumbLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   isCurrent?: boolean;
+  testId?: string;
 };
 
-const BreadcrumbLink = ({ isCurrent, className, children, ...props }: BreadcrumbLinkProps) => {
+const BreadcrumbLink = ({
+  isCurrent,
+  className,
+  children,
+  testId = 'link',
+  ...props
+}: BreadcrumbLinkProps) => {
   if (isCurrent) {
     return (
       <span
+        data-testid={testId}
         aria-current="page"
         className={cn('ui:font-semibold ui:text-primary-600', className)}
         {...props}
@@ -98,7 +110,11 @@ const BreadcrumbLink = ({ isCurrent, className, children, ...props }: Breadcrumb
     );
   }
   return (
-    <a className={cn('ui:text-gray-600 ui:hover:underline', className)} {...props}>
+    <a
+      data-testid={testId}
+      className={cn('ui:text-gray-600 ui:hover:underline', className)}
+      {...props}
+    >
       {children}
     </a>
   );
@@ -110,13 +126,20 @@ BreadcrumbLink.displayName = 'BreadcrumbLink';
 // ------------ Separator component
 
 type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<'span'> & {
+  testId?: string;
   children?: ReactNode;
 };
 
-const BreadcrumbSeparator = ({ children, className, ...props }: BreadcrumbSeparatorProps) => {
+const BreadcrumbSeparator = ({
+  children,
+  className,
+  testId = 'separator',
+  ...props
+}: BreadcrumbSeparatorProps) => {
   const { separator } = useBreadcrumbContext();
   return (
     <span
+      data-testid={testId}
       aria-hidden="true"
       className={cn('ui:mx-2 ui:inline-block ui:select-none', className)}
       {...props}
