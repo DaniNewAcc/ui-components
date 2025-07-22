@@ -1,4 +1,13 @@
-import { ComponentProps, createContext, ReactNode, RefObject, useContext } from 'react';
+import {
+  ComponentProps,
+  createContext,
+  ReactNode,
+  RefObject,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 type SidebarSides = 'left' | 'right';
 
@@ -40,15 +49,40 @@ const Sidebar = ({
   onOpenChange,
   ...props
 }: SidebarProps) => {
-  const contextValue = {
-    isOpen,
-    side,
-    dismissOnClickOutside,
-    dismissOnEscape,
-    trapFocus,
-    triggerRef,
-    onOpenChange,
-  };
+  const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
+  const isControlled = isOpen !== undefined;
+  const actualIsOpen = isControlled ? isOpen : internalOpen;
+
+  const onOpenChangeHandler = useCallback(
+    (newVal: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(newVal);
+      }
+      onOpenChange?.(newVal);
+    },
+    [isControlled, onOpenChange]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      isOpen: actualIsOpen,
+      side,
+      dismissOnClickOutside,
+      dismissOnEscape,
+      trapFocus,
+      triggerRef,
+      onOpenChange: onOpenChangeHandler,
+    }),
+    [
+      actualIsOpen,
+      side,
+      dismissOnClickOutside,
+      dismissOnEscape,
+      trapFocus,
+      triggerRef,
+      onOpenChangeHandler,
+    ]
+  );
 
   return (
     <SidebarContext.Provider value={contextValue}>
