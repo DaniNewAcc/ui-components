@@ -25,6 +25,22 @@ export const animationPresets: Record<string, Partial<VariantProps<typeof Animat
     easing: 'easeOut',
     exitEasing: 'easeIn',
   },
+  sidebarLeft: {
+    type: 'slideInLeft',
+    exitType: 'slideOutLeft',
+    duration: 300,
+    fillMode: 'forwards',
+    easing: 'easeOut',
+    exitEasing: 'easeIn',
+  },
+  sidebarRight: {
+    type: 'slideInRight',
+    exitType: 'slideOutRight',
+    duration: 300,
+    fillMode: 'forwards',
+    easing: 'easeOut',
+    exitEasing: 'easeIn',
+  },
 };
 
 export type AnimationPresetKey = keyof typeof animationPresets;
