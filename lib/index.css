@@ -86,6 +86,48 @@
     }
   }
 
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slideOutToLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slideOutToRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
   /* animation utilities */
 
   .is-animating {
@@ -138,6 +180,18 @@
   }
   .ui-animate-zoomIn {
     animation-name: zoomIn;
+  }
+  .ui-animate-slideInFromLeft {
+    animation-name: slideInFromLeft;
+  }
+  .ui-animate-slideOutToLeft {
+    animation-name: slideOutToLeft;
+  }
+  .ui-animate-slideInFromRight {
+    animation-name: slideInFromRight;
+  }
+  .ui-animate-slideOutToRight {
+    animation-name: slideOutToRight;
   }
 
   /* duration */
