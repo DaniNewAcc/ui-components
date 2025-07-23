@@ -1,5 +1,5 @@
 import {
-  ComponentProps,
+  ComponentPropsWithoutRef,
   createContext,
   ReactNode,
   RefObject,
@@ -8,11 +8,14 @@ import {
   useMemo,
   useState,
 } from 'react';
+import Animate from '../Animate';
+import { AnimateProps } from '../Animate/Animate';
+import Portal from '../Portal';
 
 type SidebarSides = 'left' | 'right';
 
-type SidebarProps = ComponentProps<'aside'> & {
-  testId?: string;
+type SidebarProps = {
+  containerId?: string;
   isOpen?: boolean;
   defaultOpen?: boolean;
   side?: SidebarSides;
@@ -21,11 +24,14 @@ type SidebarProps = ComponentProps<'aside'> & {
   trapFocus?: boolean;
   triggerRef?: RefObject<HTMLElement>;
   children: ReactNode;
+  portal?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
 
 type SidebarContextProps = Partial<{
+  containerId: string;
   isOpen: boolean;
+  portal: boolean;
   side: SidebarSides;
   dismissOnClickOutside: boolean;
   dismissOnEscape: boolean;
@@ -38,16 +44,16 @@ const SidebarContext = createContext<SidebarContextProps | null>(null);
 
 const Sidebar = ({
   isOpen,
+  portal = true,
+  containerId,
   defaultOpen,
   side = 'right',
   dismissOnEscape = true,
   dismissOnClickOutside = true,
   trapFocus = true,
   triggerRef,
-  testId,
   children,
   onOpenChange,
-  ...props
 }: SidebarProps) => {
   const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
   const isControlled = isOpen !== undefined;
@@ -71,6 +77,8 @@ const Sidebar = ({
       dismissOnEscape,
       trapFocus,
       triggerRef,
+      portal,
+      containerId,
       onOpenChange: onOpenChangeHandler,
     }),
     [
@@ -80,17 +88,13 @@ const Sidebar = ({
       dismissOnEscape,
       trapFocus,
       triggerRef,
+      portal,
+      containerId,
       onOpenChangeHandler,
     ]
   );
 
-  return (
-    <SidebarContext.Provider value={contextValue}>
-      <aside data-testid={testId} {...props}>
-        {children}
-      </aside>
-    </SidebarContext.Provider>
-  );
+  return <SidebarContext.Provider value={contextValue}>{children}</SidebarContext.Provider>;
 };
 
 Sidebar.displayName = 'Sidebar';
@@ -106,5 +110,44 @@ function useSidebarContext() {
 
   return context;
 }
+
+// ------------ Portal component
+
+type SidebarPortalProps = {
+  children: ReactNode;
+};
+
+const SidebarPortal = ({ children }: SidebarPortalProps) => {
+  const { containerId } = useSidebarContext();
+  return <Portal containerId={containerId}>{children}</Portal>;
+};
+
+// ------------ Frame component
+
+type SidebarFrameProps = ComponentPropsWithoutRef<'aside'> & {
+  AnimateProps?: Partial<AnimateProps>;
+};
+
+const SidebarFrame = ({ children, ...props }: SidebarFrameProps) => {
+  const { isOpen, portal } = useSidebarContext();
+
+  if (!isOpen) return null;
+
+  const content = (
+    <Animate isVisible={isOpen}>
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sidebar-title"
+        aria-describedby="sidebar-desc"
+        {...props}
+      >
+        {children}
+      </aside>
+    </Animate>
+  );
+
+  return portal ? <SidebarPortal>{content}</SidebarPortal> : content;
+};
 
 export default Sidebar;
