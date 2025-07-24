@@ -3,6 +3,7 @@ export { default as Animate } from '@components/Animate';
 export { default as Breadcrumb } from '@components/Breadcrumb';
 export { default as Button } from '@components/Button';
 export { default as Card } from '@components/Card';
+export { default as Close } from '@components/Close';
 export { default as Flex } from '@components/Flex';
 export { default as Footer } from '@components/Footer';
 export { default as Grid } from '@components/Grid';
