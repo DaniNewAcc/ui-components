@@ -25,6 +25,7 @@ import React, {
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Button from '../Button';
+import Overlay from '../Overlay';
 import Portal from '../Portal';
 import Text from '../Text';
 
@@ -164,22 +165,19 @@ Modal.Trigger = ModalTrigger;
 
 // ------------ Overlay component
 
-type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {};
+type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
+  testId?: string;
+};
 
-const ModalOverlay = ({ className, ...props }: ModalOverlayProps) => {
+const ModalOverlay = ({ className, testId = 'modal-overlay', ...props }: ModalOverlayProps) => {
   const { closeOnClickOutside, onClose } = useModalContext();
 
-  const handleClick = useCallback(() => {
-    if (closeOnClickOutside) {
-      onClose();
-    }
-  }, [closeOnClickOutside, onClose]);
-
   return (
-    <div
-      aria-hidden="true"
-      className={cn('ui:fixed ui:inset-0 ui:z-40 ui:bg-black ui:opacity-50', className)}
-      onClick={handleClick}
+    <Overlay
+      testId={testId}
+      className={cn('', className)}
+      closeOnClickOutside={closeOnClickOutside}
+      onClickOutside={onClose}
       {...props}
     />
   );
