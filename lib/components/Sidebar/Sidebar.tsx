@@ -1,3 +1,6 @@
+import { cn } from '@/utils/cn';
+import { TextVariants } from '@/utils/variants';
+import { VariantProps } from 'class-variance-authority';
 import {
   ComponentPropsWithoutRef,
   createContext,
@@ -11,6 +14,7 @@ import {
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Portal from '../Portal';
+import Text from '../Text';
 
 type SidebarSides = 'left' | 'right';
 
@@ -149,5 +153,67 @@ const SidebarFrame = ({ children, ...props }: SidebarFrameProps) => {
 
   return portal ? <SidebarPortal>{content}</SidebarPortal> : content;
 };
+
+Sidebar.Frame = SidebarFrame;
+SidebarFrame.displayName = 'SidebarFrame';
+
+// ------------ Overlay component
+
+const SidebarOverlay = () => {};
+
+Sidebar.Overlay = SidebarOverlay;
+SidebarOverlay.displayName = 'SidebarOverlay';
+
+// ------------ Header component
+
+const SidebarHeader = () => {};
+
+Sidebar.Header = SidebarHeader;
+SidebarHeader.displayName = 'SidebarHeader';
+
+// ------------ Title component
+
+type SidebarTitleProps = ComponentPropsWithoutRef<'h2'> &
+  VariantProps<typeof TextVariants> & {
+    testId?: string;
+  };
+
+const SidebarTitle = ({ className, children, testId, variant, ...props }: SidebarTitleProps) => {
+  return (
+    <Text
+      testId={testId}
+      as="h2"
+      variant={'heading'}
+      className={cn(TextVariants({ variant }), className)}
+      {...props}
+    >
+      {children}
+    </Text>
+  );
+};
+
+Sidebar.Title = SidebarTitle;
+SidebarTitle.displayName = 'SidebarTitle';
+
+// ------------ Close component
+
+const SidebarClose = () => {};
+
+Sidebar.Close = SidebarClose;
+SidebarClose.displayName = 'SidebarClose';
+
+// ------------ Content component
+
+const SidebarContent = () => {};
+
+Sidebar.Content = SidebarContent;
+SidebarContent.displayName = 'SidebarContent';
+
+// ------------ Footer component
+
+const SidebarFooter = () => {};
+
+Sidebar.Footer = SidebarFooter;
+SidebarFooter.displayName = 'SidebarFooter';
 
 export default Sidebar;
