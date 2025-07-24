@@ -11,7 +11,7 @@ const renderModal = (props = {}, children?: React.ReactNode) => {
         <button>Open</button>
       </Modal.Trigger>
       <Modal.Portal testId="portal">
-        <Modal.Overlay data-testid="overlay" />
+        <Modal.Overlay />
         <Modal.Content testId="content">
           <Modal.Title testId="title">Title</Modal.Title>
           <Modal.Description testId="description">Description</Modal.Description>
@@ -88,7 +88,7 @@ describe('Modal', () => {
             <button>Open</button>
           </Modal.Trigger>
           <Modal.Portal testId="portal">
-            <Modal.Overlay data-testid="overlay" />
+            <Modal.Overlay />
             <Modal.Content AnimateProps={{ duration: 500 }} testId="content">
               <Modal.Title testId="title">Title</Modal.Title>
               <Modal.Description testId="description">Description</Modal.Description>
@@ -114,7 +114,7 @@ describe('Modal', () => {
       const onClose = vi.fn();
       renderModal({ isOpen: true, onClose: onClose, closeOnClickOutside: true });
 
-      fireEvent.click(screen.getByTestId('overlay'));
+      fireEvent.click(screen.getByTestId('modal-overlay'));
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
@@ -122,7 +122,7 @@ describe('Modal', () => {
       const onClose = vi.fn();
       renderModal({ isOpen: true, onClose: onClose, closeOnClickOutside: false });
 
-      const overlay = screen.getByTestId('overlay');
+      const overlay = screen.getByTestId('modal-overlay');
 
       fireEvent.click(overlay);
 
@@ -149,7 +149,7 @@ describe('Modal', () => {
               <button>Open</button>
             </Modal.Trigger>
             <Modal.Portal testId="portal">
-              <Modal.Overlay data-testid="overlay" />
+              <Modal.Overlay />
               <Modal.Content testId="content">
                 <Modal.Title testId="title">Title</Modal.Title>
                 <Modal.Description testId="description">Description</Modal.Description>
@@ -190,7 +190,7 @@ describe('Modal', () => {
               <button onClick={() => setIsOpen(true)}>Open</button>
             </Modal.Trigger>
             <Modal.Portal testId="portal">
-              <Modal.Overlay data-testid="overlay" />
+              <Modal.Overlay />
               <Modal.Content testId="content">
                 <Modal.Title testId="title">Title</Modal.Title>
                 <Modal.Description testId="description">Description</Modal.Description>
