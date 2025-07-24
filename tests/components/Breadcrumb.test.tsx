@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components';
 import { render, screen } from '@testing-library/react';
+import { Fragment } from 'react/jsx-runtime';
 
 const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
 
@@ -8,12 +9,12 @@ const renderBreadcrumb = (orientation: 'horizontal' | 'vertical') => {
     <Breadcrumb orientation={orientation}>
       {items.map((item, index) => {
         return (
-          <>
-            <Breadcrumb.Item key={item}>
+          <Fragment key={item}>
+            <Breadcrumb.Item>
               <Breadcrumb.Link isCurrent={index === 0}>{item}</Breadcrumb.Link>
             </Breadcrumb.Item>
             {index !== items.length - 1 && <Breadcrumb.Separator />}
-          </>
+          </Fragment>
         );
       })}
     </Breadcrumb>
