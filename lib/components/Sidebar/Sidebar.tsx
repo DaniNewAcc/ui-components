@@ -13,6 +13,7 @@ import {
 } from 'react';
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
+import Close, { CloseProps } from '../Close/Close';
 import Portal from '../Portal';
 import Text from '../Text';
 
@@ -197,7 +198,29 @@ SidebarTitle.displayName = 'SidebarTitle';
 
 // ------------ Close component
 
-const SidebarClose = () => {};
+type SidebarCloseProps = Omit<CloseProps, 'onClose'>;
+
+const SidebarClose = ({ className, testId = 'sidebar-close', ...props }: SidebarCloseProps) => {
+  const { side, onOpenChange } = useSidebarContext();
+
+  const handleClose = useCallback(() => {
+    onOpenChange?.(false);
+  }, [onOpenChange]);
+
+  return (
+    <Close
+      testId={testId}
+      ariaLabel="Close sidebar"
+      className={cn(
+        'ui:absolute ui:top-4',
+        side === 'left' ? 'ui:left-4' : 'ui:right-4',
+        className
+      )}
+      onClose={handleClose}
+      {...props}
+    />
+  );
+};
 
 Sidebar.Close = SidebarClose;
 SidebarClose.displayName = 'SidebarClose';
