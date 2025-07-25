@@ -2,10 +2,16 @@ import { cn } from '@/utils/cn';
 import { ButtonVariants } from '@/utils/variants';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
-import { cloneElement, ComponentPropsWithoutRef, forwardRef, isValidElement } from 'react';
+import {
+  cloneElement,
+  ComponentPropsWithoutRef,
+  forwardRef,
+  isValidElement,
+  useCallback,
+} from 'react';
 import Button from '../Button';
 
-type CloseProps = ComponentPropsWithoutRef<'button'> &
+export type CloseProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     testId?: string;
     asChild?: boolean;
@@ -31,12 +37,15 @@ const Close = forwardRef<React.ElementRef<'button'>, CloseProps>(
     },
     ref
   ) => {
-    const handleClick = (e: React.MouseEvent) => {
-      onClose();
-      if (isValidElement(children) && typeof children.props?.onClick === 'function') {
-        children.props.onClick(e);
-      }
-    };
+    const handleClick = useCallback(
+      (e: React.MouseEvent) => {
+        onClose();
+        if (isValidElement(children) && typeof children.props?.onClick === 'function') {
+          children.props.onClick(e);
+        }
+      },
+      [children, onClose]
+    );
 
     if (asChild && isValidElement(children)) {
       return cloneElement(children, {
