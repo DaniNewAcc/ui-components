@@ -4,6 +4,7 @@ import { VariantProps } from 'class-variance-authority';
 import {
   ComponentPropsWithoutRef,
   createContext,
+  forwardRef,
   ReactNode,
   RefObject,
   useCallback,
@@ -14,6 +15,7 @@ import {
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Close, { CloseProps } from '../Close/Close';
+import Overlay from '../Overlay';
 import Portal from '../Portal';
 import Text from '../Text';
 
@@ -160,14 +162,43 @@ SidebarFrame.displayName = 'SidebarFrame';
 
 // ------------ Overlay component
 
-const SidebarOverlay = () => {};
+const SidebarOverlay = () => {
+  const { isOpen, dismissOnClickOutside, onOpenChange } = useSidebarContext();
+
+  if (!isOpen) return null;
+
+  return (
+    <Overlay
+      closeOnClickOutside={dismissOnClickOutside}
+      onClickOutside={() => onOpenChange?.(false)}
+    />
+  );
+};
 
 Sidebar.Overlay = SidebarOverlay;
 SidebarOverlay.displayName = 'SidebarOverlay';
 
 // ------------ Header component
 
-const SidebarHeader = () => {};
+type SidebarHeaderProps = ComponentPropsWithoutRef<'header'> & {
+  testId?: string;
+};
+
+const SidebarHeader = forwardRef<HTMLElement, SidebarHeaderProps>(
+  ({ children, className, testId = 'sidebar-header', ...props }, ref) => (
+    <header
+      data-testid={testId}
+      ref={ref}
+      className={cn(
+        'ui:flex ui:items-center ui:justify-between ui:border-b ui:border-gray-200 ui:px-4 ui:py-3',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </header>
+  )
+);
 
 Sidebar.Header = SidebarHeader;
 SidebarHeader.displayName = 'SidebarHeader';
@@ -179,7 +210,13 @@ type SidebarTitleProps = ComponentPropsWithoutRef<'h2'> &
     testId?: string;
   };
 
-const SidebarTitle = ({ className, children, testId, variant, ...props }: SidebarTitleProps) => {
+const SidebarTitle = ({
+  className,
+  children,
+  testId = 'sidebar-title',
+  variant,
+  ...props
+}: SidebarTitleProps) => {
   return (
     <Text
       testId={testId}
