@@ -1,3 +1,4 @@
+import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import { TextVariants } from '@/utils/variants';
 import { VariantProps } from 'class-variance-authority';
@@ -35,17 +36,17 @@ type SidebarProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
-type SidebarContextProps = Partial<{
-  containerId: string;
+type SidebarContextProps = {
+  containerId?: string;
   isOpen: boolean;
-  portal: boolean;
-  side: SidebarSides;
-  dismissOnClickOutside: boolean;
-  dismissOnEscape: boolean;
-  trapFocus: boolean;
-  triggerRef: RefObject<HTMLElement>;
-  onOpenChange: (open: boolean) => void;
-}>;
+  portal?: boolean;
+  side?: SidebarSides;
+  dismissOnClickOutside?: boolean;
+  dismissOnEscape?: boolean;
+  trapFocus?: boolean;
+  triggerRef?: RefObject<HTMLElement>;
+  onOpenChange?: (open: boolean) => void;
+};
 
 const SidebarContext = createContext<SidebarContextProps | null>(null);
 
@@ -132,26 +133,45 @@ const SidebarPortal = ({ children }: SidebarPortalProps) => {
 // ------------ Frame component
 
 type SidebarFrameProps = ComponentPropsWithoutRef<'aside'> & {
-  AnimateProps?: Partial<AnimateProps>;
+  animateProps?: Partial<AnimateProps>;
 };
 
-const SidebarFrame = ({ children, ...props }: SidebarFrameProps) => {
-  const { isOpen, portal } = useSidebarContext();
+const SidebarFrame = ({ className, children, animateProps, ...props }: SidebarFrameProps) => {
+  const duration = animateProps?.duration ?? 300;
+  const { isOpen, portal, side } = useSidebarContext();
+  const { ref: animationRef } = useSyncAnimation({
+    isOpen,
+    duration,
+  });
 
   if (!isOpen) return null;
 
   const content = (
-    <Animate isVisible={isOpen}>
+    <>
+      <Sidebar.Overlay />
       <aside
+        ref={animationRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="sidebar-title"
         aria-describedby="sidebar-desc"
+        className={cn(
+          'ui:fixed ui:top-0 ui:z-50 ui:shadow-lg',
+          { 'ui:right-0': side === 'right', 'ui:left-0': side === 'left' },
+          className
+        )}
         {...props}
       >
-        {children}
+        <Animate
+          isVisible={isOpen}
+          preset={side === 'right' ? 'sidebarRight' : 'sidebarLeft'}
+          animateHeight={false}
+          {...animateProps}
+        >
+          <div className="ui:h-screen ui:w-[300px] ui:bg-white">{children}</div>
+        </Animate>
       </aside>
-    </Animate>
+    </>
   );
 
   return portal ? <SidebarPortal>{content}</SidebarPortal> : content;
@@ -238,7 +258,7 @@ SidebarTitle.displayName = 'SidebarTitle';
 type SidebarCloseProps = Omit<CloseProps, 'onClose'>;
 
 const SidebarClose = ({ className, testId = 'sidebar-close', ...props }: SidebarCloseProps) => {
-  const { side, onOpenChange } = useSidebarContext();
+  const { onOpenChange } = useSidebarContext();
 
   const handleClose = useCallback(() => {
     onOpenChange?.(false);
@@ -248,11 +268,7 @@ const SidebarClose = ({ className, testId = 'sidebar-close', ...props }: Sidebar
     <Close
       testId={testId}
       ariaLabel="Close sidebar"
-      className={cn(
-        'ui:absolute ui:top-4',
-        side === 'left' ? 'ui:left-4' : 'ui:right-4',
-        className
-      )}
+      className={cn('ui:absolute ui:top-4 ui:right-4', className)}
       onClose={handleClose}
       {...props}
     />
