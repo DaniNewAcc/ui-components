@@ -22,6 +22,7 @@ import React, {
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Close from '../Close';
+import Overlay from '../Overlay';
 import Portal from '../Portal';
 import Text from '../Text';
 
@@ -161,22 +162,19 @@ Modal.Trigger = ModalTrigger;
 
 // ------------ Overlay component
 
-type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {};
+type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
+  testId?: string;
+};
 
-const ModalOverlay = ({ className, ...props }: ModalOverlayProps) => {
+const ModalOverlay = ({ className, testId, ...props }: ModalOverlayProps) => {
   const { closeOnClickOutside, onClose } = useModalContext();
 
-  const handleClick = useCallback(() => {
-    if (closeOnClickOutside) {
-      onClose();
-    }
-  }, [closeOnClickOutside, onClose]);
-
   return (
-    <div
-      aria-hidden="true"
-      className={cn('ui:fixed ui:inset-0 ui:z-40 ui:bg-black ui:opacity-50', className)}
-      onClick={handleClick}
+    <Overlay
+      testId={testId}
+      closeOnClickOutside={closeOnClickOutside}
+      onClickOutside={onClose}
+      className={cn('', className)}
       {...props}
     />
   );
@@ -188,14 +186,14 @@ Modal.Overlay = ModalOverlay;
 // ------------ Content component
 
 type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
-  AnimateProps?: Partial<AnimateProps>;
+  animateProps?: Partial<AnimateProps>;
   testId?: string;
 };
 
 const ModalContent = forwardRef<React.ElementRef<'div'>, ModalContentProps>(
-  ({ AnimateProps, className, testId, children, ...props }, ref) => {
+  ({ animateProps, className, testId, children, ...props }, ref) => {
     const { isOpen, onClose } = useModalContext();
-    const duration = AnimateProps?.duration ?? 300;
+    const duration = animateProps?.duration ?? 300;
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { moveFocus } = useTrapFocus({ containerRef, loop: true });
     const { ref: animationRef, shouldRender, maxHeight } = useSyncAnimation({ isOpen, duration });
