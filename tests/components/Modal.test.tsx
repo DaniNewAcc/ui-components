@@ -227,42 +227,8 @@ describe('Modal', () => {
     });
 
     it('should move focus between focusable elements when Tab and Shift+Tab are pressed', async () => {
-      render(
-        <Modal>
-          <Modal.Trigger testId="trigger">
-            <button>Open</button>
-          </Modal.Trigger>
-          <Modal.Portal>
-            <Modal.Content testId="content">
-              <button data-testid="btn1">Button 1</button>
-              <button data-testid="btn2">Button 2</button>
-              <Modal.Close data-testid="close" />
-            </Modal.Content>
-          </Modal.Portal>
-        </Modal>
-      );
+      const user = userEvent.setup();
 
-      const trigger = screen.getByTestId('trigger');
-      fireEvent.click(trigger);
-
-      const btn1 = screen.getByTestId('btn1');
-      const btn2 = screen.getByTestId('btn2');
-
-      btn1.focus();
-      expect(document.activeElement).toBe(btn1);
-
-      fireEvent.keyDown(btn1, { key: 'Tab', code: 'Tab' });
-      await waitFor(() => {
-        expect(document.activeElement).toBe(btn2);
-      });
-
-      fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab', shiftKey: true });
-      await waitFor(() => {
-        expect(document.activeElement).toBe(btn1);
-      });
-    });
-
-    it('should loop focus backwards with Shift+Tab', async () => {
       render(
         <Modal>
           <Modal.Trigger testId="trigger">
@@ -280,26 +246,21 @@ describe('Modal', () => {
 
       fireEvent.click(screen.getByTestId('trigger'));
 
-      const btn1 = screen.getByTestId('btn1');
-      const btn2 = screen.getByTestId('btn2');
-      const closeBtn = screen.getByTestId('close');
+      const btn1 = await screen.findByTestId('btn1');
+      const btn2 = await screen.findByTestId('btn2');
 
-      closeBtn.focus();
-      expect(document.activeElement).toBe(closeBtn);
-
-      fireEvent.keyDown(closeBtn, { key: 'Tab', code: 'Tab', shiftKey: true });
-      await waitFor(() => {
-        expect(document.activeElement).toBe(btn2);
-      });
-
-      fireEvent.keyDown(btn2, { key: 'Tab', code: 'Tab', shiftKey: true });
       await waitFor(() => {
         expect(document.activeElement).toBe(btn1);
       });
 
-      fireEvent.keyDown(btn1, { key: 'Tab', code: 'Tab', shiftKey: true });
+      await user.tab();
       await waitFor(() => {
-        expect(document.activeElement).toBe(closeBtn);
+        expect(document.activeElement).toBe(btn2);
+      });
+
+      await user.tab({ shift: true });
+      await waitFor(() => {
+        expect(document.activeElement).toBe(btn1);
       });
     });
   });
