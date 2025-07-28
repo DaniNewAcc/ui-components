@@ -1,7 +1,6 @@
 import useAutoFocus from '@/hooks/useAutoFocus';
 import useComponentIds from '@/hooks/useComponentIds';
 import { useMergedRefs } from '@/hooks/useMergedRefs';
-import usePortal from '@/hooks/usePortal';
 import useScrollLock from '@/hooks/useScrollLock';
 import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import useTrapFocus from '@/hooks/useTrapFocus';
@@ -20,10 +19,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { createPortal } from 'react-dom';
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Close from '../Close';
+import Portal from '../Portal';
 import Text from '../Text';
 
 type ModalProps = {
@@ -114,26 +113,23 @@ type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
 
 const ModalPortal = ({ className, testId, children, ...props }: ModalPortalProps) => {
   const { containerId, isOpen, ids } = useModalContext();
-  const container = usePortal(containerId);
-  if (!container) return null;
 
-  return createPortal(
-    <div
-      data-testid={testId}
-      aria-modal="true"
-      aria-labelledby={ids.title}
-      aria-describedby={ids.description}
+  return (
+    <Portal
+      testId={testId}
+      containerId={containerId}
+      isOpen={isOpen}
       role="dialog"
+      ariaLabelledby={ids.title}
+      ariaDescribedby={ids.description}
       className={cn(
         'ui:fixed ui:inset-0 ui:z-50 ui:flex ui:items-center ui:justify-center',
-        !isOpen && 'ui:pointer-events-none ui:opacity-0',
         className
       )}
       {...props}
     >
       {children}
-    </div>,
-    container
+    </Portal>
   );
 };
 
