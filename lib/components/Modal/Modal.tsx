@@ -7,14 +7,11 @@ import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import useTrapFocus from '@/hooks/useTrapFocus';
 import { cn } from '@/utils/cn';
 import { ButtonVariants } from '@/utils/variants';
-import { XMarkIcon } from '@heroicons/react/24/solid';
 import { VariantProps } from 'class-variance-authority';
 import React, {
-  cloneElement,
   ComponentPropsWithoutRef,
   createContext,
   forwardRef,
-  isValidElement,
   ReactNode,
   useCallback,
   useContext,
@@ -26,7 +23,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
-import Button from '../Button';
+import Close from '../Close';
 import Text from '../Text';
 
 type ModalProps = {
@@ -358,40 +355,22 @@ const ModalClose = forwardRef<React.ElementRef<'button'>, ModalCloseProps>(
   ) => {
     const { onClose } = useModalContext();
 
-    const handleClick = (e: React.MouseEvent) => {
-      onClose();
-      if (isValidElement(children) && typeof children.props?.onClick === 'function') {
-        children.props.onClick(e);
-      }
-    };
-
-    if (asChild && isValidElement(children)) {
-      return cloneElement(children, {
-        onClick: handleClick,
-        ...props,
-      });
-    }
-
     return (
-      <Button
-        type="button"
+      <Close
+        testId={testId}
         ref={ref}
-        intent={'icon'}
-        rounded={'full'}
-        size={'sm'}
-        variant={'unstyled'}
-        aria-label="Close modal"
-        onClick={onClose}
-        data-testid={testId}
-        className={cn(
-          ButtonVariants({ variant, size, intent, rounded }),
-          'ui:absolute ui:top-4 ui:right-4 ui:z-60 ui:text-gray-500 ui:hover:bg-gray-100',
-          className
-        )}
+        asChild={asChild}
+        ariaLabel="Close modal"
+        variant="unstyled"
+        intent="icon"
+        size="sm"
+        rounded="full"
+        className={cn('ui:absolute ui:top-4 ui:right-4 ui:z-60', className)}
+        onClose={onClose}
         {...props}
       >
-        <XMarkIcon className="ui:h-5 ui:w-5" aria-hidden="true" />
-      </Button>
+        {children}
+      </Close>
     );
   }
 );
