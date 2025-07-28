@@ -112,7 +112,12 @@ type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
-const ModalPortal = ({ className, testId, children, ...props }: ModalPortalProps) => {
+const ModalPortal = ({
+  className,
+  testId = 'modal-portal',
+  children,
+  ...props
+}: ModalPortalProps) => {
   const { containerId, isOpen, ids } = useModalContext();
 
   return (
@@ -144,18 +149,20 @@ type ModalTriggerProps = {
   children: React.ReactElement;
 };
 
-const ModalTrigger = forwardRef<HTMLElement, ModalTriggerProps>(({ children, testId }, ref) => {
-  const { open } = useModalContext();
+const ModalTrigger = forwardRef<HTMLElement, ModalTriggerProps>(
+  ({ children, testId = 'modal-trigger' }, ref) => {
+    const { open } = useModalContext();
 
-  return React.cloneElement(children, {
-    ref,
-    onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
-      open();
-    },
-    ...(testId && { 'data-testid': testId }),
-  });
-});
+    return React.cloneElement(children, {
+      ref,
+      onClick: (e: React.MouseEvent) => {
+        children.props.onClick?.(e);
+        open();
+      },
+      ...(testId && { 'data-testid': testId }),
+    });
+  }
+);
 
 ModalTrigger.displayName = 'ModalTrigger';
 Modal.Trigger = ModalTrigger;
@@ -166,7 +173,7 @@ type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
-const ModalOverlay = ({ className, testId, ...props }: ModalOverlayProps) => {
+const ModalOverlay = ({ className, testId = 'modal-overlay', ...props }: ModalOverlayProps) => {
   const { closeOnClickOutside, onClose } = useModalContext();
 
   return (
@@ -191,7 +198,7 @@ type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 const ModalContent = forwardRef<React.ElementRef<'div'>, ModalContentProps>(
-  ({ animateProps, className, testId, children, ...props }, ref) => {
+  ({ animateProps, className, testId = 'modal-content', children, ...props }, ref) => {
     const { isOpen, onClose } = useModalContext();
     const duration = animateProps?.duration ?? 300;
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -263,7 +270,7 @@ type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
 };
 
 const ModalTitle = forwardRef<React.ElementRef<'h2'>, ModalTitleProps>(
-  ({ className, testId, children, ...props }, ref) => {
+  ({ className, testId = 'modal-title', children, ...props }, ref) => {
     const { ids } = useModalContext();
     return (
       <Text
@@ -290,7 +297,7 @@ type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
 };
 
 const ModalDescription = forwardRef<React.ElementRef<'p'>, ModalDescriptionProps>(
-  ({ className, testId, children, ...props }, ref) => {
+  ({ className, testId = 'modal-description', children, ...props }, ref) => {
     const { ids } = useModalContext();
     return (
       <Text
@@ -317,7 +324,7 @@ type ModalFooterProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 const ModalFooter = forwardRef<React.ElementRef<'div'>, ModalFooterProps>(
-  ({ className, children, testId, ...props }, ref) => {
+  ({ className, children, testId = 'modal-footer', ...props }, ref) => {
     return (
       <div
         data-testid={testId}
@@ -344,7 +351,17 @@ type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
 
 const ModalClose = forwardRef<React.ElementRef<'button'>, ModalCloseProps>(
   (
-    { variant, size, intent, rounded, testId, className, asChild = false, children, ...props },
+    {
+      variant,
+      size,
+      intent,
+      rounded,
+      testId = 'modal-close',
+      className,
+      asChild = false,
+      children,
+      ...props
+    },
     ref
   ) => {
     const { onClose } = useModalContext();
