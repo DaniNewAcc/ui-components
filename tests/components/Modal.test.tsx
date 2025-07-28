@@ -89,7 +89,7 @@ describe('Modal', () => {
           </Modal.Trigger>
           <Modal.Portal testId="portal">
             <Modal.Overlay />
-            <Modal.Content AnimateProps={{ duration: 500 }} testId="content">
+            <Modal.Content animateProps={{ duration: 500 }} testId="content">
               <Modal.Title testId="title">Title</Modal.Title>
               <Modal.Description testId="description">Description</Modal.Description>
               <Modal.Footer testId="footer">Footer</Modal.Footer>
