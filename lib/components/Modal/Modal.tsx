@@ -248,6 +248,7 @@ const ModalContent = forwardRef<React.ElementRef<'div'>, ModalContentProps>(
               transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
               opacity: isOpen ? 1 : 0,
               visibility: isOpen ? 'visible' : 'hidden',
+              pointerEvents: isOpen ? 'auto' : 'none',
             }}
             tabIndex={-1}
             {...props}
