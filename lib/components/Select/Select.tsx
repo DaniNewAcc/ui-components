@@ -486,6 +486,7 @@ const SelectDropdown = forwardRef<React.ElementRef<'ul'>, SelectDropdownProps>(
               transition: `max-height ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
               opacity: isDropdownOpen ? 1 : 0,
               visibility: isDropdownOpen ? 'visible' : 'hidden',
+              pointerEvents: isDropdownOpen ? 'auto' : 'none',
             }}
             role="listbox"
             tabIndex={-1}
