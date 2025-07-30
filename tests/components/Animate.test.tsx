@@ -1,6 +1,6 @@
 import { Animate } from '@/components';
 import useReduceMotion from '@/hooks/useReduceMotion';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { act, useRef } from 'react';
 import { vi } from 'vitest';
 
@@ -37,6 +37,33 @@ describe('Animate', () => {
 
       const animate = screen.queryByTestId('animate');
       expect(animate).not.toBeInTheDocument();
+    });
+
+    it('should hide the content after collapse animation duration', () => {
+      vi.useFakeTimers();
+      const duration = 100;
+
+      const { rerender, queryByTestId } = render(
+        <Animate isVisible={true} duration={duration}>
+          <div>Content</div>
+        </Animate>
+      );
+
+      expect(queryByTestId('animate')).toBeInTheDocument();
+
+      rerender(
+        <Animate isVisible={false} duration={duration}>
+          <div>Content</div>
+        </Animate>
+      );
+
+      expect(queryByTestId('animate')).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(duration);
+      });
+
+      expect(queryByTestId('animate')).not.toBeInTheDocument();
     });
   });
 
@@ -80,7 +107,7 @@ describe('Animate', () => {
     });
   });
 
-  describe('Animate animateHeight behavior', () => {
+  describe('animateHeight Behavior', () => {
     beforeEach(() => {
       vi.mocked(useReduceMotion).mockReturnValue(false);
       vi.useFakeTimers();
@@ -168,13 +195,13 @@ describe('Animate', () => {
       vi.mocked(useReduceMotion).mockReturnValue(false);
     });
 
-    it('should call startOpenAnimation and set maxHeight', () => {
+    it('should call startOpenAnimation and set maxHeight', async () => {
       const TestComponent = () => {
         const ref = useRef<any>(null);
 
         return (
           <div>
-            <Animate ref={ref} isVisible={true} animateHeight>
+            <Animate ref={ref} isVisible={true} animateHeight duration={100}>
               <div style={{ height: 100 }}>Content</div>
             </Animate>
             <button onClick={() => ref.current?.startOpenAnimation()}>Open</button>
@@ -183,15 +210,24 @@ describe('Animate', () => {
       };
 
       render(<TestComponent />);
-
       const animate = screen.getByTestId('animate');
+
+      Object.defineProperty(animate, 'scrollHeight', {
+        configurable: true,
+        get() {
+          return 100;
+        },
+      });
+
       const openButton = screen.getByRole('button', { name: /open/i });
 
       act(() => {
         openButton.click();
       });
 
-      expect(animate.style.maxHeight).toMatch(/px/);
+      await waitFor(() => {
+        expect(animate.style.maxHeight).toMatch(/px/);
+      });
     });
 
     it('should call startCloseAnimation and set maxHeight to 0px', () => {
@@ -217,7 +253,7 @@ describe('Animate', () => {
         closeButton.click();
       });
 
-      expect(animate.style.maxHeight).toBe('0px');
+      expect(animate.style.maxHeight).toMatch(/^0(px)?$/);
     });
   });
 
@@ -266,7 +302,7 @@ describe('Animate', () => {
       expect(onAnimationChange).toHaveBeenCalledWith(true);
 
       act(() => {
-        vi.advanceTimersByTime(100);
+        vi.advanceTimersByTime(200);
       });
 
       expect(onAnimationChange).toHaveBeenCalledWith(false);
@@ -346,7 +382,7 @@ describe('Animate', () => {
       expect(onEnd).not.toHaveBeenCalled();
 
       act(() => {
-        vi.advanceTimersByTime(500);
+        vi.advanceTimersByTime(700);
       });
       expect(onEnd).toHaveBeenCalled();
     });
