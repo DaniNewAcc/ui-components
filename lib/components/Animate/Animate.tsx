@@ -1,11 +1,18 @@
 import useReduceMotion from '@/hooks/useReduceMotion';
-import { useSyncAnimation } from '@/hooks/useSyncAnimation'; // Import the hook
+import { useSyncAnimation } from '@/hooks/useSyncAnimation';
 import { cn } from '@/utils/cn';
 import { AnimationPresetKey, animationPresets } from '@/utils/preset';
 import { AnimationVariants } from '@/utils/variants';
 import type { VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 type AnimateMethods = {
   startOpenAnimation: () => void;
@@ -72,7 +79,9 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       ref: syncRef,
       shouldRender,
       maxHeight,
-      setMaxHeight,
+      updateSizes,
+      handleExpand,
+      handleCollapse,
       setShouldRender,
     } = useSyncAnimation({
       isOpen: isVisible,
@@ -83,45 +92,51 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
     const shouldAnimate = !disabled && !reduceMotion;
 
     // helper functions for handling enter and exit animations
-    const startOpenAnimation = () => {
+    const startOpenAnimation = useCallback(() => {
+      if (!animateHeight) return;
       if (syncRef.current) {
-        const fullHeight = syncRef.current.scrollHeight;
-        setMaxHeight(`${fullHeight}px`);
+        handleExpand();
       }
-    };
+    }, [animateHeight, handleExpand]);
 
-    const startCloseAnimation = () => {
+    const startCloseAnimation = useCallback(() => {
+      if (!animateHeight) return;
       if (syncRef.current) {
-        setMaxHeight('0px');
+        handleCollapse();
       }
-    };
+    }, [animateHeight, handleCollapse]);
 
-    const resetAnimation = () => {
-      setMaxHeight('auto');
+    const resetAnimation = useCallback(() => {
+      updateSizes('auto');
       setIsAnimating(false);
-    };
+    }, [updateSizes]);
 
     // allow the user to access internal methods in parent component
     useImperativeHandle(forwardedRef, () => ({
       startOpenAnimation,
       startCloseAnimation,
     }));
+
     const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
     const animationTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
-    // delay enter and exit animation for preventing flickers and layout shifts
-    useLayoutEffect(() => {
+    // It runs animation with delay on enter and exit for preventing flickers and layout shifts
+    const runAnimation = useCallback(() => {
+      // If animations are disabled update rendering state and skip animation logic
+      if (!shouldAnimate) {
+        setShouldRender(isVisible);
+        return;
+      }
+
       timeoutRef.current = setTimeout(() => {
         setIsAnimating(true);
         onStart?.();
         onAnimationChange?.(true);
 
-        if (animateHeight) {
-          if (isVisible) {
-            startOpenAnimation();
-          } else {
-            startCloseAnimation();
-          }
+        if (isVisible) {
+          startOpenAnimation();
+        } else {
+          startCloseAnimation();
         }
 
         animationTimeoutRef.current = setTimeout(() => {
@@ -131,12 +146,26 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
           onAnimationChange?.(false);
         }, duration);
       }, delay);
+    }, [
+      isVisible,
+      delay,
+      duration,
+      onStart,
+      onEnd,
+      onAnimationChange,
+      startOpenAnimation,
+      startCloseAnimation,
+      resetAnimation,
+    ]);
+
+    useLayoutEffect(() => {
+      runAnimation();
 
       return () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
       };
-    }, [isVisible, animateHeight, duration, delay, onStart, onEnd, onAnimationChange]);
+    }, [runAnimation]);
 
     if (!shouldRender) return null;
 
@@ -154,6 +183,8 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
     return (
       <div
         ref={syncRef}
+        aria-expanded={isVisible}
+        aria-hidden={!isVisible}
         data-testid={testId}
         className={cn(animationClass, className, {
           'is-animating': isAnimating,
@@ -174,5 +205,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
     );
   }
 );
+
+Animate.displayName = 'Animate';
 
 export default Animate;
