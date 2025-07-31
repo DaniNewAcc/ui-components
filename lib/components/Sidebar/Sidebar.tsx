@@ -16,6 +16,7 @@ import {
 import Animate from '../Animate';
 import { AnimateProps } from '../Animate/Animate';
 import Close, { CloseProps } from '../Close/Close';
+import Flex from '../Flex';
 import Overlay from '../Overlay';
 import Portal from '../Portal';
 import Text from '../Text';
@@ -27,6 +28,7 @@ type SidebarProps = {
   isOpen?: boolean;
   defaultOpen?: boolean;
   side?: SidebarSides;
+  showOverlay?: boolean;
   dismissOnEscape?: boolean;
   dismissOnClickOutside?: boolean;
   trapFocus?: boolean;
@@ -41,6 +43,7 @@ type SidebarContextProps = {
   isOpen: boolean;
   portal?: boolean;
   side?: SidebarSides;
+  showOverlay?: boolean;
   dismissOnClickOutside?: boolean;
   dismissOnEscape?: boolean;
   trapFocus?: boolean;
@@ -56,8 +59,9 @@ const Sidebar = ({
   containerId,
   defaultOpen,
   side = 'right',
+  showOverlay = false,
   dismissOnEscape = true,
-  dismissOnClickOutside = true,
+  dismissOnClickOutside = false,
   trapFocus = true,
   triggerRef,
   children,
@@ -81,6 +85,7 @@ const Sidebar = ({
     () => ({
       isOpen: actualIsOpen,
       side,
+      showOverlay,
       dismissOnClickOutside,
       dismissOnEscape,
       trapFocus,
@@ -92,6 +97,7 @@ const Sidebar = ({
     [
       actualIsOpen,
       side,
+      showOverlay,
       dismissOnClickOutside,
       dismissOnEscape,
       trapFocus,
@@ -145,7 +151,7 @@ const SidebarFrame = ({
   ...props
 }: SidebarFrameProps) => {
   const duration = animateProps?.duration ?? 300;
-  const { isOpen, portal, side } = useSidebarContext();
+  const { isOpen, portal, side, showOverlay } = useSidebarContext();
   const {
     ref: animationRef,
     maxWidth,
@@ -160,7 +166,7 @@ const SidebarFrame = ({
 
   const content = (
     <>
-      <Sidebar.Overlay />
+      {showOverlay && <Sidebar.Overlay />}
       <aside
         data-testid={testId}
         ref={animationRef}
@@ -188,7 +194,7 @@ const SidebarFrame = ({
           }}
           {...animateProps}
         >
-          <div className="ui:h-screen ui:w-[300px] ui:bg-white">{children}</div>
+          <div className="ui:flex ui:h-screen ui:w-[300px] ui:flex-col ui:bg-white">{children}</div>
         </Animate>
       </aside>
     </>
@@ -309,14 +315,46 @@ SidebarClose.displayName = 'SidebarClose';
 
 // ------------ Content component
 
-const SidebarContent = () => {};
+type SidebarContentProps = ComponentPropsWithoutRef<'div'> & {
+  testId?: string;
+};
+
+const SidebarContent = ({
+  testId = 'sidebar-content',
+  className,
+  children,
+  ...props
+}: SidebarContentProps) => {
+  return (
+    <Flex
+      testId={testId}
+      direction={'col'}
+      gap={'md'}
+      scrollable
+      scrollableProps={{ className: 'ui:flex-1 ui:min-h-0 ui:overflow-y-auto' }}
+      {...props}
+    >
+      {children}
+    </Flex>
+  );
+};
 
 Sidebar.Content = SidebarContent;
 SidebarContent.displayName = 'SidebarContent';
 
 // ------------ Footer component
 
-const SidebarFooter = () => {};
+type SidebarFooterProps = ComponentPropsWithoutRef<'footer'> & {
+  testId?: string;
+};
+
+const SidebarFooter = ({ testId, className, children, ...props }: SidebarFooterProps) => {
+  return (
+    <footer data-testid={testId} className={cn('ui:h-20 ui:px-4 ui:py-5', className)} {...props}>
+      {children}
+    </footer>
+  );
+};
 
 Sidebar.Footer = SidebarFooter;
 SidebarFooter.displayName = 'SidebarFooter';
