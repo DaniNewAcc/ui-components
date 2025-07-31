@@ -133,23 +133,36 @@ const SidebarPortal = ({ children }: SidebarPortalProps) => {
 // ------------ Frame component
 
 type SidebarFrameProps = ComponentPropsWithoutRef<'aside'> & {
+  testId?: string;
   animateProps?: Partial<AnimateProps>;
 };
 
-const SidebarFrame = ({ className, children, animateProps, ...props }: SidebarFrameProps) => {
+const SidebarFrame = ({
+  testId = 'sidebar-frame',
+  className,
+  children,
+  animateProps,
+  ...props
+}: SidebarFrameProps) => {
   const duration = animateProps?.duration ?? 300;
   const { isOpen, portal, side } = useSidebarContext();
-  const { ref: animationRef } = useSyncAnimation({
+  const {
+    ref: animationRef,
+    maxWidth,
+    shouldRender,
+  } = useSyncAnimation({
     isOpen,
     duration,
+    dimension: 'width',
   });
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const content = (
     <>
       <Sidebar.Overlay />
       <aside
+        data-testid={testId}
         ref={animationRef}
         role="dialog"
         aria-modal="true"
@@ -166,6 +179,13 @@ const SidebarFrame = ({ className, children, animateProps, ...props }: SidebarFr
           isVisible={isOpen}
           preset={side === 'right' ? 'sidebarRight' : 'sidebarLeft'}
           animateHeight={false}
+          style={{
+            maxWidth: `${maxWidth}px`,
+            transition: `max-width ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+            opacity: isOpen ? 1 : 0,
+            visibility: isOpen ? 'visible' : 'hidden',
+            pointerEvents: isOpen ? 'auto' : 'none',
+          }}
           {...animateProps}
         >
           <div className="ui:h-screen ui:w-[300px] ui:bg-white">{children}</div>
@@ -210,7 +230,7 @@ const SidebarHeader = forwardRef<HTMLElement, SidebarHeaderProps>(
       data-testid={testId}
       ref={ref}
       className={cn(
-        'ui:flex ui:items-center ui:justify-between ui:border-b ui:border-gray-200 ui:px-4 ui:py-3',
+        'ui:relative ui:flex ui:items-center ui:justify-between ui:border-b ui:border-gray-200 ui:px-4 ui:py-5',
         className
       )}
       {...props}
@@ -257,7 +277,13 @@ SidebarTitle.displayName = 'SidebarTitle';
 
 type SidebarCloseProps = Omit<CloseProps, 'onClose'>;
 
-const SidebarClose = ({ className, testId = 'sidebar-close', ...props }: SidebarCloseProps) => {
+const SidebarClose = ({
+  className,
+  children,
+  asChild = false,
+  testId = 'sidebar-close',
+  ...props
+}: SidebarCloseProps) => {
   const { onOpenChange } = useSidebarContext();
 
   const handleClose = useCallback(() => {
@@ -267,11 +293,14 @@ const SidebarClose = ({ className, testId = 'sidebar-close', ...props }: Sidebar
   return (
     <Close
       testId={testId}
+      asChild={asChild}
       ariaLabel="Close sidebar"
       className={cn('ui:absolute ui:top-4 ui:right-4', className)}
       onClose={handleClose}
       {...props}
-    />
+    >
+      {children}
+    </Close>
   );
 };
 
