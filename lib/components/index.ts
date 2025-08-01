@@ -21,3 +21,4 @@ export { default as Select } from '@components/Select';
 export { default as Separator } from '@components/Separator';
 export { default as Tabs } from '@components/Tabs';
 export { default as Text } from '@components/Text';
+export { default as Trigger } from '@components/Trigger';
