@@ -1,4 +1,4 @@
-import useComponentIds from '@/hooks/useComponentIds';
+import { useComponentIds } from '@hooks/useComponentIds';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

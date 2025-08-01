@@ -22,7 +22,10 @@
 
 import { useCallback, useRef } from 'react';
 
-function useThrottle<Func extends (...args: any[]) => void>(callback: Func, delay: number): Func {
+export function useThrottle<Func extends (...args: any[]) => void>(
+  callback: Func,
+  delay: number
+): Func {
   const lastCallRef = useRef<number>(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,5 +54,3 @@ function useThrottle<Func extends (...args: any[]) => void>(callback: Func, dela
 
   return throttledFn as Func;
 }
-
-export default useThrottle;

@@ -1,4 +1,4 @@
-import useReduceMotion, { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import { __setReduceMotionForTests, useReduceMotion } from '@hooks/useReduceMotion';
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

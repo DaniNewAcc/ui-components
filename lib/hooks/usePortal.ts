@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from 'react';
 
-const usePortal = (id: string = 'portal-root'): HTMLElement | null => {
+export function usePortal(id: string = 'portal-root'): HTMLElement | null {
   const [container, setContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -36,6 +36,4 @@ const usePortal = (id: string = 'portal-root'): HTMLElement | null => {
   }, [id]);
 
   return container;
-};
-
-export default usePortal;
+}

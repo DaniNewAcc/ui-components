@@ -14,7 +14,7 @@
  * - When the component unmounts, focus is returned to the element that was previously focused.
  */
 
-import { getFocusableElements } from '@/utils/helpers';
+import { getFocusableElements } from '@utils/helpers';
 import { MutableRefObject, useCallback, useEffect } from 'react';
 
 type TrapFocusProps = {
@@ -22,7 +22,7 @@ type TrapFocusProps = {
   loop: boolean;
 };
 
-const useTrapFocus = ({ containerRef, loop = true }: TrapFocusProps) => {
+export function useTrapFocus({ containerRef, loop = true }: TrapFocusProps) {
   const moveFocus = useCallback(
     (direction: 'next' | 'previous') => {
       const container = containerRef.current;
@@ -73,5 +73,4 @@ const useTrapFocus = ({ containerRef, loop = true }: TrapFocusProps) => {
   return {
     moveFocus,
   };
-};
-export default useTrapFocus;
+}

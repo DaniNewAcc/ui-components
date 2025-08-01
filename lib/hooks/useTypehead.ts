@@ -32,7 +32,7 @@ type UseTypeaheadProps<T extends TypeaheadOption> = {
   timeout?: number;
 };
 
-function useTypeahead<T extends TypeaheadOption>({
+export function useTypeahead<T extends TypeaheadOption>({
   options,
   getLabel,
   getValue,
@@ -69,5 +69,3 @@ function useTypeahead<T extends TypeaheadOption>({
 
   return { handleTypeahead };
 }
-
-export default useTypeahead;

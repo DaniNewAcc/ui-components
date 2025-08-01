@@ -14,17 +14,15 @@ import { useId } from 'react';
 type CompoundParts = string[];
 type CompoundIdMap = Record<string, string>;
 
-const useComponentIds = (
+export function useComponentIds(
   baseName: string,
   parts: CompoundParts,
   overrides?: Partial<CompoundIdMap>
-): CompoundIdMap => {
+): CompoundIdMap {
   const baseId = useId();
 
   return parts.reduce<CompoundIdMap>((acc, part) => {
     acc[part] = overrides?.[part] ?? `${baseName}-${baseId}-${part}`;
     return acc;
   }, {});
-};
-
-export default useComponentIds;
+}

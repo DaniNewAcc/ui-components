@@ -15,7 +15,7 @@ export const __setReduceMotionForTests = (value: boolean | undefined) => {
   forcedValue = value;
 };
 
-const useReduceMotion = () => {
+export function useReduceMotion() {
   const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
     if (forcedValue !== undefined) return forcedValue;
 
@@ -48,6 +48,4 @@ const useReduceMotion = () => {
   }, []);
 
   return reduceMotion;
-};
-
-export default useReduceMotion;
+}

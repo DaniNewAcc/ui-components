@@ -25,8 +25,8 @@
  * - Use `shouldRender`, `maxHeight` and/or `maxWidth` values to control the transition and visibility.
  */
 
+import { useReduceMotion } from '@hooks/useReduceMotion';
 import { useEffect, useRef, useState } from 'react';
-import useReduceMotion from './useReduceMotion';
 
 type Dimension = 'height' | 'width';
 
@@ -40,11 +40,11 @@ type UseSyncAnimationProps = {
   dimension?: Dimension | Dimension[];
 };
 
-export const useSyncAnimation = <T extends HTMLElement = HTMLDivElement>({
+export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
   isOpen,
   duration,
   dimension = 'height',
-}: UseSyncAnimationProps) => {
+}: UseSyncAnimationProps) {
   const ref = useRef<T | null>(null);
   const [shouldRender, setShouldRender] = useState<boolean>(isOpen);
   const hasMounted = useRef<boolean>(false);
@@ -155,4 +155,4 @@ export const useSyncAnimation = <T extends HTMLElement = HTMLDivElement>({
     handleCollapse,
     setShouldRender,
   };
-};
+}

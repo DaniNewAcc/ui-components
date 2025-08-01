@@ -1,8 +1,8 @@
-import useAutoFocus from '@/hooks/useAutoFocus';
+import { useAutoFocus } from '@hooks/useAutoFocus';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('@/utils/helpers', () => ({
+vi.mock('@utils/helpers', () => ({
   getFocusableElements: (container: HTMLElement) =>
     Array.from(container.querySelectorAll('button, [tabindex]:not([tabindex="-1"])')),
 }));

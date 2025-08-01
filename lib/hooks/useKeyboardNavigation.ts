@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 
 type InputMode = 'mouse' | 'keyboard';
 
-function useKeyboardNavigation() {
+export function useKeyboardNavigation() {
   const [inputMode, setInputMode] = useState<InputMode>('mouse');
 
   useEffect(() => {
@@ -46,5 +46,3 @@ function useKeyboardNavigation() {
 
   return inputMode;
 }
-
-export default useKeyboardNavigation;

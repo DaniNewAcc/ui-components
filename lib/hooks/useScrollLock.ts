@@ -11,7 +11,7 @@
 
 import { useEffect } from 'react';
 
-const useScrollLock = (active: boolean) => {
+export function useScrollLock(active: boolean) {
   useEffect(() => {
     if (!active) return;
 
@@ -23,6 +23,4 @@ const useScrollLock = (active: boolean) => {
       document.body.style.overflow = originalStyle;
     };
   }, [active]);
-};
-
-export default useScrollLock;
+}

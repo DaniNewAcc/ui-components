@@ -22,7 +22,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 
-const useFocusVisible = (inputMode: string) => {
+export function useFocusVisible(inputMode: string) {
   const [isFocusVisible, setIsFocusVisible] = useState(false);
   const isClickingRef = useRef(false);
 
@@ -49,6 +49,4 @@ const useFocusVisible = (inputMode: string) => {
     handleFocus,
     handleBlur,
   };
-};
-
-export default useFocusVisible;
+}

@@ -41,7 +41,7 @@
  * - `registeredCount` tracks how many focusable elements have been registered via setFocusRef.
  */
 
-import { isElementFocusable } from '@/utils/helpers';
+import { isElementFocusable } from '@utils/helpers';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SetFocusRefProps = {
@@ -60,7 +60,7 @@ export type RovingFocusHookProps = {
   clearFocusRefs: () => void;
 };
 
-function useRovingFocus(
+export function useRovingFocus(
   initialFocusedIndex?: string | number | (string | number)[] | null,
   loop: boolean = false
 ): RovingFocusHookProps {
@@ -153,5 +153,3 @@ function useRovingFocus(
     clearFocusRefs,
   };
 }
-
-export default useRovingFocus;

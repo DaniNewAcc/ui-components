@@ -8,10 +8,10 @@
  * @param containerRef - A ref to the container that holds focusable elements.
  */
 
-import { getFocusableElements } from '@/utils/helpers';
+import { getFocusableElements } from '@utils/helpers';
 import { useEffect } from 'react';
 
-const useAutoFocus = (shouldFocus: boolean, containerRef: React.RefObject<HTMLElement>) => {
+export function useAutoFocus(shouldFocus: boolean, containerRef: React.RefObject<HTMLElement>) {
   useEffect(() => {
     const container = containerRef.current;
     if (!shouldFocus || !container) return;
@@ -27,6 +27,4 @@ const useAutoFocus = (shouldFocus: boolean, containerRef: React.RefObject<HTMLEl
 
     return () => cancelAnimationFrame(frame);
   }, [shouldFocus, containerRef]);
-};
-
-export default useAutoFocus;
+}

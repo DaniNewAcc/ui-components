@@ -1,4 +1,4 @@
-import useThrottle from '@/hooks/useThrottle';
+import { useThrottle } from '@hooks/useThrottle';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 

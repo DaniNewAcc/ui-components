@@ -1,4 +1,4 @@
-import useTypeahead from '@/hooks/useTypehead';
+import { useTypeahead } from '@hooks/useTypehead';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 

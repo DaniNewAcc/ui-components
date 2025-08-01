@@ -1,4 +1,4 @@
-import useRovingFocus from '@/hooks/useRovingFocus';
+import { useRovingFocus } from '@hooks/useRovingFocus';
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 

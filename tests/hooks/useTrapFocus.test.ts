@@ -1,4 +1,4 @@
-import useTrapFocus from '@/hooks/useTrapFocus';
+import { useTrapFocus } from '@hooks/useTrapFocus';
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
