@@ -4,6 +4,7 @@ import Flex, { FlexProps } from '@components/Flex';
 import Overlay, { OverlayProps } from '@components/Overlay';
 import Portal, { PortalProps } from '@components/Portal';
 import Text, { TextProps } from '@components/Text';
+import Trigger, { TriggerProps } from '@components/Trigger';
 import { useSyncAnimation } from '@hooks/useSyncAnimation';
 import { cn } from '@utils/cn';
 import { TextVariants } from '@utils/variants';
@@ -123,6 +124,32 @@ export function useSidebarContext() {
   return context;
 }
 
+// ------------ Trigger component
+
+export type SidebarTriggerProps = TriggerProps & {
+  testId?: string;
+};
+
+const SidebarTrigger = forwardRef<HTMLElement, SidebarTriggerProps>(
+  ({ testId = 'sidebar-trigger', children, ...props }, ref) => {
+    const { onOpenChange, triggerRef } = useSidebarContext();
+
+    return (
+      <Trigger
+        testId={testId}
+        ref={ref ?? triggerRef}
+        {...props}
+        onTrigger={() => onOpenChange?.(true)}
+      >
+        {children}
+      </Trigger>
+    );
+  }
+);
+
+Sidebar.Trigger = SidebarTrigger;
+SidebarTrigger.displayName = 'SidebarTrigger';
+
 // ------------ Portal component
 
 export type SidebarPortalProps = PortalProps & {
@@ -137,6 +164,9 @@ const SidebarPortal = ({ testId = 'sidebar-portal', children }: SidebarPortalPro
     </Portal>
   );
 };
+
+Sidebar.Portal = SidebarPortal;
+SidebarPortal.displayName = 'SidebarPortal';
 
 // ------------ Frame component
 
