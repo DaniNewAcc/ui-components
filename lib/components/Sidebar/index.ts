@@ -10,4 +10,5 @@ export type {
   SidebarPortalProps,
   SidebarProps,
   SidebarTitleProps,
+  SidebarTriggerProps,
 } from './Sidebar';
