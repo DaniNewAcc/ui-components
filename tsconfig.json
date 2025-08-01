@@ -2,9 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["lib/*"],
       "@components/*": ["lib/components/*"],
-      "@utils/*": ["lib/utils/*"]
+      "@hooks/*": ["lib/hooks/*"],
+      "@utils/*": ["lib/utils/*"],
+      "@/*": ["lib/*"]
     },
     "target": "ES2022",
     "useDefineForClassFields": true,

@@ -1,48 +1,49 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import dts from "vite-plugin-dts";
-import { defineConfig } from "vitest/config";
-import peerDependencies from "./package.json";
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import dts from 'vite-plugin-dts';
+import { defineConfig } from 'vitest/config';
+import peerDependencies from './package.json';
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     dts({
-      include: ["lib"],
-      exclude: ["**/*.test.tsx", "**/__tests__/**, tests/**"],
+      include: ['lib'],
+      exclude: ['**/*.test.tsx', '**/__tests__/**, tests/**'],
       insertTypesEntry: true,
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./lib"),
-      "@components": path.resolve(__dirname, "./lib/components/"),
-      "@utils": path.resolve(__dirname, "./lib/utils/"),
+      '@components': path.resolve(__dirname, './lib/components/'),
+      '@hooks': path.resolve(__dirname, './lib/hooks/'),
+      '@utils': path.resolve(__dirname, './lib/utils/'),
+      '@': path.resolve(__dirname, './lib'),
     },
   },
   test: {
     coverage: {
-      reporter: ["text", "html"],
+      reporter: ['text', 'html'],
     },
     globals: true,
-    environment: "jsdom",
-    setupFiles: "./tests/setupTests.ts",
+    environment: 'jsdom',
+    setupFiles: './tests/setupTests.ts',
   },
   build: {
     minify: true,
     copyPublicDir: false,
     lib: {
-      entry: "./lib/index.ts",
-      name: "ui",
-      fileName: (format) => `ui.${format}.js`,
-      formats: ["es", "cjs", "umd"],
+      entry: './lib/index.ts',
+      name: 'ui',
+      fileName: format => `ui.${format}.js`,
+      formats: ['es', 'cjs', 'umd'],
     },
     rollupOptions: {
       treeshake: true,
       external: Object.keys(peerDependencies),
-      output: { globals: { react: "React", "react-dom": "ReactDOM" } },
+      output: { globals: { react: 'React', 'react-dom': 'ReactDOM' } },
     },
   },
 });
