@@ -1,7 +1,12 @@
-import { useSyncAnimation } from '@/hooks/useSyncAnimation';
-import { cn } from '@/utils/cn';
-import { TextVariants } from '@/utils/variants';
-import { VariantProps } from 'class-variance-authority';
+import Animate, { AnimateProps } from '@components/Animate';
+import Close, { CloseProps } from '@components/Close';
+import Flex, { FlexProps } from '@components/Flex';
+import Overlay, { OverlayProps } from '@components/Overlay';
+import Portal, { PortalProps } from '@components/Portal';
+import Text, { TextProps } from '@components/Text';
+import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { cn } from '@utils/cn';
+import { TextVariants } from '@utils/variants';
 import {
   ComponentPropsWithoutRef,
   createContext,
@@ -13,17 +18,10 @@ import {
   useMemo,
   useState,
 } from 'react';
-import Animate from '../Animate';
-import { AnimateProps } from '../Animate/Animate';
-import Close, { CloseProps } from '../Close/Close';
-import Flex from '../Flex';
-import Overlay from '../Overlay';
-import Portal from '../Portal';
-import Text from '../Text';
 
 type SidebarSides = 'left' | 'right';
 
-type SidebarProps = {
+export type SidebarProps = {
   containerId?: string;
   isOpen?: boolean;
   defaultOpen?: boolean;
@@ -38,7 +36,7 @@ type SidebarProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
-type SidebarContextProps = {
+export type SidebarContextProps = {
   containerId?: string;
   isOpen: boolean;
   portal?: boolean;
@@ -115,7 +113,7 @@ Sidebar.displayName = 'Sidebar';
 
 // helper function for using Sidebar context
 
-function useSidebarContext() {
+export function useSidebarContext() {
   const context = useContext(SidebarContext);
 
   if (!context) {
@@ -127,18 +125,22 @@ function useSidebarContext() {
 
 // ------------ Portal component
 
-type SidebarPortalProps = {
-  children: ReactNode;
+export type SidebarPortalProps = PortalProps & {
+  testId?: string;
 };
 
-const SidebarPortal = ({ children }: SidebarPortalProps) => {
+const SidebarPortal = ({ testId = 'sidebar-portal', children }: SidebarPortalProps) => {
   const { containerId } = useSidebarContext();
-  return <Portal containerId={containerId}>{children}</Portal>;
+  return (
+    <Portal testId={testId} containerId={containerId}>
+      {children}
+    </Portal>
+  );
 };
 
 // ------------ Frame component
 
-type SidebarFrameProps = ComponentPropsWithoutRef<'aside'> & {
+export type SidebarFrameProps = ComponentPropsWithoutRef<'aside'> & {
   testId?: string;
   animateProps?: Partial<AnimateProps>;
 };
@@ -208,13 +210,18 @@ SidebarFrame.displayName = 'SidebarFrame';
 
 // ------------ Overlay component
 
-const SidebarOverlay = () => {
+export type SidebarOverlayProps = OverlayProps & {
+  testId?: string;
+};
+
+const SidebarOverlay = ({ testId }: SidebarOverlayProps) => {
   const { isOpen, dismissOnClickOutside, onOpenChange } = useSidebarContext();
 
   if (!isOpen) return null;
 
   return (
     <Overlay
+      testId={testId}
       closeOnClickOutside={dismissOnClickOutside}
       onClickOutside={() => onOpenChange?.(false)}
     />
@@ -226,7 +233,7 @@ SidebarOverlay.displayName = 'SidebarOverlay';
 
 // ------------ Header component
 
-type SidebarHeaderProps = ComponentPropsWithoutRef<'header'> & {
+export type SidebarHeaderProps = ComponentPropsWithoutRef<'header'> & {
   testId?: string;
 };
 
@@ -251,10 +258,9 @@ SidebarHeader.displayName = 'SidebarHeader';
 
 // ------------ Title component
 
-type SidebarTitleProps = ComponentPropsWithoutRef<'h2'> &
-  VariantProps<typeof TextVariants> & {
-    testId?: string;
-  };
+export type SidebarTitleProps = TextProps<'h2'> & {
+  testId?: string;
+};
 
 const SidebarTitle = ({
   className,
@@ -281,7 +287,7 @@ SidebarTitle.displayName = 'SidebarTitle';
 
 // ------------ Close component
 
-type SidebarCloseProps = Omit<CloseProps, 'onClose'>;
+export type SidebarCloseProps = Omit<CloseProps, 'onClose'>;
 
 const SidebarClose = ({
   className,
@@ -315,7 +321,7 @@ SidebarClose.displayName = 'SidebarClose';
 
 // ------------ Content component
 
-type SidebarContentProps = ComponentPropsWithoutRef<'div'> & {
+export type SidebarContentProps = FlexProps<'div'> & {
   testId?: string;
 };
 
@@ -344,7 +350,7 @@ SidebarContent.displayName = 'SidebarContent';
 
 // ------------ Footer component
 
-type SidebarFooterProps = ComponentPropsWithoutRef<'footer'> & {
+export type SidebarFooterProps = ComponentPropsWithoutRef<'footer'> & {
   testId?: string;
 };
 
