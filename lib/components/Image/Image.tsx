@@ -1,5 +1,5 @@
-import { ImageVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
+import { ImageVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import {
   ComponentPropsWithoutRef,
@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 
-type ImageProps = Omit<ComponentPropsWithoutRef<'img'>, 'width' | 'height' | 'alt'> &
+export type ImageProps = Omit<ComponentPropsWithoutRef<'img'>, 'width' | 'height' | 'alt'> &
   VariantProps<typeof ImageVariants> & {
     width?: string | number;
     height?: string | number;

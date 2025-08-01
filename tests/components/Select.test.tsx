@@ -1,13 +1,13 @@
 import AnimateMock from '../__mocks__/components/MockAnimate';
 
-vi.mock('@/components/Animate', () => {
+vi.mock('@components/Animate', () => {
   return {
     default: AnimateMock,
   };
 });
 
-import { Select } from '@/components';
-import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import Select from '@components/Select';
+import { __setReduceMotionForTests } from '@hooks/useReduceMotion';
 import '@testing-library/jest-dom';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

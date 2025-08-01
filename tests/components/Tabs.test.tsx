@@ -1,17 +1,21 @@
 import AnimateMock from '../__mocks__/components/MockAnimate';
 
-vi.mock('@/components/Animate', () => {
+vi.mock('@components/Animate', () => {
   return {
     default: AnimateMock,
   };
 });
 
-vi.mock('@/hooks/useComponentIds', () => ({
-  default: () => ({}),
+vi.mock('@hooks/useComponentIds', () => ({
+  useComponentIds: vi.fn(() => ({
+    list: 'tabs-list',
+    trigger: (value: string | number) => `trigger-${value}`,
+    content: (value: string | number) => `content-${value}`,
+  })),
 }));
 
-import { Tabs } from '@/components';
-import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import Tabs from '@components/Tabs';
+import { __setReduceMotionForTests } from '@hooks/useReduceMotion';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react';

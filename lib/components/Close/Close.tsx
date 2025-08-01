@@ -1,6 +1,7 @@
-import { cn } from '@/utils/cn';
-import { ButtonVariants } from '@/utils/variants';
+import Button from '@components/Button';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import { cn } from '@utils/cn';
+import { ButtonVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import {
   cloneElement,
@@ -9,7 +10,6 @@ import {
   isValidElement,
   useCallback,
 } from 'react';
-import Button from '../Button';
 
 export type CloseProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {

@@ -1,4 +1,4 @@
-import { Label } from '@/components';
+import Label from '@components/Label';
 import { render, screen } from '@testing-library/react';
 
 describe('Label', () => {

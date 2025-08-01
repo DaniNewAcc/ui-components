@@ -1,4 +1,4 @@
-import { Breadcrumb } from '@/components';
+import Breadcrumb from '@components/Breadcrumb';
 import { render, screen } from '@testing-library/react';
 import { Fragment } from 'react/jsx-runtime';
 

@@ -1,4 +1,4 @@
-import { Flex } from '@/components';
+import Flex from '@components/Flex';
 import { render, screen } from '@testing-library/react';
 
 describe('Flex', () => {

@@ -1,6 +1,6 @@
-import { TextVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
 import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
+import { TextVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 
 type TextOwnProps = {
@@ -8,7 +8,7 @@ type TextOwnProps = {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 } & VariantProps<typeof TextVariants>;
 
-type TextProps<C extends React.ElementType> = PolymorphicProps<C, TextOwnProps>;
+export type TextProps<C extends React.ElementType> = PolymorphicProps<C, TextOwnProps>;
 
 function TextRender<C extends React.ElementType = 'span'>(
   { as, variant, level, className, children, testId, ...props }: TextProps<C>,

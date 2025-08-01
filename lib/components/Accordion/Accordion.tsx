@@ -1,9 +1,11 @@
-import useComponentIds from '@/hooks/useComponentIds';
-import { useMergedRefs } from '@/hooks/useMergedRefs';
-import useRovingFocus from '@/hooks/useRovingFocus';
-import { useSyncAnimation } from '@/hooks/useSyncAnimation';
-import { cn } from '@/utils/cn';
+import Animate, { AnimateProps } from '@components/Animate';
+import Flex from '@components/Flex';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { useComponentIds } from '@hooks/useComponentIds';
+import { useMergedRefs } from '@hooks/useMergedRefs';
+import { useRovingFocus } from '@hooks/useRovingFocus';
+import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { cn } from '@utils/cn';
 import {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -16,13 +18,10 @@ import {
   useMemo,
   useState,
 } from 'react';
-import Animate from '../Animate';
-import { AnimateProps } from '../Animate/Animate';
-import Flex from '../Flex';
 
 type ActiveItems = string | number | (string | number)[] | null;
 
-type AccordionProps = ComponentProps<'div'> & {
+export type AccordionProps = ComponentProps<'div'> & {
   items: number;
   defaultValue?: string | number | null;
   multiple?: boolean;
@@ -33,7 +32,7 @@ type AccordionProps = ComponentProps<'div'> & {
   children: ReactNode;
 };
 
-type AccordionContextProps = {
+export type AccordionContextProps = {
   activeItems: ActiveItems;
   isMultiple: boolean;
   isFocused: boolean;
@@ -141,7 +140,7 @@ Accordion.displayName = 'Accordion';
 
 // Helper function for using Accordion context
 
-function useAccordionContext() {
+export function useAccordionContext() {
   const context = useContext(AccordionContext);
 
   if (!context) {
@@ -153,14 +152,14 @@ function useAccordionContext() {
 
 // ------------ Item component
 
-type AccordionItemContextProps = {
+export type AccordionItemContextProps = {
   value: string | number;
   idMap: Record<string, string>;
 };
 
 const AccordionItemContext = createContext<AccordionItemContextProps | null>(null);
 
-type AccordionItemProps = ComponentPropsWithoutRef<'div'> & {
+export type AccordionItemProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   value: string | number;
   headingLevel?: number;
@@ -265,7 +264,7 @@ AccordionItem.displayName = 'AccordionItem';
 
 // Helper function for using AccordionItem context
 
-function useAccordionItemContext() {
+export function useAccordionItemContext() {
   const context = useContext(AccordionItemContext);
 
   if (!context) {
@@ -277,7 +276,7 @@ function useAccordionItemContext() {
 
 // ------------ Trigger component
 
-type AccordionTriggerProps = ComponentPropsWithoutRef<'div'> & {
+export type AccordionTriggerProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   iconProps?: React.ComponentProps<typeof ChevronDownIcon>;
   children: ReactNode;
@@ -325,7 +324,7 @@ AccordionTrigger.displayName = 'AccordionTrigger';
 
 // ------------ Content component
 
-type AccordionContentProps = ComponentPropsWithoutRef<'div'> & {
+export type AccordionContentProps = ComponentPropsWithoutRef<'div'> & {
   animateProps?: Partial<AnimateProps>;
   testId?: string;
   children: ReactNode;

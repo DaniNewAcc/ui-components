@@ -1,11 +1,16 @@
-import useAutoFocus from '@/hooks/useAutoFocus';
-import useComponentIds from '@/hooks/useComponentIds';
-import { useMergedRefs } from '@/hooks/useMergedRefs';
-import useScrollLock from '@/hooks/useScrollLock';
-import { useSyncAnimation } from '@/hooks/useSyncAnimation';
-import useTrapFocus from '@/hooks/useTrapFocus';
-import { cn } from '@/utils/cn';
-import { ButtonVariants } from '@/utils/variants';
+import Animate, { AnimateProps } from '@components/Animate';
+import Close from '@components/Close';
+import Overlay from '@components/Overlay';
+import Portal from '@components/Portal';
+import Text from '@components/Text';
+import { useAutoFocus } from '@hooks/useAutoFocus';
+import { useComponentIds } from '@hooks/useComponentIds';
+import { useMergedRefs } from '@hooks/useMergedRefs';
+import { useScrollLock } from '@hooks/useScrollLock';
+import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { useTrapFocus } from '@hooks/useTrapFocus';
+import { cn } from '@utils/cn';
+import { ButtonVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import React, {
   ComponentPropsWithoutRef,
@@ -19,14 +24,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Animate from '../Animate';
-import { AnimateProps } from '../Animate/Animate';
-import Close from '../Close';
-import Overlay from '../Overlay';
-import Portal from '../Portal';
-import Text from '../Text';
 
-type ModalProps = {
+export type ModalProps = {
   containerId?: string;
   closeOnClickOutside?: boolean;
   isOpen?: boolean;
@@ -34,7 +33,7 @@ type ModalProps = {
   onClose?: () => void;
 };
 
-type ModalContextProps = {
+export type ModalContextProps = {
   containerId?: string;
   isOpen: boolean;
   closeOnClickOutside?: boolean;
@@ -98,7 +97,7 @@ const Modal = ({
 Modal.displayName = 'Modal';
 
 // Helper function for using modal context
-function useModalContext() {
+export function useModalContext() {
   const context = useContext(ModalContext);
   if (!context) {
     throw new Error('Modal components must be wrapped in <Modal>.');
@@ -108,7 +107,7 @@ function useModalContext() {
 
 // ------------ Portal component
 
-type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
@@ -144,7 +143,7 @@ Modal.Portal = ModalPortal;
 
 // ------------ Trigger component
 
-type ModalTriggerProps = {
+export type ModalTriggerProps = {
   testId?: string;
   children: React.ReactElement;
 };
@@ -169,7 +168,7 @@ Modal.Trigger = ModalTrigger;
 
 // ------------ Overlay component
 
-type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
@@ -192,7 +191,7 @@ Modal.Overlay = ModalOverlay;
 
 // ------------ Content component
 
-type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalContentProps = ComponentPropsWithoutRef<'div'> & {
   animateProps?: Partial<AnimateProps>;
   testId?: string;
 };
@@ -266,7 +265,7 @@ Modal.Content = ModalContent;
 
 // ------------ Title component
 
-type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
+export type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
   testId?: string;
 };
 
@@ -293,7 +292,7 @@ Modal.Title = ModalTitle;
 
 // ------------ Description component
 
-type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
+export type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
   testId?: string;
 };
 
@@ -320,7 +319,7 @@ Modal.Description = ModalDescription;
 
 // ------------ Footer component
 
-type ModalFooterProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalFooterProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
 };
 
@@ -344,7 +343,7 @@ Modal.Footer = ModalFooter;
 
 // ------------ Close component
 
-type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
+export type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     testId?: string;
     asChild?: boolean;

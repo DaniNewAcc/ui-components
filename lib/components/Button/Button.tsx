@@ -1,11 +1,11 @@
-import { ButtonVariants } from '@/utils/variants';
+import Loader from '@components/Loader';
+import Text from '@components/Text';
 import { cn } from '@utils/cn';
+import { ButtonVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
-import Loader from '../Loader';
-import Text from '../Text';
 
-type ButtonProps = ComponentPropsWithoutRef<'button'> &
+export type ButtonProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     loading?: boolean;
     showLoader?: boolean;

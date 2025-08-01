@@ -1,4 +1,4 @@
-import { Overlay } from '@/components';
+import Overlay from '@components/Overlay';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

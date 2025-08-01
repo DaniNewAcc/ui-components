@@ -1,9 +1,9 @@
-import { FooterVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
+import { FooterVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type FooterProps = ComponentPropsWithoutRef<'footer'> &
+export type FooterProps = ComponentPropsWithoutRef<'footer'> &
   VariantProps<typeof FooterVariants> & {
     testId?: string;
     children: ReactNode;

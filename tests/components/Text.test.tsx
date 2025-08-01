@@ -1,4 +1,4 @@
-import { Text } from '@/components';
+import Text from '@components/Text';
 import { render, screen } from '@testing-library/react';
 
 describe('Text', () => {

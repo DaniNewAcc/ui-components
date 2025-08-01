@@ -1,8 +1,8 @@
-import useReduceMotion from '@/hooks/useReduceMotion';
-import { useSyncAnimation } from '@/hooks/useSyncAnimation';
-import { cn } from '@/utils/cn';
-import { AnimationPresetKey, animationPresets } from '@/utils/preset';
-import { AnimationVariants } from '@/utils/variants';
+import { useReduceMotion } from '@hooks/useReduceMotion';
+import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { cn } from '@utils/cn';
+import { AnimationPresetKey, animationPresets } from '@utils/preset';
+import { AnimationVariants } from '@utils/variants';
 import type { VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
   useState,
 } from 'react';
 
-type AnimateMethods = {
+export type AnimateMethods = {
   startOpenAnimation: () => void;
   startCloseAnimation: () => void;
 };

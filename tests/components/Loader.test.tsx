@@ -1,4 +1,4 @@
-import { Loader } from '@/components';
+import Loader from '@components/Loader';
 import { render, screen } from '@testing-library/react';
 
 describe('Loader', () => {

@@ -1,4 +1,4 @@
-import { Button } from '@/components';
+import Button from '@components/Button';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('Button', () => {

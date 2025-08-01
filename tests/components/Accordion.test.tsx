@@ -1,4 +1,4 @@
-import { AnimateProps } from '@/components/Animate/Animate';
+import { AnimateProps } from '@components/Animate';
 import AnimateMock from '../__mocks__/components/MockAnimate';
 
 vi.mock('@/components/Animate', () => {
@@ -7,8 +7,8 @@ vi.mock('@/components/Animate', () => {
   };
 });
 
-import { Accordion } from '@/components';
-import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import Accordion from '@components/Accordion';
+import { __setReduceMotionForTests } from '@hooks/useReduceMotion';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react';

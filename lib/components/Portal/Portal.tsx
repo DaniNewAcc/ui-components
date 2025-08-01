@@ -1,9 +1,9 @@
-import usePortal from '@/hooks/usePortal';
+import { usePortal } from '@hooks/usePortal';
 import { cn } from '@utils/cn';
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-type PortalProps = ComponentPropsWithoutRef<'div'> & {
+export type PortalProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   containerId?: string;
   isOpen?: boolean;

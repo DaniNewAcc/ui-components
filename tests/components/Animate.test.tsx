@@ -1,13 +1,13 @@
-import { Animate } from '@/components';
-import useReduceMotion from '@/hooks/useReduceMotion';
+import Animate from '@components/Animate';
+import { useReduceMotion } from '@hooks/useReduceMotion';
 import { render, screen, waitFor } from '@testing-library/react';
 import { act, useRef } from 'react';
 import { vi } from 'vitest';
 
 // mock reduce motion hook for testing
-vi.mock('@/hooks/useReduceMotion', () => ({
+vi.mock('@hooks/useReduceMotion', () => ({
   __esmodule: true,
-  default: vi.fn(),
+  useReduceMotion: vi.fn(),
 }));
 
 describe('Animate', () => {

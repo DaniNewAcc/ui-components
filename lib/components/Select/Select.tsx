@@ -1,12 +1,13 @@
-import { useClickOutside } from '@/hooks/useClickOutside';
-import useComponentIds from '@/hooks/useComponentIds';
-import { useMergedRefs } from '@/hooks/useMergedRefs';
-import useRovingFocus from '@/hooks/useRovingFocus';
-import { useSyncAnimation } from '@/hooks/useSyncAnimation';
-import useTypeahead from '@/hooks/useTypehead';
-import { cn } from '@/utils/cn';
-import { applyInitialFocus } from '@/utils/helpers';
+import Animate, { AnimateProps } from '@components/Animate';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { useClickOutside } from '@hooks/useClickOutside';
+import { useComponentIds } from '@hooks/useComponentIds';
+import { useMergedRefs } from '@hooks/useMergedRefs';
+import { useRovingFocus } from '@hooks/useRovingFocus';
+import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { useTypeahead } from '@hooks/useTypehead';
+import { cn } from '@utils/cn';
+import { applyInitialFocus } from '@utils/helpers';
 import React, {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -20,8 +21,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Animate from '../Animate';
-import { AnimateProps } from '../Animate/Animate';
 
 type Option = {
   [key: string]: any;
@@ -30,7 +29,7 @@ type Option = {
 
 type ActiveOption = string | number | null;
 
-type SelectProps = ComponentProps<'div'> & {
+export type SelectProps = ComponentProps<'div'> & {
   options: Option[];
   defaultValue?: string | number | null;
   testId?: string;
@@ -41,7 +40,7 @@ type SelectProps = ComponentProps<'div'> & {
   children: ReactNode;
 };
 
-type SelectContextProps = {
+export type SelectContextProps = {
   options: Option[];
   activeOption: ActiveOption;
   valueKey: string;
@@ -210,7 +209,7 @@ const Select = ({
 Select.displayName = 'Select';
 
 // Helper function for using select context
-function useSelectContext() {
+export function useSelectContext() {
   const context = useContext(SelectContext);
 
   if (!context) {
@@ -221,7 +220,7 @@ function useSelectContext() {
 }
 
 // ------------ Trigger component
-type SelectTriggerProps = ComponentPropsWithoutRef<'button'> & {
+export type SelectTriggerProps = ComponentPropsWithoutRef<'button'> & {
   testId?: string;
   placeholderText?: string;
 };
@@ -359,7 +358,7 @@ Select.Trigger = SelectTrigger;
 SelectTrigger.displayName = 'SelectTrigger';
 
 // ------------ Dropdown component
-type SelectDropdownProps = ComponentPropsWithoutRef<'ul'> & {
+export type SelectDropdownProps = ComponentPropsWithoutRef<'ul'> & {
   animateProps?: Partial<AnimateProps>;
   testId?: string;
   children: ReactNode;
@@ -505,7 +504,7 @@ Select.Dropdown = SelectDropdown;
 SelectDropdown.displayName = 'SelectDropdown';
 
 // ------------ Option component
-type SelectOptionProps = ComponentPropsWithoutRef<'li'> & {
+export type SelectOptionProps = ComponentPropsWithoutRef<'li'> & {
   testId?: string;
   value: string | number;
   disabled?: boolean;

@@ -11,6 +11,7 @@ exports[`Tabs > Rendering > should match snapshot 1`] = `
       aria-orientation="horizontal"
       class="ui:inline-flex ui:w-fit ui:shrink-0 ui:items-center ui:justify-center ui:bg-transparent"
       data-testid="tabslist"
+      id="tabs-list"
       role="tablist"
     >
       <button

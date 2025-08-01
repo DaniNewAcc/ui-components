@@ -1,4 +1,4 @@
-import { Image } from '@/components';
+import Image from '@components/Image';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 describe('Image', () => {

@@ -1,10 +1,11 @@
-import useComponentIds from '@/hooks/useComponentIds';
-import useFocusVisible from '@/hooks/useFocusVisible';
-import useKeyboardNavigation from '@/hooks/useKeyboardNavigation';
-import { useMergedRefs } from '@/hooks/useMergedRefs';
-import useRovingFocus from '@/hooks/useRovingFocus';
-import { cn } from '@/utils/cn';
-import { ButtonVariants, TabsListVariants, TabsVariants } from '@/utils/variants';
+import Button from '@components/Button';
+import { useComponentIds } from '@hooks/useComponentIds';
+import { useFocusVisible } from '@hooks/useFocusVisible';
+import { useKeyboardNavigation } from '@hooks/useKeyboardNavigation';
+import { useMergedRefs } from '@hooks/useMergedRefs';
+import { useRovingFocus } from '@hooks/useRovingFocus';
+import { cn } from '@utils/cn';
+import { ButtonVariants, TabsListVariants, TabsVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import React, {
   Children,
@@ -20,13 +21,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Button from '../Button';
 
 type Orientation = 'horizontal' | 'vertical';
 
 type TabbingDirection = 'forward' | 'backward' | null;
 
-type TabsProps = ComponentProps<'div'> &
+export type TabsProps = ComponentProps<'div'> &
   VariantProps<typeof TabsVariants> & {
     defaultValue: number | string;
     testId?: string;
@@ -38,7 +38,7 @@ type TabsProps = ComponentProps<'div'> &
     loop?: boolean;
   };
 
-type TabsContextProps = {
+export type TabsContextProps = {
   activeTab: number | string;
   focusedIndex: number | string | null;
   orientation?: Orientation;
@@ -150,7 +150,7 @@ Tabs.displayName = 'Tabs';
 
 // helper function for using Tabs context
 
-function useTabsContext() {
+export function useTabsContext() {
   const context = useContext(TabsContext);
 
   if (!context) {
@@ -162,7 +162,7 @@ function useTabsContext() {
 
 // ------------ List component
 
-type TabsListProps = ComponentPropsWithoutRef<'div'> &
+export type TabsListProps = ComponentPropsWithoutRef<'div'> &
   VariantProps<typeof TabsListVariants> & {
     children: ReactNode;
     testId?: string;
@@ -295,7 +295,7 @@ TabsList.displayName = 'TabsList';
 
 // ------------ Trigger component
 
-type TabsTriggerProps = ComponentPropsWithoutRef<'button'> &
+export type TabsTriggerProps = ComponentPropsWithoutRef<'button'> &
   VariantProps<typeof ButtonVariants> & {
     disabled?: boolean;
     value: number | string;
@@ -391,7 +391,7 @@ TabsTrigger.displayName = 'TabsTrigger';
 
 // ------------ Content component
 
-type TabsContentProps = ComponentPropsWithoutRef<'div'> & {
+export type TabsContentProps = ComponentPropsWithoutRef<'div'> & {
   value: number | string;
   children: ReactNode;
 };

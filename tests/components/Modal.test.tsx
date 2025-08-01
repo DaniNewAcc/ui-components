@@ -1,5 +1,5 @@
-import { Modal } from '@/components';
-import { __setReduceMotionForTests } from '@/hooks/useReduceMotion';
+import Modal from '@components/Modal';
+import { __setReduceMotionForTests } from '@hooks/useReduceMotion';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act, useState } from 'react';

@@ -1,5 +1,5 @@
-import Portal from '@/components/Portal';
-import * as usePortalModule from '@/hooks/usePortal';
+import Portal from '@components/Portal';
+import * as usePortalModule from '@hooks/usePortal';
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 
@@ -11,7 +11,7 @@ describe('Portal', () => {
     container.id = 'test-portal-container';
     document.body.appendChild(container);
 
-    vi.spyOn(usePortalModule, 'default').mockReturnValue(container);
+    vi.spyOn(usePortalModule, 'usePortal').mockReturnValue(container);
   });
 
   afterEach(() => {
@@ -33,7 +33,7 @@ describe('Portal', () => {
   });
 
   it('should return null if there is no container', () => {
-    vi.spyOn(usePortalModule, 'default').mockReturnValue(null);
+    vi.spyOn(usePortalModule, 'usePortal').mockReturnValue(null);
 
     const { container } = render(
       <Portal containerId="nonexistent">

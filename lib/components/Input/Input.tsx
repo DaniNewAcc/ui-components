@@ -1,9 +1,9 @@
-import { cn } from '@/utils/cn';
-import { InputVariants } from '@/utils/variants';
+import { cn } from '@utils/cn';
+import { InputVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import React, { ComponentPropsWithoutRef, forwardRef } from 'react';
 
-type InputProps = ComponentPropsWithoutRef<'input'> &
+export type InputProps = ComponentPropsWithoutRef<'input'> &
   VariantProps<typeof InputVariants> & {
     testId?: string;
     errorId?: string;

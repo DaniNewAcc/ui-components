@@ -1,4 +1,4 @@
-import { Grid } from '@/components';
+import Grid from '@components/Grid';
 import { render, screen } from '@testing-library/react';
 
 describe('Grid', () => {

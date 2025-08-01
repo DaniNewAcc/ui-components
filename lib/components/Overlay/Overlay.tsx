@@ -1,7 +1,7 @@
 import { cn } from '@utils/cn';
 import { ComponentPropsWithoutRef, useCallback } from 'react';
 
-type OverlayProps = ComponentPropsWithoutRef<'div'> & {
+export type OverlayProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   closeOnClickOutside?: boolean;
   zIndex?: number;

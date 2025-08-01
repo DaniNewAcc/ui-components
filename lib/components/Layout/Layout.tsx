@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn';
+import { cn } from '@utils/cn';
 import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { ElementType } from 'react';
 
@@ -8,7 +8,7 @@ type LayoutOwnProps = {
   overflowHidden?: boolean;
 };
 
-type LayoutProps<C extends ElementType> = PolymorphicProps<C, LayoutOwnProps>;
+export type LayoutProps<C extends ElementType> = PolymorphicProps<C, LayoutOwnProps>;
 
 function LayoutRender<C extends ElementType = 'div'>(
   {

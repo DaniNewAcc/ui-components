@@ -1,9 +1,9 @@
-import { GridVariants } from '@/utils/variants';
+import Scrollable from '@components/Scrollable';
 import { cn } from '@utils/cn';
 import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
+import { GridVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ElementType } from 'react';
-import Scrollable from '../Scrollable/Scrollable';
 
 type GridOwnProps = {
   testId?: string;
@@ -11,7 +11,7 @@ type GridOwnProps = {
   scrollableProps?: React.ComponentProps<typeof Scrollable>;
 } & VariantProps<typeof GridVariants>;
 
-type GridProps<C extends React.ElementType> = PolymorphicProps<C, GridOwnProps>;
+export type GridProps<C extends React.ElementType> = PolymorphicProps<C, GridOwnProps>;
 
 function GridRender<C extends ElementType = 'div'>(
   {

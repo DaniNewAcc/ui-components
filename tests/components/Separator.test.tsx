@@ -1,4 +1,4 @@
-import { Separator } from '@/components';
+import Separator from '@components/Separator';
 import { render, screen } from '@testing-library/react';
 
 describe('Separator', () => {

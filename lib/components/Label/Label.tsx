@@ -1,7 +1,7 @@
-import { cn } from '@/utils/cn';
+import { cn } from '@utils/cn';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type LabelProps = ComponentPropsWithoutRef<'label'> & {
+export type LabelProps = ComponentPropsWithoutRef<'label'> & {
   testId?: string;
   children?: ReactNode;
 };

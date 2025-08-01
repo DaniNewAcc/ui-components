@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn';
+import { cn } from '@utils/cn';
 import React, {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -9,13 +9,13 @@ import React, {
 
 type Orientation = 'horizontal' | 'vertical';
 
-type BreadcrumbProps = ComponentProps<'nav'> & {
+export type BreadcrumbProps = ComponentProps<'nav'> & {
   testId?: string;
   orientation?: Orientation;
   separator?: ReactNode;
 };
 
-type BreadcrumbContextProps = {
+export type BreadcrumbContextProps = {
   orientation: Orientation;
   separator: ReactNode;
 };
@@ -56,7 +56,7 @@ Breadcrumb.displayName = 'Breadcrumb';
 
 // helper function for using Breadcrumb context
 
-function useBreadcrumbContext() {
+export function useBreadcrumbContext() {
   const context = useContext(BreadcrumbContext);
 
   if (!context) {
@@ -68,7 +68,7 @@ function useBreadcrumbContext() {
 
 // ------------ Item component
 
-type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'> & {
+export type BreadcrumbItemProps = ComponentPropsWithoutRef<'li'> & {
   testId?: string;
 };
 
@@ -85,7 +85,7 @@ BreadcrumbItem.displayName = 'BreadcrumbItem';
 
 // ------------ Link component
 
-type BreadcrumbLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+export type BreadcrumbLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   isCurrent?: boolean;
   testId?: string;
 };
@@ -125,7 +125,7 @@ BreadcrumbLink.displayName = 'BreadcrumbLink';
 
 // ------------ Separator component
 
-type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<'span'> & {
+export type BreadcrumbSeparatorProps = ComponentPropsWithoutRef<'span'> & {
   testId?: string;
   children?: ReactNode;
 };

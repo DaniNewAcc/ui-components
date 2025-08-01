@@ -1,9 +1,9 @@
-import { CardVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
+import { CardVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type CardProps = ComponentPropsWithoutRef<'article'> &
+export type CardProps = ComponentPropsWithoutRef<'article'> &
   VariantProps<typeof CardVariants> & {
     testId?: string;
     focusable?: boolean;

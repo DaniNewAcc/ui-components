@@ -1,7 +1,7 @@
-import useThrottle from '@/hooks/useThrottle';
-import { cn } from '@/utils/cn';
-import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@/utils/types';
-import { ScrollableVariants } from '@/utils/variants';
+import { useThrottle } from '@hooks/useThrottle';
+import { cn } from '@utils/cn';
+import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
+import { ScrollableVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ElementType, UIEvent, useCallback, useRef } from 'react';
 
@@ -27,7 +27,7 @@ type ScrollableOwnProps = {
   onScrollStateChange?: (state: ScrollState) => void;
 } & VariantProps<typeof ScrollableVariants>;
 
-type ScrollableProps<C extends ElementType> = PolymorphicProps<C, ScrollableOwnProps>;
+export type ScrollableProps<C extends ElementType> = PolymorphicProps<C, ScrollableOwnProps>;
 
 function ScrollableRender<C extends React.ElementType = 'div'>(
   {

@@ -1,9 +1,9 @@
-import { HeaderVariants } from '@/utils/variants';
 import { cn } from '@utils/cn';
+import { HeaderVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type HeaderProps = ComponentPropsWithoutRef<'header'> &
+export type HeaderProps = ComponentPropsWithoutRef<'header'> &
   VariantProps<typeof HeaderVariants> & {
     testId?: string;
     children: ReactNode;

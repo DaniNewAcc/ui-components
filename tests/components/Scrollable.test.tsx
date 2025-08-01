@@ -1,4 +1,4 @@
-import { Scrollable } from '@/components';
+import Scrollable from '@components/Scrollable';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 const setup = (props = {}) => {

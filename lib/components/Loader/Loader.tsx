@@ -1,11 +1,11 @@
 import '@/index.css';
-import { FlexVariants, LoaderVariants } from '@/utils/variants';
 import Flex from '@components/Flex';
 import { cn } from '@utils/cn';
+import { FlexVariants, LoaderVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 
-type LoaderProps = ComponentPropsWithoutRef<'div'> &
+export type LoaderProps = ComponentPropsWithoutRef<'div'> &
   VariantProps<typeof LoaderVariants> &
   VariantProps<typeof FlexVariants> & {
     testId?: string;

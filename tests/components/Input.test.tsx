@@ -1,4 +1,4 @@
-import { Input } from '@/components';
+import Input from '@components/Input';
 import { render, screen } from '@testing-library/react';
 
 describe('Input', () => {
