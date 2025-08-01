@@ -1,5 +1,5 @@
+import { AnimationVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
-import { AnimationVariants } from './variants';
 
 export const animationPresets: Record<string, Partial<VariantProps<typeof AnimationVariants>>> = {
   dropdown: {
