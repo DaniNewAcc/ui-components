@@ -1,8 +1,9 @@
 import Animate, { AnimateProps } from '@components/Animate';
-import Close from '@components/Close';
-import Overlay from '@components/Overlay';
-import Portal from '@components/Portal';
-import Text from '@components/Text';
+import Close, { CloseProps } from '@components/Close';
+import Overlay, { OverlayProps } from '@components/Overlay';
+import Portal, { PortalProps } from '@components/Portal';
+import Text, { TextProps } from '@components/Text';
+import Trigger, { TriggerProps } from '@components/Trigger';
 import { useAutoFocus } from '@hooks/useAutoFocus';
 import { useComponentIds } from '@hooks/useComponentIds';
 import { useMergedRefs } from '@hooks/useMergedRefs';
@@ -10,8 +11,6 @@ import { useScrollLock } from '@hooks/useScrollLock';
 import { useSyncAnimation } from '@hooks/useSyncAnimation';
 import { useTrapFocus } from '@hooks/useTrapFocus';
 import { cn } from '@utils/cn';
-import { ButtonVariants } from '@utils/variants';
-import { VariantProps } from 'class-variance-authority';
 import React, {
   ComponentPropsWithoutRef,
   createContext,
@@ -107,7 +106,7 @@ export function useModalContext() {
 
 // ------------ Portal component
 
-export type ModalPortalProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalPortalProps = PortalProps & {
   testId?: string;
 };
 
@@ -143,23 +142,20 @@ Modal.Portal = ModalPortal;
 
 // ------------ Trigger component
 
-export type ModalTriggerProps = {
+export type ModalTriggerProps = TriggerProps & {
   testId?: string;
   children: React.ReactElement;
 };
 
 const ModalTrigger = forwardRef<HTMLElement, ModalTriggerProps>(
-  ({ children, testId = 'modal-trigger' }, ref) => {
+  ({ children, testId = 'modal-trigger', ...props }, ref) => {
     const { open } = useModalContext();
 
-    return React.cloneElement(children, {
-      ref,
-      onClick: (e: React.MouseEvent) => {
-        children.props.onClick?.(e);
-        open();
-      },
-      ...(testId && { 'data-testid': testId }),
-    });
+    return (
+      <Trigger testId={testId} ref={ref} {...props} onTrigger={open}>
+        {children}
+      </Trigger>
+    );
   }
 );
 
@@ -168,7 +164,7 @@ Modal.Trigger = ModalTrigger;
 
 // ------------ Overlay component
 
-export type ModalOverlayProps = ComponentPropsWithoutRef<'div'> & {
+export type ModalOverlayProps = OverlayProps & {
   testId?: string;
 };
 
@@ -265,7 +261,7 @@ Modal.Content = ModalContent;
 
 // ------------ Title component
 
-export type ModalTitleProps = ComponentPropsWithoutRef<'h2'> & {
+export type ModalTitleProps = TextProps<'h2'> & {
   testId?: string;
 };
 
@@ -292,7 +288,7 @@ Modal.Title = ModalTitle;
 
 // ------------ Description component
 
-export type ModalDescriptionProps = ComponentPropsWithoutRef<'p'> & {
+export type ModalDescriptionProps = TextProps<'p'> & {
   testId?: string;
 };
 
@@ -343,11 +339,9 @@ Modal.Footer = ModalFooter;
 
 // ------------ Close component
 
-export type ModalCloseProps = ComponentPropsWithoutRef<'button'> &
-  VariantProps<typeof ButtonVariants> & {
-    testId?: string;
-    asChild?: boolean;
-  };
+export type ModalCloseProps = Omit<CloseProps, 'onClose'> & {
+  testId?: string;
+};
 
 const ModalClose = forwardRef<React.ElementRef<'button'>, ModalCloseProps>(
   (
