@@ -1,3 +1,11 @@
+import { cn } from '@utils/cn';
+import { CSSProperties } from 'react';
+
+type MergeScrollableClassesProps = Partial<{
+  className: string;
+  style: CSSProperties;
+}>;
+
 export const isElementDisabled = (el: HTMLElement | null): boolean =>
   !el || el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
 
@@ -42,4 +50,22 @@ export const applyInitialFocus = <T>(
   } else if (fallbackValue !== undefined) {
     setFocus(fallbackValue);
   }
+};
+
+export const mergeScrollableClasses = ({
+  className,
+  style,
+}: MergeScrollableClassesProps): string => {
+  const DEFAULT_MAX_HEIGHT = '50vh';
+
+  const hasHeightInClass = /\b(?:h-|max-h-)/.test(className ?? '');
+  const hasHeightInStyle = style?.height !== undefined || style?.maxHeight !== undefined;
+
+  const shouldApplyDefaultMaxHeight = !hasHeightInClass && !hasHeightInStyle;
+
+  return cn(
+    'overflow-y-auto',
+    shouldApplyDefaultMaxHeight && `ui:max-h-[${DEFAULT_MAX_HEIGHT}]`,
+    className
+  );
 };
