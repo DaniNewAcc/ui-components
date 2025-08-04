@@ -14,6 +14,8 @@ import {
   useState,
 } from 'react';
 
+type TimeoutId = ReturnType<typeof setTimeout> | null;
+
 export type AnimateMethods = {
   startOpenAnimation: () => void;
   startCloseAnimation: () => void;
@@ -27,7 +29,7 @@ export type AnimateProps = ComponentPropsWithoutRef<'div'> &
     disabled?: boolean;
     isVisible: boolean;
     testId?: string;
-    animateHeight?: boolean;
+    animateSize?: 'height' | 'width' | 'both' | boolean;
     style?: React.CSSProperties;
     onStart?: () => void;
     onEnd?: () => void;
@@ -51,7 +53,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       children,
       isVisible,
       testId = 'animate',
-      animateHeight = false,
+      animateSize = false,
       style,
       onStart,
       onEnd,
@@ -79,6 +81,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       ref: syncRef,
       shouldRender,
       maxHeight,
+      maxWidth,
       updateSizes,
       handleExpand,
       handleCollapse,
@@ -86,25 +89,28 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
     } = useSyncAnimation({
       isOpen: isVisible,
       duration,
+      dimension: ['height', 'width'],
     });
     const reduceMotion = useReduceMotion();
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
+    const animateHeight = animateSize === 'height' || animateSize === 'both';
+    const animateWidth = animateSize === 'width' || animateSize === 'both';
     const shouldAnimate = !disabled && !reduceMotion;
 
     // helper functions for handling enter and exit animations
     const startOpenAnimation = useCallback(() => {
-      if (!animateHeight) return;
+      if (!animateHeight && !animateWidth) return;
       if (syncRef.current) {
         handleExpand();
       }
-    }, [animateHeight, handleExpand]);
+    }, [animateHeight, animateWidth, handleExpand]);
 
     const startCloseAnimation = useCallback(() => {
-      if (!animateHeight) return;
+      if (!animateHeight && !animateWidth) return;
       if (syncRef.current) {
         handleCollapse();
       }
-    }, [animateHeight, handleCollapse]);
+    }, [animateHeight, animateWidth, handleCollapse]);
 
     const resetAnimation = useCallback(() => {
       updateSizes('auto');
@@ -117,8 +123,8 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       startCloseAnimation,
     }));
 
-    const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-    const animationTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+    const startDelayRef = useRef<TimeoutId>(null);
+    const durationRef = useRef<TimeoutId>(null);
 
     // It runs animation with delay on enter and exit for preventing flickers and layout shifts
     const runAnimation = useCallback(() => {
@@ -128,7 +134,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
         return;
       }
 
-      timeoutRef.current = setTimeout(() => {
+      startDelayRef.current = setTimeout(() => {
         setIsAnimating(true);
         onStart?.();
         onAnimationChange?.(true);
@@ -139,7 +145,7 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
           startCloseAnimation();
         }
 
-        animationTimeoutRef.current = setTimeout(() => {
+        durationRef.current = setTimeout(() => {
           resetAnimation();
           setShouldRender(isVisible);
           onEnd?.();
@@ -162,8 +168,8 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       runAnimation();
 
       return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+        if (startDelayRef.current) clearTimeout(startDelayRef.current);
+        if (durationRef.current) clearTimeout(durationRef.current);
       };
     }, [runAnimation]);
 
@@ -192,10 +198,18 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
           'is-animating-exit': isAnimating && !isVisible,
         })}
         style={{
-          overflow: animateHeight ? 'hidden' : undefined,
+          overflow: animateHeight || animateWidth ? 'hidden' : undefined,
           maxHeight: animateHeight ? maxHeight : undefined,
-          transition: animateHeight ? `max-height ${duration}ms ease` : undefined,
-          willChange: animateHeight ? 'max-height' : undefined,
+          maxWidth: animateWidth ? maxWidth : undefined,
+          transition: [
+            animateHeight && `max-height ${duration}ms ease`,
+            animateWidth && `max-width ${duration}ms ease`,
+          ]
+            .filter(Boolean)
+            .join(', '),
+          willChange: [animateHeight && 'max-height', animateWidth && 'max-width']
+            .filter(Boolean)
+            .join(', '),
           ...style,
         }}
         {...props}
