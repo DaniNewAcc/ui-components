@@ -117,17 +117,17 @@ describe('Animate', () => {
       vi.useRealTimers();
     });
 
-    it('should call startOpenAnimation and onStart when isVisible is true with animateHeight', () => {
+    it('should call startOpenAnimation and onStart when isVisible is true with animateSize=height', () => {
       const onStart = vi.fn();
 
       const { rerender } = render(
-        <Animate isVisible={false} animateHeight onStart={onStart}>
+        <Animate isVisible={false} animateSize={'height'} onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
 
       rerender(
-        <Animate isVisible={true} animateHeight onStart={onStart}>
+        <Animate isVisible={true} animateSize={'height'} onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
@@ -139,17 +139,17 @@ describe('Animate', () => {
       expect(onStart).toHaveBeenCalled();
     });
 
-    it('should call startCloseAnimation and onStart when isVisible is false with animateHeight', () => {
+    it('should call startCloseAnimation and onStart when isVisible is false with animateSize=height', () => {
       const onStart = vi.fn();
 
       const { rerender } = render(
-        <Animate isVisible={true} animateHeight onStart={onStart}>
+        <Animate isVisible={true} animateSize={'height'} onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
 
       rerender(
-        <Animate isVisible={false} animateHeight onStart={onStart}>
+        <Animate isVisible={false} animateSize={'height'} onStart={onStart}>
           <div style={{ height: 50 }}>Content</div>
         </Animate>
       );
@@ -201,7 +201,7 @@ describe('Animate', () => {
 
         return (
           <div>
-            <Animate ref={ref} isVisible={true} animateHeight duration={100}>
+            <Animate ref={ref} isVisible={true} animateSize={'height'} duration={100}>
               <div style={{ height: 100 }}>Content</div>
             </Animate>
             <button onClick={() => ref.current?.startOpenAnimation()}>Open</button>
@@ -236,7 +236,7 @@ describe('Animate', () => {
 
         return (
           <div>
-            <Animate ref={ref} isVisible={true} animateHeight>
+            <Animate ref={ref} isVisible={true} animateSize={'height'}>
               <div style={{ height: 100 }}>Content</div>
             </Animate>
             <button onClick={() => ref.current?.startCloseAnimation()}>Close</button>
@@ -273,7 +273,7 @@ describe('Animate', () => {
         <Animate
           isVisible={false}
           onAnimationChange={onAnimationChange}
-          animateHeight={false}
+          animateSize={false}
           duration={100}
           delay={100}
         >
@@ -287,7 +287,7 @@ describe('Animate', () => {
         <Animate
           isVisible={true}
           onAnimationChange={onAnimationChange}
-          animateHeight={false}
+          animateSize={false}
           duration={100}
           delay={100}
         >
