@@ -51,12 +51,17 @@ const renderSelect = (
 };
 
 beforeEach(() => {
+  vi.useRealTimers();
+
   __setReduceMotionForTests(true);
 });
 
 afterEach(() => {
   __setReduceMotionForTests(undefined);
+
   cleanup();
+  vi.resetAllMocks();
+  vi.clearAllTimers();
 });
 
 describe('Select', () => {
@@ -142,7 +147,6 @@ describe('Select', () => {
     });
 
     it('should skip disabled options when using keyboard navigation', async () => {
-      vi.useRealTimers();
       renderSelect({}, [false, true, false]);
 
       const user = userEvent.setup({ delay: null });
@@ -165,60 +169,67 @@ describe('Select', () => {
   });
 
   describe('Interaction', () => {
-    it('should open dropdown when trigger is clicked', () => {
+    it('should open dropdown when trigger is clicked', async () => {
       renderSelect();
-
-      fireEvent.click(screen.getByTestId('select-trigger'));
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('select-trigger'));
+      });
 
       expect(screen.getByTestId('select-dropdown')).toBeInTheDocument();
     });
 
-    it('should close dropdown when clicking outside', () => {
+    it('should close dropdown when clicking outside', async () => {
       renderSelect();
 
-      fireEvent.click(screen.getByTestId('select-trigger'));
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('select-trigger'));
+      });
       expect(screen.getByTestId('select-dropdown')).toBeInTheDocument();
 
-      fireEvent.mouseDown(document.body);
+      await act(async () => {
+        await userEvent.click(document.body);
+      });
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
     });
 
-    it('should close the dropdown when the same option is clicked again', () => {
+    it('should close the dropdown when the same option is clicked again', async () => {
       renderSelect({ defaultValue: 1 });
-
-      const trigger = screen.getByTestId('select-trigger');
-      fireEvent.click(trigger);
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('select-trigger'));
+      });
 
       const option = screen.getByTestId('option-1');
-      fireEvent.click(option);
+      await act(async () => {
+        await userEvent.click(option);
+      });
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
     });
 
-    it('should reset selection when clear button is clicked', () => {
+    it('should reset selection when clear button is clicked', async () => {
       renderSelect({ defaultValue: 1, clearable: true });
 
       const clearButton = screen.getByTestId('clear-btn');
       expect(clearButton).toBeInTheDocument();
-      fireEvent.click(clearButton);
+      await act(async () => {
+        await userEvent.click(clearButton);
+      });
 
       expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
       expect(screen.getByText('Select an option...')).toBeInTheDocument();
     });
 
     it('should focus the active option on open when activeOption is valid and enabled', async () => {
-      vi.useRealTimers();
       renderSelect({ defaultValue: 1 });
-
       const trigger = screen.getByTestId('select-trigger');
       await act(async () => {
-        fireEvent.click(trigger);
+        await userEvent.click(trigger);
       });
 
       const options = await screen.findAllByRole('option');
       await waitFor(() => {
-        expect(options[0]).toHaveFocus();
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
     });
   });
@@ -240,7 +251,6 @@ describe('Select', () => {
     });
 
     it('should reset selection when clear button is focused and enter key is pressed', async () => {
-      vi.useRealTimers();
       renderSelect({ defaultValue: 1, clearable: true });
 
       expect(screen.getByText('First Option')).toBeInTheDocument();
@@ -258,7 +268,6 @@ describe('Select', () => {
     });
 
     it('should reset selection when clear button is focused and Spacebar key is pressed', async () => {
-      vi.useRealTimers();
       renderSelect({ defaultValue: 1, clearable: true });
 
       expect(screen.getByText('First Option')).toBeInTheDocument();
@@ -306,10 +315,9 @@ describe('Select', () => {
 
   describe('Keyboard Navigation - Dropdown', () => {
     it('should move the focus with up and down arrow keys', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -346,10 +354,9 @@ describe('Select', () => {
     });
 
     it('should move the focus to the first element with Home key', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -386,10 +393,9 @@ describe('Select', () => {
     });
 
     it('should move the focus to the last element with End key', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -425,7 +431,6 @@ describe('Select', () => {
     });
 
     it('should close the dropdown when escape key is pressed', async () => {
-      vi.useRealTimers();
       renderSelect();
 
       const user = userEvent.setup({ delay: null });
@@ -446,10 +451,9 @@ describe('Select', () => {
     });
 
     it('should pass to the trigger the option selected when enter key is pressed', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -489,10 +493,9 @@ describe('Select', () => {
     });
 
     it('should pass to the trigger the option selected when spacebar key is pressed', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -529,7 +532,6 @@ describe('Select', () => {
     });
 
     it('should not move the focus if tab key is pressed when the dropdown is open', async () => {
-      vi.useRealTimers();
       renderSelect();
 
       const user = userEvent.setup({ delay: null });
@@ -551,10 +553,9 @@ describe('Select', () => {
     });
 
     it('should trap focus and not move it when Tab is pressed', async () => {
-      vi.useRealTimers();
       renderSelect();
 
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       const trigger = screen.getByRole('combobox');
 
       await act(async () => {
@@ -577,8 +578,7 @@ describe('Select', () => {
 
   describe('Typeahead Behavior', () => {
     it('should focus option matching single key', async () => {
-      vi.useRealTimers();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: 5 });
       renderSelect();
       await act(() => user.click(screen.getByRole('combobox')));
       const opt1 = screen.getByTestId('option-1');
