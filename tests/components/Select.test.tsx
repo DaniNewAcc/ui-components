@@ -325,7 +325,12 @@ describe('Select', () => {
       await act(async () => {
         await user.click(trigger);
       });
-      await waitFor(() => expect(screen.getByRole('listbox')).toBeVisible());
+      const listbox = await screen.findByRole('listbox');
+      await waitFor(() => expect(listbox).toBeVisible());
+      await waitFor(() => {
+        const options = screen.queryAllByRole('option');
+        expect(options.length).toBeGreaterThan(0);
+      });
       return trigger;
     }
 
