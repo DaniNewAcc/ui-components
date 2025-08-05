@@ -12,14 +12,14 @@ describe('Flex', () => {
     render(<Flex testId="flex" scrollable={true} />);
     const flex = screen.getByTestId('flex');
     const wrapper = flex.parentElement;
-    expect(wrapper?.className).toMatch('ui:max-h-[300px]');
+    expect(wrapper?.className).toMatch('ui:max-h-[50vh]');
   });
 
   it('should wrap content in Scrollable with custom props when ScrollableProps are provided', () => {
     render(
       <Flex
         scrollable
-        scrollableProps={{ className: 'custom-scroll', 'data-testid': 'scrollable-wrap' }}
+        scrollableProps={{ className: 'custom-scroll', testId: 'scrollable-wrap' }}
       />
     );
     const scrollable = screen.getByTestId('scrollable-wrap');
@@ -31,6 +31,20 @@ describe('Flex', () => {
     render(<Flex scrollable={false} />);
     const flex = screen.getByTestId('flex');
     const wrapper = flex.parentElement;
-    expect(wrapper?.className).not.toMatch('ui:max-h-[300px]|custom-scroll');
+    expect(wrapper?.className).not.toMatch('ui:max-h-[50vh]|custom-scroll');
+  });
+
+  it('should render Scrollable with the correct height', () => {
+    render(<Flex scrollable scrollableProps={{ style: { height: '100px' } }} />);
+    const flex = screen.getByTestId('flex');
+    const wrapper = flex.parentElement;
+    expect(wrapper?.style.height).toBe('100px');
+  });
+
+  it('should render Scrollable with the correct maxHeight', () => {
+    render(<Flex scrollable scrollableProps={{ style: { maxHeight: '100px' } }} />);
+    const flex = screen.getByTestId('flex');
+    const wrapper = flex.parentElement;
+    expect(wrapper?.style.maxHeight).toBe('100px');
   });
 });
