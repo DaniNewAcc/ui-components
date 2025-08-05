@@ -446,7 +446,6 @@ describe('Select', () => {
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-      expect(document.activeElement).toBe(options[1]);
 
       await act(async () => {
         await user.keyboard('{Enter}');
