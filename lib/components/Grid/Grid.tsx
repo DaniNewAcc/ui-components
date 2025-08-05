@@ -1,5 +1,6 @@
-import Scrollable from '@components/Scrollable';
+import Scrollable, { ScrollableProps } from '@components/Scrollable';
 import { cn } from '@utils/cn';
+import { mergeScrollableClasses } from '@utils/helpers';
 import { forwardRefWithAs, PolymorphicProps, PolymorphicRef } from '@utils/types';
 import { GridVariants } from '@utils/variants';
 import { VariantProps } from 'class-variance-authority';
@@ -8,7 +9,7 @@ import { ElementType } from 'react';
 type GridOwnProps = {
   testId?: string;
   scrollable?: boolean;
-  scrollableProps?: React.ComponentProps<typeof Scrollable>;
+  scrollableProps?: ScrollableProps<'div'>;
 } & VariantProps<typeof GridVariants>;
 
 export type GridProps<C extends React.ElementType> = PolymorphicProps<C, GridOwnProps>;
@@ -45,9 +46,10 @@ function GridRender<C extends ElementType = 'div'>(
   );
 
   if (scrollable) {
-    const defaultScrollableClassName = 'ui:max-h-[300px]';
-    const mergedScrollableClassName = cn(defaultScrollableClassName, scrollableProps?.className);
-
+    const mergedScrollableClassName = mergeScrollableClasses({
+      className: scrollableProps?.className,
+      style: scrollableProps?.style,
+    });
     return (
       <Scrollable {...scrollableProps} className={mergedScrollableClassName}>
         {gridContent}
