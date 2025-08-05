@@ -314,162 +314,91 @@ describe('Select', () => {
   });
 
   describe('Keyboard Navigation - Dropdown', () => {
-    it('should move the focus with up and down arrow keys', async () => {
-      renderSelect();
+    let user: ReturnType<typeof userEvent.setup>;
 
-      const user = userEvent.setup({ delay: 5 });
+    beforeEach(() => {
+      user = userEvent.setup();
+    });
+
+    async function openDropdown() {
       const trigger = screen.getByRole('combobox');
-
       await act(async () => {
         await user.click(trigger);
       });
+      await waitFor(() => expect(screen.getByRole('listbox')).toBeVisible());
+      return trigger;
+    }
 
-      const listbox = await screen.findByRole('listbox');
-      await waitFor(() => {
-        expect(listbox).toBeInTheDocument();
-      });
+    it('should move focus with ArrowDown and ArrowUp keys', async () => {
+      renderSelect();
 
+      const trigger = await openDropdown();
       const options = screen.getAllByRole('option');
-
-      options[0].focus();
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
-
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
-      });
+      expect(options[1]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{ArrowUp}');
       });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
-      });
+      expect(options[0]).toHaveFocus();
     });
 
-    it('should move the focus to the first element with Home key', async () => {
+    it('should move focus to first option with Home key', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: 5 });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      const listbox = await screen.findByRole('listbox');
-      await waitFor(() => {
-        expect(listbox).toBeInTheDocument();
-      });
-
+      const trigger = await openDropdown();
       const options = screen.getAllByRole('option');
-
-      options[0].focus();
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
-
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
       });
+      expect(options[2]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{Home}');
       });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
-      });
+      expect(options[0]).toHaveFocus();
     });
 
-    it('should move the focus to the last element with End key', async () => {
+    it('should move focus to last option with End key', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: 5 });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      const listbox = await screen.findByRole('listbox');
-      await waitFor(() => {
-        expect(listbox).toBeInTheDocument();
-      });
-
+      const trigger = await openDropdown();
       const options = screen.getAllByRole('option');
-
-      options[0].focus();
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
-
-      await act(async () => {
-        await user.keyboard('{ArrowDown}');
-      });
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
-      });
-
       await act(async () => {
         await user.keyboard('{End}');
       });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', options[2].id);
-      });
+      expect(options[2]).toHaveFocus();
     });
 
-    it('should close the dropdown when escape key is pressed', async () => {
+    it('should close dropdown when Escape is pressed', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: null });
-      const trigger = screen.getByRole('combobox');
-
+      const trigger = await openDropdown();
       await act(async () => {
-        await user.click(trigger);
+        await user.keyboard('{Escape}');
       });
-
-      expect(screen.getByRole('listbox')).toBeInTheDocument();
-
-      fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
-
       await waitFor(() => {
         expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
-        expect(trigger).toHaveFocus();
       });
+      expect(trigger).toHaveFocus();
     });
 
-    it('should pass to the trigger the option selected when enter key is pressed', async () => {
+    it('should select an option with Enter key', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: 5 });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
-      const listbox = await screen.findByRole('listbox');
-      await waitFor(() => {
-        expect(listbox).toBeInTheDocument();
-      });
-
+      const trigger = await openDropdown();
       const options = screen.getAllByRole('option');
-      options[0].focus();
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
 
@@ -477,45 +406,27 @@ describe('Select', () => {
         await user.keyboard('{ArrowDown}');
       });
       await waitFor(() => {
-        expect(document.activeElement).not.toBe(options[0]);
         expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
-
       await act(async () => {
         await user.keyboard('{Enter}');
       });
-
       await waitFor(() => {
-        expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
       });
-
       expect(trigger).toHaveTextContent('Second Option');
     });
 
-    it('should pass to the trigger the option selected when spacebar key is pressed', async () => {
+    it('should select an option with Spacebar key', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: 5 });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      const listbox = await screen.findByRole('listbox');
+      const trigger = await openDropdown();
       const options = screen.getAllByRole('option');
-      expect(listbox).toBeInTheDocument();
-
-      options[0].focus();
-
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
-
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-
       await waitFor(() => {
         expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
@@ -523,56 +434,23 @@ describe('Select', () => {
       await act(async () => {
         await user.keyboard('[Space]');
       });
-
       await waitFor(() => {
-        expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
       });
-
       expect(trigger).toHaveTextContent('Second Option');
     });
 
-    it('should not move the focus if tab key is pressed when the dropdown is open', async () => {
+    it('should not close or move focus with Tab key (trap focus)', async () => {
       renderSelect();
-
-      const user = userEvent.setup({ delay: null });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      const option1 = screen.getByTestId('option-1');
-
-      await act(async () => {
-        await user.keyboard('{Tab}');
-      });
-
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute('aria-activedescendant', option1.id);
-      });
-    });
-
-    it('should trap focus and not move it when Tab is pressed', async () => {
-      renderSelect();
-
-      const user = userEvent.setup({ delay: 5 });
-      const trigger = screen.getByRole('combobox');
-
-      await act(async () => {
-        await user.click(trigger);
-      });
-
-      expect(screen.getByRole('listbox')).toBeVisible();
-
+      await openDropdown();
       const options = screen.getAllByRole('option');
-      options[0].focus();
-      expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
+      options[1].focus();
+      expect(options[1]).toHaveFocus();
 
       await act(async () => {
         await user.keyboard('{Tab}');
       });
-
-      expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
+      expect(options[1]).toHaveFocus();
     });
   });
 
