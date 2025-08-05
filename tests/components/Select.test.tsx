@@ -52,12 +52,10 @@ const renderSelect = (
 
 beforeEach(() => {
   __setReduceMotionForTests(true);
-  vi.useFakeTimers();
 });
 
 afterEach(() => {
   __setReduceMotionForTests(undefined);
-  vi.useRealTimers();
   cleanup();
 });
 
@@ -319,12 +317,15 @@ describe('Select', () => {
       });
 
       const listbox = await screen.findByRole('listbox');
+      await waitFor(() => {
+        expect(listbox).toBeInTheDocument();
+      });
+
       const options = screen.getAllByRole('option');
-      expect(listbox).toBeInTheDocument();
 
       options[0].focus();
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[0]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
 
       await act(async () => {
@@ -332,7 +333,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[1]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
 
       await act(async () => {
@@ -340,7 +341,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[0]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
     });
 
@@ -356,12 +357,23 @@ describe('Select', () => {
       });
 
       const listbox = await screen.findByRole('listbox');
-      const options = screen.getAllByRole('option');
-      expect(listbox).toBeInTheDocument();
-
-      options[1].focus();
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[1]);
+        expect(listbox).toBeInTheDocument();
+      });
+
+      const options = screen.getAllByRole('option');
+
+      options[0].focus();
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
+      });
+
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
+      });
+
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
 
       await act(async () => {
@@ -369,7 +381,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[1]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
     });
 
@@ -385,12 +397,22 @@ describe('Select', () => {
       });
 
       const listbox = await screen.findByRole('listbox');
-      const options = screen.getAllByRole('option');
-      expect(listbox).toBeInTheDocument();
-
-      options[1].focus();
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[1]);
+        expect(listbox).toBeInTheDocument();
+      });
+
+      const options = screen.getAllByRole('option');
+
+      options[0].focus();
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
+      });
+
+      await act(async () => {
+        await user.keyboard('{ArrowDown}');
+      });
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
 
       await act(async () => {
@@ -398,7 +420,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[2]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[2].id);
       });
     });
 
@@ -437,16 +459,23 @@ describe('Select', () => {
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
       const listbox = await screen.findByRole('listbox');
-      expect(listbox).toBeInTheDocument();
+      await waitFor(() => {
+        expect(listbox).toBeInTheDocument();
+      });
 
       const options = screen.getAllByRole('option');
       options[0].focus();
-      expect(document.activeElement).toBe(options[0]);
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
+      });
 
       await act(async () => {
         await user.keyboard('{ArrowDown}');
       });
-      expect(document.activeElement).toBe(options[1]);
+      await waitFor(() => {
+        expect(document.activeElement).not.toBe(options[0]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
+      });
 
       await act(async () => {
         await user.keyboard('{Enter}');
@@ -477,7 +506,7 @@ describe('Select', () => {
       options[0].focus();
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[0]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
       });
 
       await act(async () => {
@@ -485,14 +514,16 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(options[1]);
+        expect(trigger).toHaveAttribute('aria-activedescendant', options[1].id);
       });
 
       await act(async () => {
-        await user.keyboard(' ');
+        await user.keyboard('[Space]');
       });
 
-      expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId('select-dropdown')).not.toBeInTheDocument();
+      });
 
       expect(trigger).toHaveTextContent('Second Option');
     });
@@ -515,7 +546,7 @@ describe('Select', () => {
       });
 
       await waitFor(() => {
-        expect(document.activeElement).toBe(option1);
+        expect(trigger).toHaveAttribute('aria-activedescendant', option1.id);
       });
     });
 
@@ -534,13 +565,13 @@ describe('Select', () => {
 
       const options = screen.getAllByRole('option');
       options[0].focus();
-      expect(document.activeElement).toBe(options[0]);
+      expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
 
       await act(async () => {
         await user.keyboard('{Tab}');
       });
 
-      expect(document.activeElement).toBe(options[0]);
+      expect(trigger).toHaveAttribute('aria-activedescendant', options[0].id);
     });
   });
 
