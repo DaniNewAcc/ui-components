@@ -7,7 +7,7 @@ import Text, { TextProps } from '@components/Text';
 import Trigger, { TriggerProps } from '@components/Trigger';
 import { useSyncAnimation } from '@hooks/useSyncAnimation';
 import { cn } from '@utils/cn';
-import { TextVariants } from '@utils/variants';
+import { FlexVariants, TextVariants } from '@utils/variants';
 import {
   ComponentPropsWithoutRef,
   createContext,
@@ -301,10 +301,13 @@ export type SidebarTitleProps = TextProps<'h2'> & {
 };
 
 const SidebarTitle = ({
+  variant,
+  border,
+  clamp,
+  truncate,
   className,
   children,
   testId = 'sidebar-title',
-  variant,
   ...props
 }: SidebarTitleProps) => {
   return (
@@ -312,7 +315,7 @@ const SidebarTitle = ({
       testId={testId}
       as="h2"
       variant={'heading'}
-      className={cn(TextVariants({ variant }), className)}
+      className={cn(TextVariants({ variant, border, clamp, truncate }), className)}
       {...props}
     >
       {children}
@@ -357,6 +360,42 @@ const SidebarClose = ({
 Sidebar.Close = SidebarClose;
 SidebarClose.displayName = 'SidebarClose';
 
+// ------------ Section component
+
+export type SidebarSectionProps = FlexProps<'div'> & {
+  testId?: string;
+};
+
+const SidebarSection = ({
+  testId = 'sidebar-Section',
+  direction,
+  gap,
+  align,
+  flexWrap,
+  justify,
+  className,
+  children,
+  ...props
+}: SidebarSectionProps) => {
+  return (
+    <Flex
+      testId={testId}
+      direction={'col'}
+      className={cn(
+        FlexVariants({ direction, gap, align, flexWrap, justify }),
+        'ui:h-full ui:min-h-0 ui:w-[300px] ui:bg-white',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Flex>
+  );
+};
+
+Sidebar.Section = SidebarSection;
+SidebarSection.displayName = 'SidebarSection';
+
 // ------------ Content component
 
 export type SidebarContentProps = FlexProps<'div'> & {
@@ -365,6 +404,11 @@ export type SidebarContentProps = FlexProps<'div'> & {
 
 const SidebarContent = ({
   testId = 'sidebar-content',
+  direction,
+  gap,
+  align,
+  flexWrap,
+  justify,
   className,
   children,
   ...props
@@ -382,7 +426,11 @@ const SidebarContent = ({
         smooth: true,
         className: 'ui:h-full',
       }}
-      className={cn('ui:min-h-0 ui:flex-1 ui:p-4', className)}
+      className={cn(
+        FlexVariants({ direction, gap, align, flexWrap, justify }),
+        'ui:min-h-0 ui:flex-1 ui:p-4',
+        className
+      )}
       {...props}
     >
       {children}
