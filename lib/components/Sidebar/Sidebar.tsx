@@ -206,27 +206,35 @@ const SidebarFrame = ({
         aria-modal="true"
         aria-labelledby="sidebar-title"
         aria-describedby="sidebar-desc"
-        className={cn(
-          'ui:fixed ui:top-0 ui:z-50 ui:shadow-lg',
-          { 'ui:right-0': side === 'right', 'ui:left-0': side === 'left' },
-          className
-        )}
         {...props}
       >
         <Animate
           isVisible={isOpen}
           preset={side === 'right' ? 'sidebarRight' : 'sidebarLeft'}
-          animateHeight={false}
+          className={cn(
+            'ui:fixed ui:top-0 ui:z-50 ui:h-screen ui:shadow-lg',
+            side === 'right' ? 'ui:right-0' : 'ui:left-0',
+            className
+          )}
           style={{
+            height: '100%',
             maxWidth: `${maxWidth}px`,
-            transition: `max-width ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
-            opacity: isOpen ? 1 : 0,
-            visibility: isOpen ? 'visible' : 'hidden',
             pointerEvents: isOpen ? 'auto' : 'none',
+            opacity: isOpen ? 1 : 0,
+            transform:
+              !isOpen && side === 'left'
+                ? 'translateX(-100%)'
+                : !isOpen && side === 'right'
+                  ? 'translateX(100%)'
+                  : 'translateX(0)',
+            transition: `max-width ${duration}ms ease, opacity ${duration}ms ease, visibility ${duration}ms ease`,
+            visibility: isOpen ? 'visible' : 'hidden',
           }}
           {...animateProps}
         >
-          <div className="ui:flex ui:h-screen ui:w-[300px] ui:flex-col ui:bg-white">{children}</div>
+          <div className="ui:flex ui:h-full ui:flex-col ui:overflow-hidden ui:bg-white">
+            {children}
+          </div>
         </Animate>
       </aside>
     </>
@@ -366,8 +374,15 @@ const SidebarContent = ({
       testId={testId}
       direction={'col'}
       gap={'md'}
+      flexWrap="noWrap"
       scrollable
-      scrollableProps={{ className: 'ui:flex-1 ui:min-h-0 ui:overflow-y-auto' }}
+      scrollableProps={{
+        direction: 'vertical',
+        scrollBar: 'auto',
+        smooth: true,
+        className: 'ui:h-full',
+      }}
+      className={cn('ui:min-h-0 ui:flex-1 ui:p-4', className)}
       {...props}
     >
       {children}
