@@ -5,7 +5,10 @@ import Overlay, { OverlayProps } from '@components/Overlay';
 import Portal, { PortalProps } from '@components/Portal';
 import Text, { TextProps } from '@components/Text';
 import Trigger, { TriggerProps } from '@components/Trigger';
+import { useAutoFocus } from '@hooks/useAutoFocus';
+import { useScrollLock } from '@hooks/useScrollLock';
 import { useSyncAnimation } from '@hooks/useSyncAnimation';
+import { useTrapFocus } from '@hooks/useTrapFocus';
 import { cn } from '@utils/cn';
 import { FlexVariants, TextVariants } from '@utils/variants';
 import {
@@ -17,6 +20,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -27,6 +31,7 @@ export type SidebarProps = {
   isOpen?: boolean;
   defaultOpen?: boolean;
   side?: SidebarSides;
+  lockScroll?: boolean;
   showOverlay?: boolean;
   dismissOnEscape?: boolean;
   dismissOnClickOutside?: boolean;
@@ -58,10 +63,11 @@ const Sidebar = ({
   containerId,
   defaultOpen,
   side = 'right',
+  lockScroll,
   showOverlay = false,
   dismissOnEscape = true,
   dismissOnClickOutside = false,
-  trapFocus = true,
+  trapFocus = false,
   triggerRef,
   children,
   onOpenChange,
@@ -69,6 +75,9 @@ const Sidebar = ({
   const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
   const isControlled = isOpen !== undefined;
   const actualIsOpen = isControlled ? isOpen : internalOpen;
+  const shouldScrollLock = lockScroll ?? (actualIsOpen && (dismissOnClickOutside || trapFocus));
+
+  useScrollLock(shouldScrollLock);
 
   const onOpenChangeHandler = useCallback(
     (newVal: boolean) => {
@@ -206,6 +215,7 @@ const SidebarFrame = ({
         aria-modal="true"
         aria-labelledby="sidebar-title"
         aria-describedby="sidebar-desc"
+        tabIndex={-1}
         {...props}
       >
         <Animate
@@ -377,15 +387,39 @@ const SidebarSection = ({
   children,
   ...props
 }: SidebarSectionProps) => {
+  const { isOpen, trapFocus, dismissOnEscape, onOpenChange } = useSidebarContext();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { moveFocus } = useTrapFocus({ containerRef, loop: trapFocus ?? false });
+  useAutoFocus(isOpen, containerRef);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const key = e.key;
+
+      if (key === 'Escape') {
+        e.preventDefault();
+        if (dismissOnEscape) {
+          onOpenChange?.(false);
+        }
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        moveFocus(e.shiftKey ? 'previous' : 'next');
+      }
+    },
+    [dismissOnEscape, moveFocus, onOpenChange]
+  );
   return (
     <Flex
       testId={testId}
+      ref={containerRef}
       direction={'col'}
       className={cn(
         FlexVariants({ direction, gap, align, flexWrap, justify }),
         'ui:h-full ui:min-h-0 ui:w-[300px] ui:bg-white',
         className
       )}
+      onKeyDown={handleKeyDown}
       {...props}
     >
       {children}
