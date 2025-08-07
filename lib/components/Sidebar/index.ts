@@ -9,6 +9,7 @@ export type {
   SidebarOverlayProps,
   SidebarPortalProps,
   SidebarProps,
+  SidebarSectionProps,
   SidebarTitleProps,
   SidebarTriggerProps,
 } from './Sidebar';
