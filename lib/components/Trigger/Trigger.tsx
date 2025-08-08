@@ -1,20 +1,24 @@
-import React, { forwardRef } from 'react';
+import React, { cloneElement, forwardRef, HTMLAttributes } from 'react';
 
-export type TriggerProps = {
+export type TriggerProps<T extends HTMLElement> = {
   testId?: string;
   children: React.ReactElement;
   onTrigger?: () => void;
-};
+} & HTMLAttributes<T>;
 
-const Trigger = forwardRef<HTMLElement, TriggerProps>(
-  ({ children, testId = 'trigger', onTrigger }, ref) => {
-    return React.cloneElement(children, {
+const Trigger = forwardRef(
+  <T extends HTMLElement>(
+    { children, testId = 'trigger', onTrigger, ...props }: TriggerProps<T>,
+    ref: React.Ref<T>
+  ) => {
+    return cloneElement(children, {
       ref,
       onClick: (e: React.MouseEvent) => {
         children.props.onClick?.(e);
         onTrigger?.();
       },
       ...(testId && { 'data-testid': testId }),
+      ...props,
     });
   }
 );
