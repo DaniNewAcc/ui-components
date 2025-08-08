@@ -135,18 +135,19 @@ export function useSidebarContext() {
 
 // ------------ Trigger component
 
-export type SidebarTriggerProps = TriggerProps & {
+export type SidebarTriggerProps = TriggerProps<HTMLElement> & {
   testId?: string;
 };
 
 const SidebarTrigger = forwardRef<HTMLElement, SidebarTriggerProps>(
   ({ testId = 'sidebar-trigger', children, ...props }, ref) => {
-    const { onOpenChange, triggerRef } = useSidebarContext();
+    const { isOpen, triggerRef, onOpenChange } = useSidebarContext();
 
     return (
       <Trigger
         testId={testId}
         ref={ref ?? triggerRef}
+        aria-expanded={isOpen}
         {...props}
         onTrigger={() => onOpenChange?.(true)}
       >
