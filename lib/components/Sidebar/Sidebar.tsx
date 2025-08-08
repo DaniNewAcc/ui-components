@@ -6,6 +6,7 @@ import Portal, { PortalProps } from '@components/Portal';
 import Text, { TextProps } from '@components/Text';
 import Trigger, { TriggerProps } from '@components/Trigger';
 import { useAutoFocus } from '@hooks/useAutoFocus';
+import { useComponentIds } from '@hooks/useComponentIds';
 import { useScrollLock } from '@hooks/useScrollLock';
 import { useSyncAnimation } from '@hooks/useSyncAnimation';
 import { useTrapFocus } from '@hooks/useTrapFocus';
@@ -52,6 +53,7 @@ export type SidebarContextProps = {
   dismissOnEscape?: boolean;
   trapFocus?: boolean;
   triggerRef?: RefObject<HTMLElement>;
+  idMap: Record<string, string>;
   onOpenChange?: (open: boolean) => void;
 };
 
@@ -76,6 +78,7 @@ const Sidebar = ({
   const isControlled = isOpen !== undefined;
   const actualIsOpen = isControlled ? isOpen : internalOpen;
   const shouldScrollLock = lockScroll ?? (actualIsOpen && (dismissOnClickOutside || trapFocus));
+  const idMap = useComponentIds('sidebar', ['frame', 'title', 'description']);
 
   useScrollLock(shouldScrollLock);
 
@@ -100,6 +103,7 @@ const Sidebar = ({
       triggerRef,
       portal,
       containerId,
+      idMap,
       onOpenChange: onOpenChangeHandler,
     }),
     [
@@ -112,6 +116,7 @@ const Sidebar = ({
       triggerRef,
       portal,
       containerId,
+      idMap,
       onOpenChangeHandler,
     ]
   );
@@ -193,7 +198,7 @@ const SidebarFrame = ({
   ...props
 }: SidebarFrameProps) => {
   const duration = animateProps?.duration ?? 300;
-  const { isOpen, portal, side, showOverlay } = useSidebarContext();
+  const { isOpen, portal, side, showOverlay, idMap } = useSidebarContext();
   const {
     ref: animationRef,
     maxWidth,
@@ -214,8 +219,8 @@ const SidebarFrame = ({
         ref={animationRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="sidebar-title"
-        aria-describedby="sidebar-desc"
+        aria-labelledby={idMap.title}
+        aria-describedby={idMap.description}
         tabIndex={-1}
         {...props}
       >
