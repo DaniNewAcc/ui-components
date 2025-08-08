@@ -1,5 +1,6 @@
 export { default, useSidebarContext } from './Sidebar';
 export type {
+  SidebarBodyProps,
   SidebarCloseProps,
   SidebarContentProps,
   SidebarContextProps,

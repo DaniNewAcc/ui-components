@@ -242,9 +242,7 @@ const SidebarFrame = ({
           }}
           {...animateProps}
         >
-          <div className="ui:flex ui:h-full ui:flex-col ui:overflow-hidden ui:bg-white">
-            {children}
-          </div>
+          <div className="ui:h-full ui:overflow-hidden">{children}</div>
         </Animate>
       </aside>
     </>
@@ -370,14 +368,14 @@ const SidebarClose = ({
 Sidebar.Close = SidebarClose;
 SidebarClose.displayName = 'SidebarClose';
 
-// ------------ Section component
+// ------------ Body component
 
-export type SidebarSectionProps = FlexProps<'div'> & {
+export type SidebarBodyProps = FlexProps<'div'> & {
   testId?: string;
 };
 
-const SidebarSection = ({
-  testId = 'sidebar-Section',
+const SidebarBody = ({
+  testId = 'sidebar-body',
   direction,
   gap,
   align,
@@ -386,7 +384,7 @@ const SidebarSection = ({
   className,
   children,
   ...props
-}: SidebarSectionProps) => {
+}: SidebarBodyProps) => {
   const { isOpen, trapFocus, dismissOnEscape, onOpenChange } = useSidebarContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { moveFocus } = useTrapFocus({ containerRef, loop: trapFocus ?? false });
@@ -416,10 +414,41 @@ const SidebarSection = ({
       direction={'col'}
       className={cn(
         FlexVariants({ direction, gap, align, flexWrap, justify }),
-        'ui:h-full ui:min-h-0 ui:w-[300px] ui:bg-white',
+        'ui:h-full ui:min-h-0 ui:w-[300px] ui:overflow-hidden ui:bg-white',
         className
       )}
       onKeyDown={handleKeyDown}
+      {...props}
+    >
+      {children}
+    </Flex>
+  );
+};
+
+Sidebar.Body = SidebarBody;
+SidebarBody.displayName = 'SidebarBody';
+
+// ------------ Section component
+
+export type SidebarSectionProps = FlexProps<'div'> & {
+  testId?: string;
+};
+
+const SidebarSection = ({
+  testId = 'sidebar-section',
+  direction,
+  gap,
+  align,
+  flexWrap,
+  justify,
+  className,
+  children,
+  ...props
+}: SidebarSectionProps) => {
+  return (
+    <Flex
+      direction={'col'}
+      className={cn(FlexVariants({ direction, gap, align, flexWrap, justify }), className)}
       {...props}
     >
       {children}
