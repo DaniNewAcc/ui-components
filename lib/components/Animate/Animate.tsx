@@ -190,7 +190,6 @@ const Animate = forwardRef<AnimateMethods, AnimateProps>(
       <div
         ref={syncRef}
         aria-expanded={isVisible}
-        aria-hidden={!isVisible}
         data-testid={testId}
         className={cn(animationClass, className, {
           'is-animating': isAnimating,
