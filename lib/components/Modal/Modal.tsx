@@ -142,7 +142,7 @@ Modal.Portal = ModalPortal;
 
 // ------------ Trigger component
 
-export type ModalTriggerProps = TriggerProps & {
+export type ModalTriggerProps = TriggerProps<HTMLElement> & {
   testId?: string;
   children: React.ReactElement;
 };
