@@ -1,4 +1,5 @@
 import Trigger, { TriggerProps } from '@components/Trigger';
+import { cn } from '@utils/cn';
 import {
   ComponentPropsWithoutRef,
   createContext,
@@ -12,13 +13,18 @@ import {
 export type CollapsibleProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   isOpen?: boolean;
+  value?: string | number;
+  defaultValues?: string | number | (string | number)[];
   defaultOpen?: boolean;
+  multiple?: boolean;
   children: ReactNode;
   onOpenChange?: (open: boolean) => void;
 };
 
 export type CollapsibleContextProps = {
   isOpen?: boolean;
+  value?: string | number;
+  defaultValues?: string | number | (string | number)[];
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
@@ -29,6 +35,7 @@ const Collapsible = ({
   testId = 'collapsible',
   isOpen,
   defaultOpen = false,
+  multiple,
   children,
   onOpenChange,
   ...props
@@ -74,6 +81,52 @@ export function useCollapsibleContext() {
   return context;
 }
 
+export type CollapsibleItemProps = ComponentPropsWithoutRef<'div'> & {
+  testId?: string;
+  value: string | number;
+};
+
+export type CollapsibleItemContextProps = {
+  value: string | number;
+};
+
+const CollapsibleItemContext = createContext<CollapsibleItemContextProps | null>(null);
+
+const CollapsibleItem = ({
+  testId = 'collapsible-item',
+  value,
+  className,
+  children,
+  ...props
+}: CollapsibleItemProps) => {
+  const contextValue = useMemo(
+    () => ({
+      value,
+    }),
+    [value]
+  );
+  return (
+    <CollapsibleItemContext.Provider value={contextValue}>
+      <div data-testid={testId} className={cn('', className)} {...props}>
+        {children}
+      </div>
+    </CollapsibleItemContext.Provider>
+  );
+};
+
+CollapsibleItem.displayName = 'CollapsibleItem';
+Collapsible.Item = CollapsibleItem;
+
+// Helper function for using collapsible item context
+
+export function useCollapsibleItemContext() {
+  const context = useContext(CollapsibleItemContext);
+  if (!context) {
+    throw new Error('CollapsibleItem components must be wrapped in <CollapsibleItem>.');
+  }
+  return context;
+}
+
 // ------------ Trigger component
 
 export type CollapsibleTriggerProps = TriggerProps<HTMLElement> & {
@@ -85,9 +138,14 @@ const CollapsibleTrigger = ({
   children,
   ...props
 }: CollapsibleTriggerProps) => {
+  const { onOpenChange } = useCollapsibleContext();
+  const handleClick = useCallback(() => {
+    onOpenChange?.(true);
+  }, [onOpenChange]);
+
   // need to add aria attributes for expanded and controls
   return (
-    <Trigger testId={testId} {...props}>
+    <Trigger testId={testId} onTrigger={handleClick} {...props}>
       {children}
     </Trigger>
   );
@@ -95,5 +153,27 @@ const CollapsibleTrigger = ({
 
 CollapsibleTrigger.displayName = 'CollapsibleTrigger';
 Collapsible.Trigger = CollapsibleTrigger;
+
+// ------------ Content component
+
+export type CollapsibleContentProps = ComponentPropsWithoutRef<'div'> & {
+  testId?: string;
+};
+
+const CollapsibleContent = ({
+  testId = 'collapsible-content',
+  className,
+  children,
+  ...props
+}: CollapsibleContentProps) => {
+  return (
+    <div data-testid={testId} className={cn('', className)} {...props}>
+      {children}
+    </div>
+  );
+};
+
+CollapsibleContent.displayName = 'CollapsibleContent';
+Collapsible.Content = CollapsibleContent;
 
 export default Collapsible;
