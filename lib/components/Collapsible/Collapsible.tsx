@@ -10,55 +10,85 @@ import {
   useState,
 } from 'react';
 
+type ActiveItems = string | number | (string | number)[] | null;
+
 export type CollapsibleProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
-  isOpen?: boolean;
-  value?: string | number;
-  defaultValues?: string | number | (string | number)[];
-  defaultOpen?: boolean;
+  value?: ActiveItems;
+  defaultValue?: ActiveItems;
   multiple?: boolean;
   children: ReactNode;
   onOpenChange?: (open: boolean) => void;
+  onValueChange?: (value: ActiveItems) => void;
 };
 
 export type CollapsibleContextProps = {
-  isOpen?: boolean;
-  value?: string | number;
-  defaultValues?: string | number | (string | number)[];
-  defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  activeItems: ActiveItems;
+  value?: ActiveItems;
+  multiple?: boolean;
+  toggleItems?: (item: string | number) => void;
 };
 
 const CollapsibleContext = createContext<CollapsibleContextProps | null>(null);
 
 const Collapsible = ({
   testId = 'collapsible',
-  isOpen,
-  defaultOpen = false,
+  value,
+  defaultValue,
   multiple,
   children,
   onOpenChange,
+  onValueChange,
   ...props
 }: CollapsibleProps) => {
-  const isControlled = isOpen !== undefined;
-  const [internalOpen, setInternalOpen] = useState<boolean>(defaultOpen);
-  const actualIsOpen = isControlled ? isOpen : internalOpen;
+  const isControlled = value !== undefined;
+  const [internalActiveItems, setInternalActiveItems] = useState<ActiveItems>(() => {
+    // initialize activeItems based on default value and multiple mode
+    if (multiple) {
+      if (defaultValue === undefined) return [];
+      return Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    }
+    return defaultValue ?? null;
+  });
+  const actualActiveItems = isControlled ? value : internalActiveItems;
 
-  // handles the open state updates based on the control mode: uncontrolled (internalOpen) or controlled (isOpen)
-  const onOpenChangeHandler = useCallback(
-    (newVal: boolean) => {
-      if (!isControlled) {
-        setInternalOpen(newVal);
+  // handles collapsible item content toggling through if statement based on multiple prop
+  const toggleItems = useCallback(
+    (item: string | number) => {
+      const current = Array.isArray(actualActiveItems)
+        ? actualActiveItems
+        : actualActiveItems !== null
+          ? [actualActiveItems]
+          : [];
+
+      let newItems: ActiveItems;
+
+      if (multiple) {
+        const updated = current.includes(item)
+          ? current.filter(i => i !== item)
+          : [...current, item];
+
+        newItems = updated.filter((i): i is string | number => i !== undefined);
       } else {
-        onOpenChange?.(newVal);
+        newItems = current.includes(item) ? null : item;
+      }
+
+      if (isControlled) {
+        onValueChange?.(newItems);
+      } else {
+        setInternalActiveItems(newItems);
       }
     },
-    [isControlled, onOpenChange]
+    [actualActiveItems, multiple, isControlled, onValueChange]
   );
 
   const contextValue = useMemo(
-    () => ({ isOpen: actualIsOpen, defaultOpen, onOpenChange: onOpenChangeHandler }),
-    [isOpen, defaultOpen, onOpenChange]
+    () => ({
+      activeItems: actualActiveItems,
+      multiple,
+      toggleItems,
+    }),
+    [actualActiveItems, multiple]
   );
   return (
     <CollapsibleContext.Provider value={contextValue}>
@@ -84,16 +114,19 @@ export function useCollapsibleContext() {
 export type CollapsibleItemProps = ComponentPropsWithoutRef<'div'> & {
   testId?: string;
   value: string | number;
+  disabled?: boolean;
 };
 
 export type CollapsibleItemContextProps = {
   value: string | number;
+  disabled?: boolean;
 };
 
 const CollapsibleItemContext = createContext<CollapsibleItemContextProps | null>(null);
 
 const CollapsibleItem = ({
   testId = 'collapsible-item',
+  disabled,
   value,
   className,
   children,
@@ -102,8 +135,9 @@ const CollapsibleItem = ({
   const contextValue = useMemo(
     () => ({
       value,
+      disabled,
     }),
-    [value]
+    [value, disabled]
   );
   return (
     <CollapsibleItemContext.Provider value={contextValue}>
@@ -138,10 +172,13 @@ const CollapsibleTrigger = ({
   children,
   ...props
 }: CollapsibleTriggerProps) => {
-  const { onOpenChange } = useCollapsibleContext();
+  const { toggleItems } = useCollapsibleContext();
+  const { value, disabled } = useCollapsibleItemContext();
+
   const handleClick = useCallback(() => {
-    onOpenChange?.(true);
-  }, [onOpenChange]);
+    if (disabled) return;
+    toggleItems?.(value);
+  }, [toggleItems, value, disabled]);
 
   // need to add aria attributes for expanded and controls
   return (
@@ -166,8 +203,13 @@ const CollapsibleContent = ({
   children,
   ...props
 }: CollapsibleContentProps) => {
+  const { activeItems } = useCollapsibleContext();
+  const { value } = useCollapsibleItemContext();
+
+  const isActive = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
+
   return (
-    <div data-testid={testId} className={cn('', className)} {...props}>
+    <div data-testid={testId} hidden={!isActive} className={cn('', className)} {...props}>
       {children}
     </div>
   );
