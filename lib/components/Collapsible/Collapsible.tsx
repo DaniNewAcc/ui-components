@@ -6,6 +6,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useId,
   useMemo,
   useState,
 } from 'react';
@@ -18,7 +19,6 @@ export type CollapsibleProps = ComponentPropsWithoutRef<'div'> & {
   defaultValue?: ActiveItems;
   multiple?: boolean;
   children: ReactNode;
-  onOpenChange?: (open: boolean) => void;
   onValueChange?: (value: ActiveItems) => void;
 };
 
@@ -26,6 +26,7 @@ export type CollapsibleContextProps = {
   activeItems: ActiveItems;
   value?: ActiveItems;
   multiple?: boolean;
+  baseId?: string;
   toggleItems?: (item: string | number) => void;
 };
 
@@ -37,10 +38,10 @@ const Collapsible = ({
   defaultValue,
   multiple,
   children,
-  onOpenChange,
   onValueChange,
   ...props
 }: CollapsibleProps) => {
+  const baseId = useId();
   const isControlled = value !== undefined;
   const [internalActiveItems, setInternalActiveItems] = useState<ActiveItems>(() => {
     // initialize activeItems based on default value and multiple mode
@@ -86,9 +87,10 @@ const Collapsible = ({
     () => ({
       activeItems: actualActiveItems,
       multiple,
+      baseId,
       toggleItems,
     }),
-    [actualActiveItems, multiple]
+    [actualActiveItems, multiple, baseId, toggleItems]
   );
   return (
     <CollapsibleContext.Provider value={contextValue}>
@@ -120,6 +122,8 @@ export type CollapsibleItemProps = ComponentPropsWithoutRef<'div'> & {
 export type CollapsibleItemContextProps = {
   value: string | number;
   disabled?: boolean;
+  triggerId: string;
+  contentId: string;
 };
 
 const CollapsibleItemContext = createContext<CollapsibleItemContextProps | null>(null);
@@ -132,12 +136,17 @@ const CollapsibleItem = ({
   children,
   ...props
 }: CollapsibleItemProps) => {
+  const { baseId } = useCollapsibleContext();
+  const triggerId = `${baseId}-trigger-${value}`;
+  const contentId = `${baseId}-content-${value}`;
   const contextValue = useMemo(
     () => ({
       value,
       disabled,
+      triggerId,
+      contentId,
     }),
-    [value, disabled]
+    [value, disabled, triggerId, contentId]
   );
   return (
     <CollapsibleItemContext.Provider value={contextValue}>
@@ -172,17 +181,25 @@ const CollapsibleTrigger = ({
   children,
   ...props
 }: CollapsibleTriggerProps) => {
-  const { toggleItems } = useCollapsibleContext();
-  const { value, disabled } = useCollapsibleItemContext();
+  const { activeItems, toggleItems } = useCollapsibleContext();
+  const { value, disabled, triggerId, contentId } = useCollapsibleItemContext();
+
+  const isActive = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
 
   const handleClick = useCallback(() => {
     if (disabled) return;
     toggleItems?.(value);
   }, [toggleItems, value, disabled]);
 
-  // need to add aria attributes for expanded and controls
   return (
-    <Trigger testId={testId} onTrigger={handleClick} {...props}>
+    <Trigger
+      testId={testId}
+      id={triggerId}
+      aria-controls={contentId}
+      aria-expanded={isActive}
+      onTrigger={handleClick}
+      {...props}
+    >
       {children}
     </Trigger>
   );
@@ -204,12 +221,21 @@ const CollapsibleContent = ({
   ...props
 }: CollapsibleContentProps) => {
   const { activeItems } = useCollapsibleContext();
-  const { value } = useCollapsibleItemContext();
+  const { value, triggerId, contentId } = useCollapsibleItemContext();
 
   const isActive = Array.isArray(activeItems) ? activeItems.includes(value) : activeItems === value;
 
   return (
-    <div data-testid={testId} hidden={!isActive} className={cn('', className)} {...props}>
+    <div
+      data-testid={testId}
+      role="region"
+      id={contentId}
+      aria-labelledby={triggerId}
+      aria-hidden={!isActive}
+      hidden={!isActive}
+      className={cn('', className)}
+      {...props}
+    >
       {children}
     </div>
   );
