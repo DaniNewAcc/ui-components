@@ -26,7 +26,7 @@
  */
 
 import { useReduceMotion } from '@hooks/useReduceMotion';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type Dimension = 'height' | 'width';
 
@@ -53,7 +53,7 @@ export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
   const reduceMotion = useReduceMotion();
   const dims = Array.isArray(dimension) ? dimension : [dimension];
 
-  const getSize = (dim: Dimension, type: SizeMode) => {
+  const getSize = useCallback((dim: Dimension, type: SizeMode) => {
     const el = ref.current;
     if (!el) return 0;
 
@@ -62,23 +62,26 @@ export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
     } else {
       return type === 'scroll' ? el.scrollWidth : el.offsetWidth;
     }
-  };
+  }, []);
 
-  const updateSizes = (value: SizeValue) => {
-    setSizes(prev => {
-      let changed = false;
-      const updated = { ...prev };
-      dims.forEach(dim => {
-        if (prev[dim] !== value) {
-          updated[dim] = value;
-          changed = true;
-        }
+  const updateSizes = useCallback(
+    (value: SizeValue) => {
+      setSizes(prev => {
+        let changed = false;
+        const updated = { ...prev };
+        dims.forEach(dim => {
+          if (prev[dim] !== value) {
+            updated[dim] = value;
+            changed = true;
+          }
+        });
+        return changed ? updated : prev;
       });
-      return changed ? updated : prev;
-    });
-  };
+    },
+    [dims]
+  );
 
-  const handleExpand = (): NodeJS.Timeout => {
+  const handleExpand = useCallback((): NodeJS.Timeout => {
     setShouldRender(true);
 
     return setTimeout(() => {
@@ -92,9 +95,9 @@ export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
         return isSame ? prev : newSizes;
       });
     }, 0);
-  };
+  }, [dims, getSize]);
 
-  const handleCollapse = (): [NodeJS.Timeout, NodeJS.Timeout] => {
+  const handleCollapse = useCallback((): [NodeJS.Timeout, NodeJS.Timeout] => {
     const currentSizes: Partial<Record<Dimension, number>> = {};
     dims.forEach(dim => {
       currentSizes[dim] = getSize(dim, 'offset');
@@ -114,7 +117,7 @@ export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
     }, duration);
 
     return [animationTimeout, collapseTimeout];
-  };
+  }, [dims, getSize, updateSizes, duration]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -145,14 +148,26 @@ export function useSyncAnimation<T extends HTMLElement = HTMLDivElement>({
     };
   }, [isOpen, duration, reduceMotion]);
 
-  return {
-    ref,
-    shouldRender,
-    maxHeight: sizes.height,
-    maxWidth: sizes.width,
-    updateSizes,
-    handleExpand,
-    handleCollapse,
-    setShouldRender,
-  };
+  return useMemo(
+    () => ({
+      ref,
+      shouldRender,
+      maxHeight: sizes.height,
+      maxWidth: sizes.width,
+      updateSizes,
+      handleExpand,
+      handleCollapse,
+      setShouldRender,
+    }),
+    [
+      ref,
+      shouldRender,
+      sizes.height,
+      sizes.width,
+      updateSizes,
+      handleExpand,
+      handleCollapse,
+      setShouldRender,
+    ]
+  );
 }
