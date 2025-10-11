@@ -23,4 +23,5 @@ export { default as Separator } from '@components/Separator';
 export { default as Sidebar } from '@components/Sidebar';
 export { default as Tabs } from '@components/Tabs';
 export { default as Text } from '@components/Text';
+export { default as Toast } from '@components/Toast';
 export { default as Trigger } from '@components/Trigger';
