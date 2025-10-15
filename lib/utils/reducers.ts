@@ -1,10 +1,20 @@
+import { ReactNode } from 'react';
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+export type ToastRenderProps = {
+  id: string;
+  onClose: () => void;
+  onPause: () => void;
+  onResume: () => void;
+};
+
+type ToastContent = ReactNode | ((helpers: ToastRenderProps) => ReactNode);
 
 export type ToastData = {
   id: string;
   type?: ToastType;
-  title?: string;
-  message?: string;
+  content: ToastContent;
   duration?: number;
   isOpen?: boolean;
 };
