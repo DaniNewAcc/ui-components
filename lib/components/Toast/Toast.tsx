@@ -1,6 +1,5 @@
-import Close from '@components/Close';
 import Portal from '@components/Portal';
-import { ToastData, toastReducer } from '@utils/reducers';
+import { ToastData, toastReducer, ToastRenderProps } from '@utils/reducers';
 import {
   createContext,
   ReactNode,
@@ -19,11 +18,7 @@ type TimerData = {
   remaining: number;
 };
 
-type ToastProps = ToastData & {
-  onClose: () => void;
-  onPause: () => void;
-  onResume: () => void;
-};
+type ToastProps = ToastData & ToastRenderProps;
 
 type ToastContextProps = {
   toasts: ToastData[];
@@ -153,18 +148,9 @@ export function useToast() {
   return context;
 }
 
-const Toast = ({
-  id,
-  title,
-  type,
-  message,
-  isOpen = true,
-  onClose,
-  onPause,
-  onResume,
-}: ToastProps) => {
+const Toast = ({ id, content, isOpen = true, onClose, onPause, onResume }: ToastProps) => {
   const animationDuration = 300;
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const enterTimer = setTimeout(() => {
@@ -173,15 +159,11 @@ const Toast = ({
     return () => clearTimeout(enterTimer);
   }, []);
 
-  const handleManualClose = () => {
-    onClose();
-  };
-
   if (!isOpen && !isVisible) return null;
 
   return (
     <div
-      className="ui:pointer-events-auto ui:flex ui:w-[300px] ui:justify-between ui:overflow-hidden ui:rounded-md ui:bg-gray-300 ui:shadow-lg ui:transition-all ui:duration-300 ui:ease-out"
+      className="ui:pointer-events-auto ui:overflow-hidden ui:ease-out"
       style={{
         opacity: isVisible && isOpen ? 1 : 0,
         transform: isVisible && isOpen ? 'translateY(0)' : 'translateY(20px)',
@@ -192,11 +174,7 @@ const Toast = ({
       onTouchStart={onPause}
       onTouchEnd={onResume}
     >
-      <div className="ui:flex ui:flex-col ui:gap-1 ui:p-3 ui:text-black">
-        {title && <span className="ui:font-semibold">{title}</span>}
-        {message && <span className="ui:text-sm">{message}</span>}
-      </div>
-      <Close onClose={handleManualClose} />
+      {typeof content === 'function' ? content({ id, onClose, onPause, onResume }) : content}
     </div>
   );
 };
@@ -208,7 +186,7 @@ const ToastContainer = () => {
     <Portal>
       <div
         aria-live="polite"
-        className="ui:scrollbar-hide ui:pointer-events-none ui:fixed ui:right-4 ui:bottom-4 ui:flex ui:h-[500px] ui:max-h-[70vh] ui:flex-col-reverse ui:items-end ui:gap-3 ui:overflow-y-auto"
+        className="ui:scrollbar-hide ui:pointer-events-none ui:fixed ui:right-4 ui:bottom-4 ui:flex ui:h-[500px] ui:max-h-[70vh] ui:flex-col-reverse ui:items-end ui:gap-3 ui:overflow-x-hidden ui:overflow-y-auto"
       >
         {toasts.map(toast => (
           <Toast
