@@ -12,18 +12,21 @@ import {
   useState,
 } from 'react';
 
+const ANIMATION_DURATION = 300;
+
 type TimerData = {
   timerId: NodeJS.Timeout;
   start: number;
   remaining: number;
 };
 
-type ToastProps = ToastData & ToastRenderProps;
+type ToastProps = ToastData & ToastRenderProps & { isExiting?: boolean };
 
 type ToastContextProps = {
   toasts: ToastData[];
   addToast: (toast: Omit<ToastData, 'id'>) => void;
   closeToast: (id: string) => void;
+  removeToast: (id: string) => void;
   pauseTimer: (id: string) => void;
   resumeTimer: (id: string) => void;
 };
@@ -34,8 +37,6 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, dispatch] = useReducer(toastReducer, []);
 
   const timersRef = useRef<Record<string, TimerData>>({});
-
-  const ANIMATION_DURATION = 300;
 
   const clearTimer = (id: string) => {
     const timerData = timersRef.current[id];
@@ -49,60 +50,38 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     const start = Date.now();
     const timerId = setTimeout(() => {
       dispatch({ type: 'CLOSE', id });
-
-      const removeTimer = setTimeout(() => {
-        dispatch({ type: 'REMOVE', id });
-        delete timersRef.current[id];
-      }, ANIMATION_DURATION);
-
-      timersRef.current[id] = {
-        timerId: removeTimer,
-        start: Date.now(),
-        remaining: ANIMATION_DURATION,
-      };
+      delete timersRef.current[id];
     }, duration);
 
-    timersRef.current[id] = {
-      timerId,
-      start,
-      remaining: duration,
-    };
+    timersRef.current[id] = { timerId, start, remaining: duration };
   };
 
   const addToast = useCallback((toast: Omit<ToastData, 'id' | 'isOpen'>) => {
     const id = Math.random().toString(36).substring(2, 9);
     const duration = toast.duration ?? 5000;
 
-    dispatch({ type: 'ADD', toast: { ...toast, id, isOpen: true } });
-
-    startCloseTimer(id, duration);
+    dispatch({ type: 'ADD', toast: { ...toast, id, isOpen: false } });
+    requestAnimationFrame(() => {
+      dispatch({ type: 'OPEN', id });
+      startCloseTimer(id, duration);
+    });
   }, []);
 
   const closeToast = useCallback((id: string) => {
     clearTimer(id);
-
     dispatch({ type: 'CLOSE', id });
+  }, []);
 
-    const removeTimer = setTimeout(() => {
-      dispatch({ type: 'REMOVE', id });
-      delete timersRef.current[id];
-    }, ANIMATION_DURATION);
-
-    timersRef.current[id] = {
-      timerId: removeTimer,
-      start: Date.now(),
-      remaining: ANIMATION_DURATION,
-    };
+  const removeToast = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE', id });
   }, []);
 
   const pauseTimer = useCallback((id: string) => {
     const timerData = timersRef.current[id];
     if (timerData) {
       clearTimeout(timerData.timerId);
-
       const elapsed = Date.now() - timerData.start;
       const remaining = timerData.remaining - elapsed;
-
       timersRef.current[id] = {
         ...timerData,
         remaining: remaining > 0 ? remaining : 0,
@@ -119,7 +98,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     return () => {
-      Object.values(timersRef.current).forEach(timerData => clearTimeout(timerData.timerId));
+      Object.values(timersRef.current).forEach(t => clearTimeout(t.timerId));
       timersRef.current = {};
     };
   }, []);
@@ -129,10 +108,11 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       toasts,
       addToast,
       closeToast,
+      removeToast,
       pauseTimer,
       resumeTimer,
     }),
-    [toasts, addToast, closeToast, pauseTimer, resumeTimer]
+    [toasts, addToast, closeToast, removeToast, pauseTimer, resumeTimer]
   );
 
   return <ToastContext.Provider value={contextValue}>{children}</ToastContext.Provider>;
@@ -148,54 +128,63 @@ export function useToast() {
   return context;
 }
 
-const Toast = ({ id, content, isOpen = true, onClose, onPause, onResume }: ToastProps) => {
-  const animationDuration = 300;
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+const Toast = ({
+  id,
+  content,
+  isOpen = false,
+  onClose,
+  onPause,
+  onResume,
+  isExiting = false,
+}: ToastProps) => {
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const enterTimer = setTimeout(() => {
-      setIsVisible(true);
-    }, 10);
-    return () => clearTimeout(enterTimer);
-  }, []);
-
-  if (!isOpen && !isVisible) return null;
+    if (isOpen) {
+      const frame = requestAnimationFrame(() => setIsVisible(true));
+      return () => cancelAnimationFrame(frame);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   return (
     <div
-      className="ui:pointer-events-auto ui:overflow-hidden ui:ease-out"
-      style={{
-        opacity: isVisible && isOpen ? 1 : 0,
-        transform: isVisible && isOpen ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity ${animationDuration}ms ease, transform ${animationDuration}ms ease`,
-      }}
+      role="alert"
+      aria-live="assertive"
       onMouseEnter={onPause}
       onMouseLeave={onResume}
       onTouchStart={onPause}
       onTouchEnd={onResume}
+      onTouchCancel={onResume}
+      style={{
+        opacity: isVisible && !isExiting ? 1 : 0,
+        transform:
+          isVisible && !isExiting
+            ? 'translateX(0)'
+            : isExiting
+              ? 'translateX(100%)'
+              : 'translateX(100%)',
+        transition: `opacity ${ANIMATION_DURATION}ms ease, transform ${ANIMATION_DURATION}ms ease`,
+        pointerEvents: isVisible ? 'auto' : 'none',
+      }}
     >
       {typeof content === 'function' ? content({ id, onClose, onPause, onResume }) : content}
     </div>
   );
 };
-
 const ToastContainer = () => {
-  const { toasts, closeToast, pauseTimer, resumeTimer } = useToast();
+  const { toasts } = useToast();
 
   return (
     <Portal>
       <div
         aria-live="polite"
-        className="ui:scrollbar-hide ui:pointer-events-none ui:fixed ui:right-4 ui:bottom-4 ui:flex ui:h-[500px] ui:max-h-[70vh] ui:flex-col-reverse ui:items-end ui:gap-3 ui:overflow-x-hidden ui:overflow-y-auto"
+        className="ui:pointer-events-none ui:fixed ui:right-4 ui:bottom-4 ui:flex ui:flex-col ui:items-end ui:gap-3"
+        style={{ overflow: 'visible' }}
       >
         {toasts.map(toast => (
-          <Toast
-            key={toast.id}
-            {...toast}
-            onClose={() => closeToast(toast.id)}
-            onPause={() => pauseTimer(toast.id)}
-            onResume={() => resumeTimer(toast.id)}
-          />
+          <ToastFrame key={toast.id} toast={toast} />
         ))}
       </div>
     </Portal>
@@ -204,5 +193,46 @@ const ToastContainer = () => {
 
 Toast.Container = ToastContainer;
 ToastContainer.displayName = 'ToastContainer';
+
+type ToastFrameProps = {
+  toast: ToastData;
+};
+
+const ToastFrame = ({ toast }: ToastFrameProps) => {
+  const { closeToast, removeToast, pauseTimer, resumeTimer } = useToast();
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    if (!toast.isOpen) {
+      setIsExiting(true);
+      const timer = setTimeout(() => {
+        removeToast(toast.id);
+      }, ANIMATION_DURATION);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsExiting(false);
+    }
+  }, [toast.isOpen, removeToast, toast.id]);
+
+  return (
+    <div
+      style={{
+        marginBottom: 12,
+        transition: `margin ${ANIMATION_DURATION}ms ease`,
+      }}
+    >
+      <Toast
+        {...toast}
+        isOpen={!isExiting}
+        onClose={() => closeToast(toast.id)}
+        onPause={() => pauseTimer(toast.id)}
+        onResume={() => resumeTimer(toast.id)}
+        onExited={() => removeToast(toast.id)}
+        isExiting={isExiting}
+      />
+    </div>
+  );
+};
 
 export default Toast;
