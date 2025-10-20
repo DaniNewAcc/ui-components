@@ -1,7 +1,5 @@
 import { ReactNode } from 'react';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
 export type ToastRenderProps = {
   id: string;
   onClose: () => void;
@@ -14,7 +12,6 @@ type ToastContent = ReactNode | ((helpers: ToastRenderProps) => ReactNode);
 
 export type ToastData = {
   id: string;
-  type?: ToastType;
   content: ToastContent;
   duration?: number;
   isOpen?: boolean;
